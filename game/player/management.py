@@ -39,8 +39,10 @@ def get_opponent_progression(player_id):
     opp = Players.objects.filter(room_id=p.room_id).exclude(player_id=player_id).first()
 
     if p.state == room.state.pve:
-        progression = \
-            tutorial.dialog.get_tutorial_progression(player_id=opp.player_id)
+        progression = tutorial.dialog.get_tutorial_progression(
+                player_id=opp.player_id,
+                called_from=__path__ + ':' + utils.fname()
+            )
     else:
         comp = RoundComposition.objects.filter(player_id=opp.player_id)
         rd = None
@@ -93,7 +95,7 @@ def _tutorial_is_done(player_id):
         room.dialog.update_state(
             room_id=rm.room_id,
             room_state=room.state.pve,
-            called_from=utils.fname()
+            called_from=__path__ + ':' + utils.fname()
         )
 
 
@@ -102,7 +104,7 @@ def _pve_is_done(player_id):
     p = Players.objects.get(player_id=player_id)
 
     # As player is alone, once he finished, we can close the r
-    round.dialog.close_round(round_id=p.round_id, called_from=utils.fname())
+    round.dialog.close_round(round_id=p.round_id, called_from=__path__ + ':' + utils.fname())
 
     # load objects
     next_round = Round.objects.get(room_id=p.room_id, state=room.state.pvp)
@@ -116,7 +118,7 @@ def _pve_is_done(player_id):
 
     # set room state
     if rm.trial or _opponent_has_done_pve(player_id=player_id):
-        room.dialog.update_state(room_id=p.room_id, room_state=room.state.pvp, called_from=utils.fname())
+        room.dialog.update_state(room_id=p.room_id, room_state=room.state.pvp, called_from=__path__ + ':' + utils.fname())
 
 
 def _pvp_is_done(player_id):
@@ -132,11 +134,11 @@ def _pvp_is_done(player_id):
     if rm.trial or _opponent_has_done_pvp(player_id=player_id):
 
         # Close round
-        round.dialog.close_round(round_id=p.round_id, called_from=utils.fname())
+        round.dialog.close_round(round_id=p.round_id, called_from=__path__ + ':' + utils.fname())
 
         # Close room and set state
         room.dialog.close(room_id=p.room_id, called_from=__path__ + ":" + utils.fname())
-        room.dialog.update_state(room_id=p.room_id, room_state=room.state.end, called_from=utils.fname())
+        room.dialog.update_state(room_id=p.room_id, room_state=room.state.end, called_from=__path__ + ':' + utils.fname())
 
 
 # --------------------------------------- Info regarding the opponent --------------------------------------------- #

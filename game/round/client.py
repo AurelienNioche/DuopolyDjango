@@ -32,13 +32,13 @@ def ask_firm_init(player_id):
 
     # -------  Maybe client has to wait the other player ------------------------------------------ #
 
-    if player.dialog.client_has_to_wait_over_player(player_id=player_id, called_from=utils.fname()):
+    if player.dialog.client_has_to_wait_over_player(player_id=player_id, called_from=__path__ + ':' + utils.fname()):
 
         if not room.dialog.is_trial(player_id, utils.fname()):
 
             opp_progression = player.dialog.get_opponent_progression(
                 player_id=player_id,
-                called_from=utils.fname()
+                called_from=__path__ + ':' + utils.fname()
             )
             return parameters.error["wait"], opp_progression  # Tuple is necessary!! '-1' hold for wait
 
@@ -130,7 +130,7 @@ def ask_firm_passive_consumer_choices(player_id, t):
             consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                player.dialog.go_to_next_round(player_id=player_id, called_from=utils.fname())
+                player.dialog.go_to_next_round(player_id=player_id, called_from=__path__ + ':' + utils.fname())
 
             return (t, ) + tuple((i for i in consumer_choices)) + (is_end, )
 
@@ -220,7 +220,7 @@ def ask_firm_active_consumer_choices(player_id, t):
             consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                player.dialog.go_to_next_round(player_id=player_id, called_from=utils.fname())
+                player.dialog.go_to_next_round(player_id=player_id, called_from=__path__ + ':' + utils.fname())
 
             return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
 

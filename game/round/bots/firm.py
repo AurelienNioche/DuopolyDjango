@@ -51,7 +51,7 @@ def play(round_id, t):
         t=t,
         price=price,
         position=position,
-        called_from=utils.fname()
+        called_from=__path__ + ':' + utils.fname()
     )
 
 
