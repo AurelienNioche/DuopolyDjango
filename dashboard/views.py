@@ -155,6 +155,7 @@ class LogsView(TemplateView):
 
         filename = subprocess.getoutput("echo $(date +%F).log")
 
+        context.update({"current_file": filename})
         context.update({"logs": self.refresh_logs(filename)})
 
         files = [f for f in os.listdir(parameters.logs_path)
@@ -170,7 +171,7 @@ class LogsView(TemplateView):
             if request.GET["refresh_logs"]:
 
                 filename = request.GET["filename"]
-                n_lines = request.GET["n_lines"]
+                n_lines = int(request.GET["n_lines"])
 
                 return JsonResponse(
                     {
@@ -185,7 +186,7 @@ class LogsView(TemplateView):
 
         with open(parameters.logs_path + filename, "r") as f:
             if n_lines:
-                logs = "".join(f.readlines()[int(n_lines):])
+                logs = "".join(f.readlines()[n_lines:])
             else:
                 logs = f.read()
             f.close()

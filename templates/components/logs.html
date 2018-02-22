@@ -25,9 +25,13 @@
                             <button class="btn btn-success" onclick="Start();">Start</button>
                             <button class="btn btn-danger" onclick="Stop();">Stop</button>
                         <div style="margin-right: 15px" align="right">
-                            <select id="logfile" class="form-control" style="width: 20%;">
+                            <select id="logfile" onchange="GoToFileName(this);" class="form-control" style="width: 20%;">
                                 {% for file in files %}
-                                    <option onclick="GoToLog({{ file }});" value="{{ file }}">{{ file }}</option>
+                                    {% if current_file == file %}
+                                        <option value="{{ file }}" selected>{{ file }}</option>
+                                    {% else %}
+                                        <option value="{{ file }}">{{ file }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
@@ -51,9 +55,12 @@
     var refresh = true;
     var logs = document.getElementById("logs");
 
+    ScrollToBottom();
     setInterval(RefreshLogs, 1000);
 
-    function GoToLog (filename) {
+    function GoToFileName(element) {
+        var filename = element.options[element.selectedIndex].text;
+        Start();
         RefreshLogs(filename, 0);
     }
 
@@ -69,12 +76,14 @@
 
     function RefreshLogs(filename, n_lines) {
 
-            if (!n_lines) {
-                n_lines = $("#logs").text().split("\n").length;
+        if (refresh) {
+
+            if (filename === undefined ) {
+                filename = $("#logfile").find(":selected").text();
             }
 
-            if (!filename) {
-                filename = $("#logfile").find(":selected").text();
+            if (n_lines === undefined) {
+                 n_lines = $("#logs").text().split("\n").length;
             }
 
             $.ajax({
@@ -82,12 +91,17 @@
                 url: '/logs/?refresh_logs=1&filename=' + filename + '&n_lines=' + n_lines,
                 success: function (data) {
                     if (data["logs"].length > 0) {
-                        $('#logs').append(data["logs"]);
+                        if (n_lines === 0) {
+                            $('#logs').html(data["logs"]);
+                        } else {
+                            $('#logs').append(data["logs"]);
+                        }
                     }
                     ScrollToBottom();
                 }
 
             });
+        }
     }
 
 
