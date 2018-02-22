@@ -16,12 +16,9 @@ error = {
     "player_quit": -4
 }
 
-# Time before a player is considered disconnected (in minutes)
-disconnected_timeout = 2
-
 
 # Where we save logs
-logs_path = os.getcwd() + "/log/DuopolyDjango.log"
+logs_path = os.getcwd() + "/log/"
 
 
 auto_reply_msg = "Hi! Thanks for joining the experiment! Unfortunately we're not available "\
