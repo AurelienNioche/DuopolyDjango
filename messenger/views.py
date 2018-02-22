@@ -8,7 +8,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from . admin import Admin
-from utils.utils import log, function_name
+from utils import utils
 
 __path__ = os.path.relpath(__file__)
 
@@ -44,7 +44,7 @@ class MessengerView(TemplateView):
         # get current user if a user is selected
         if self.user is not None:
             Admin.set_user_msg_as_read(self.user)
-            log("I detected {} as user".format(self.user), f=function_name(), path=__path__)
+            utils.log("I detected {} as user".format(self.user), f=utils.fname(), path=__path__)
             context.update(
                 {"current_user": self.user}
             )
@@ -57,7 +57,7 @@ class MessengerView(TemplateView):
             )
 
         else:
-            log("No user sent message.", f=function_name(), path=__path__)
+            utils.log("No user sent message.", f=utils.fname(), path=__path__)
 
         # update context with messages
         messages = Admin.get_all_messages_from_user(context.get('current_user'))

@@ -4,16 +4,17 @@ import utils.utils as utils
 
 from game.models import Players
 
-from game import round
+from game import player
+
 
 __path__ = os.path.relpath(__file__)
 
 
 def tutorial_done(player_id):
 
-    round.dialog.go_to_next_round(
+    player.dialog.go_to_next_round(
         player_id=player_id,
-        called_from=__path__ + ":" + utils.function_name()
+        called_from=__path__ + ":" + utils.fname()
     )
 
 

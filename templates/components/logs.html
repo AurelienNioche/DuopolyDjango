@@ -66,12 +66,16 @@
     function RefreshLogs(){
 
         if (refresh) {
+            var filename = $("#logfile").find(":selected").text();
+            var n_lines = $("#logs").text().split("\n").length;
+
             $.ajax({
                 type: "GET",
-                url: '/logs/?refresh_logs=1&filename=' + $("#logfile").find(":selected").text(),
+                url: '/logs/?refresh_logs=1&filename=' + filename + '&n_lines=' + n_lines,
                 success: function (data) {
-                    // REFRESH CONTACTS
-                    $('#logs').html(data["logs"]);
+                    if (data["logs"].length > 0) {
+                        $('#logs').append(data["logs"]);
+                    }
                     ScrollToBottom();
                 }
 

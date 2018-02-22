@@ -4,7 +4,7 @@ import pytz
 import click
 
 
-def function_name():
+def fname():
     return inspect.stack()[1][3]
 
 

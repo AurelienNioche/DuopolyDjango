@@ -35,7 +35,7 @@ def create(round_id, n_real_players):
 def delete(round_id):
 
     utils.log("Delete composition corresponding to 'round_id' '{}'".format(round_id),
-              path=__path__, f=utils.function_name())
+              path=__path__, f=utils.fname())
 
     rc = RoundComposition.objects.filter(round_id=round_id)
     if rc.count():

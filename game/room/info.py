@@ -11,7 +11,7 @@ def room_available():
 
     exclude_missing_players_entries = Room.objects.exclude(missing_players=0)
     entries = exclude_missing_players_entries.exclude(opened=0)
-    utils.log("There are {} available rooms".format(len(entries)), f=utils.function_name(), path=__path__)
+    utils.log("There are {} available rooms".format(len(entries)), f=utils.fname(), path=__path__)
 
     return int(len(entries) > 0)
 

@@ -6,7 +6,7 @@ import os
 
 from utils import utils
 
-from . import tutorial, room, round
+from . import tutorial, room, round, player
 
 __path__ = os.path.relpath(__file__)
 
@@ -21,7 +21,9 @@ def client_request(request):
     :return: response
     """
 
-    utils.log("Post request: {}".format(request.POST), f=utils.function_name(), path=__path__)
+    utils.log("Post request: {}".format(list(request.POST.items())),
+              f=utils.fname(), path=__path__)
+
     demand = request.POST["demand"]
 
     try:
@@ -34,7 +36,7 @@ def client_request(request):
 
     to_reply = "/".join((str(i) for i in func(request)))
 
-    utils.log("I will reply '{}' to client.".format(to_reply), f=utils.function_name(), path=__path__)
+    utils.log("I will reply '{}' to client.".format(to_reply), f=utils.fname(), path=__path__)
     response = HttpResponse(to_reply)
     response["Access-Control-Allow-Credentials"] = "true"
     response["Access-Control-Allow-Headers"] = "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time"
@@ -63,10 +65,10 @@ def register(request):
         mechanical_id=mechanical_id
     )
     if went_well:
-        return "reply", utils.function_name(), 1
+        return "reply", utils.fname(), 1
 
     else:
-        return "reply", utils.function_name(), 0, "sending_aborted"
+        return "reply", utils.fname(), 0, "sending_aborted"
 
 
 def send_password_again(request):
@@ -91,7 +93,7 @@ def send_password_again(request):
         mechanical_id=mechanical_id
     )
 
-    return "reply", utils.function_name(), int(went_well)
+    return "reply", utils.fname(), int(went_well)
 
 # ----------------------------------| Participation |--------------------------------------------------------------- #
 
@@ -102,7 +104,7 @@ def connect(request):
     password = request.POST["password"]
 
     went_well = room.client.connect(username=username, password=password)
-    return "reply", utils.function_name(), int(went_well)
+    return "reply", utils.fname(), int(went_well)
 
 
 def registered_as_player(request):
@@ -111,21 +113,21 @@ def registered_as_player(request):
     rsp = room.client.registered_as_player(username)
 
     if rsp:
-        return ("reply", utils.function_name(), 1) + rsp
+        return ("reply", utils.fname(), 1) + rsp
 
     else:
-        return "reply", utils.function_name(), 0
+        return "reply", utils.fname(), 0
 
 
 def room_available(request):
 
     username = request.POST["username"]
-    utils.log("{} asks for a room available.".format(username), f=utils.function_name(), path=__path__)
+    utils.log("{} asks for a room available.".format(username), f=utils.fname(), path=__path__)
 
     # 1 if a room is available, else 0
     rsp = room.client.room_available()
 
-    return "reply", utils.function_name(), rsp
+    return "reply", utils.fname(), rsp
 
 
 @transaction.atomic
@@ -139,64 +141,64 @@ def proceed_to_registration_as_player(request):
         return "reply", "error", "player_id_is_not_unique"
 
     if rsp:
-        return ("reply", utils.function_name(), 1) + rsp
+        return ("reply", utils.fname(), 1) + rsp
 
     else:
-        return "reply", utils.function_name(), 0
+        return "reply", utils.fname(), 0
 
 
 # ----------------------------------| Demand relatives to Tutorial  |------------------------------------------------- #
 
-@round.state.banned
+@player.management.banned
 def tutorial_done(request):
 
     player_id = request.POST["player_id"]
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
     tutorial.client.tutorial_done(player_id=player_id)
-    return "reply", utils.function_name()
+    return "reply", utils.fname()
 
 
-@round.state.banned
+@player.management.banned
 def submit_tutorial_progression(request):
 
     player_id = request.POST["player_id"]
     tutorial_progression = float(request.POST["tutorial_progression"].replace(",", "."))
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
     tutorial.client.record_tutorial_progression(player_id=player_id, tutorial_progression=tutorial_progression)
-    return "reply", utils.function_name()
+    return "reply", utils.fname()
 
 
 # ------------------------| Players ask for missing players in their before starting to playing  |------------------- #
 
 @transaction.atomic
-@round.state.banned
+@player.management.banned
 def missing_players(request):
 
     player_id = request.POST["player_id"]
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
     n = room.client.missing_players(player_id=player_id)
-    return "reply", utils.function_name(), n
+    return "reply", utils.fname(), n
 
 
 # ------------------------| Firms ask for their init info at the beginning of each round |-------------------------- #
 
-@round.state.banned
+@player.management.banned
 def ask_firm_init(request):
 
     player_id = request.POST["player_id"]
 
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_init(
         player_id=player_id
     )
 
-    return ("reply", utils.function_name(), ) + to_reply
+    return ("reply", utils.fname(), ) + to_reply
 
 # ----------------------------------| passive firm demands |----------------------------------------------------- #
 
 
-@round.state.banned
+@player.management.banned
 def ask_firm_passive_opponent_choice(request):
 
     """
@@ -206,17 +208,17 @@ def ask_firm_passive_opponent_choice(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_passive_opponent_choice(
         player_id=player_id,
         t=t
     )
 
-    return ("reply", utils.function_name(), ) + to_reply
+    return ("reply", utils.fname(), ) + to_reply
 
 
-@round.state.banned
+@player.management.banned
 def ask_firm_passive_consumer_choices(request):
 
     """
@@ -226,19 +228,19 @@ def ask_firm_passive_consumer_choices(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_passive_consumer_choices(
         player_id=player_id,
         t=t
     )
 
-    return ("reply", utils.function_name(), ) + to_reply
+    return ("reply", utils.fname(), ) + to_reply
 
 # -----------------------------------| active firm demands |-------------------------------------------------------- #
 
 
-@round.state.banned
+@player.management.banned
 def ask_firm_active_choice_recording(request):
     """
     called by active firm
@@ -249,7 +251,7 @@ def ask_firm_active_choice_recording(request):
     position = int(request.POST["position"])
     price = int(request.POST["price"])
 
-    round.state.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_active_choice_recording(
         player_id=player_id,
@@ -258,10 +260,10 @@ def ask_firm_active_choice_recording(request):
         price=price
     )
 
-    return ("reply", utils.function_name(), ) + to_reply
+    return ("reply", utils.fname(), ) + to_reply
 
 
-@round.state.banned
+@player.management.banned
 def ask_firm_active_consumer_choices(request):
 
     """
@@ -271,11 +273,11 @@ def ask_firm_active_consumer_choices(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    round.dialog.set_time_last_request(player_id, utils.function_name())
+    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_active_consumer_choices(
         player_id=player_id,
         t=t
     )
 
-    return ("reply", utils.function_name(), ) + to_reply
+    return ("reply", utils.fname(), ) + to_reply

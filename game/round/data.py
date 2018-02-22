@@ -31,7 +31,7 @@ def init(round_id):
 def delete(round_id):
 
     utils.log("Delete data corresponding to 'round_id' '{}'".format(round_id),
-              path=__path__, f=utils.function_name())
+              path=__path__, f=utils.fname())
 
     for table in \
             (FirmPositions, FirmPrices, FirmProfits, FirmProfitsPerTurn, ConsumerChoices):

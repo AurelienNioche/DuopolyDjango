@@ -6,6 +6,7 @@ from parameters import parameters
 from game.models import Players, RoundState, Round, RoundComposition
 
 from . import data, state
+from game import player, room
 
 __path__ = os.path.relpath(__file__)
 
@@ -27,13 +28,19 @@ def ask_firm_init(player_id):
 
     utils.log("Player {} for room {} and round {} ask init: t is {}.".format(
         player_id, p.room_id, rd.round_id, rd.t),
-        f=utils.function_name(), path=__path__)
+        f=utils.fname(), path=__path__)
 
     # -------  Maybe client has to wait the other player ------------------------------------------ #
 
-    if state.client_has_to_wait_over_player(player_id=player_id):
-        opp_progression = state.get_opponent_progression(player_id=player_id)
-        return parameters.error["wait"], opp_progression  # Tuple is necessary!! '-1' hold for wait
+    if player.dialog.client_has_to_wait_over_player(player_id=player_id, called_from=utils.fname()):
+
+        if not room.dialog.is_trial(player_id, utils.fname()):
+
+            opp_progression = player.dialog.get_opponent_progression(
+                player_id=player_id,
+                called_from=utils.fname()
+            )
+            return parameters.error["wait"], opp_progression  # Tuple is necessary!! '-1' hold for wait
 
     # Get information necessary for firm initialization
     d = data.get_init_info(player_id=player_id)
@@ -60,11 +67,11 @@ def ask_firm_passive_opponent_choice(player_id, t):
     utils.log("Firm passive {} of room {} and round {} asks for opponent strategy.".format(
         player_id, p.room_id, rd.round_id
     ),
-        f=utils.function_name(), path=__path__)
+        f=utils.fname(), path=__path__)
 
     utils.log(
         "Client's time is {}, server's time is {}.".format(t, rd.t),
-        f=utils.function_name(), path=__path__
+        f=utils.fname(), path=__path__
     )
 
     # ---------- Record call ------------------------------------------------------------------ #
@@ -83,11 +90,11 @@ def ask_firm_passive_opponent_choice(player_id, t):
             return t, positions[opponent_id], prices[opponent_id]
 
         else:
-            utils.log("Have to wait: Active firm needs to play", f=utils.function_name(), path=__path__)
+            utils.log("Have to wait: Active firm needs to play", f=utils.fname(), path=__path__)
             return parameters.error["wait"],  # Tuple is necessary!!
 
     else:
-        utils.log("Error: Time is superior!!!!", f=utils.function_name(), path=__path__, level=3)
+        utils.log("Error: Time is superior!!!!", f=utils.fname(), path=__path__, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
@@ -104,12 +111,12 @@ def ask_firm_passive_consumer_choices(player_id, t):
     utils.log("Firm {} (passive) of room {} and round {} asks for its number of clients.".format(
         agent_id, p.room_id, rd.round_id
     ),
-        f=utils.function_name(),
+        f=utils.fname(),
         path=__path__
     )
 
     utils.log(
-        "Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.function_name(), path=__path__)
+        "Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.fname(), path=__path__)
 
     # ---------- Do stuff ------------------------------------------------------------------- #
 
@@ -123,7 +130,7 @@ def ask_firm_passive_consumer_choices(player_id, t):
             consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                state.go_to_next_round(player_id=player_id)
+                player.dialog.go_to_next_round(player_id=player_id, called_from=utils.fname())
 
             return (t, ) + tuple((i for i in consumer_choices)) + (is_end, )
 
@@ -131,7 +138,7 @@ def ask_firm_passive_consumer_choices(player_id, t):
             return parameters.error["wait"],   # Tuple is necessary!! // Have to wait
 
     else:
-        utils.log("Error: Time is superior!!!!", f=utils.function_name(), path=__path__, level=3)
+        utils.log("Error: Time is superior!!!!", f=utils.fname(), path=__path__, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
@@ -150,11 +157,11 @@ def ask_firm_active_choice_recording(player_id, t, position, price):
     utils.log(
         "Firm active {} of room {} and round {} asks to save its price and position.".format(
             player_id, p.room_id, rd.round_id
-        ), f=utils.function_name(), path=__path__)
+        ), f=utils.fname(), path=__path__)
 
     utils.log(
         "Client's time is {}, server's time is {}.".format(t, rd.t),
-        f=utils.function_name(), path=__path__)
+        f=utils.fname(), path=__path__)
 
     # -------  do stuff -------------------------------------------------------------------------- #
 
@@ -177,7 +184,7 @@ def ask_firm_active_choice_recording(player_id, t, position, price):
         return t,  # ! Must be a tuple
 
     else:
-        utils.log("Error: Time is superior!!!!", f=utils.function_name(), path=__path__, level=3)
+        utils.log("Error: Time is superior!!!!", f=utils.fname(), path=__path__, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
@@ -198,8 +205,8 @@ def ask_firm_active_consumer_choices(player_id, t):
     utils.log(
         "Firm active {} of room {} and round {} asks the number of its clients.".format(
             player_id, p.room_id, rd.round_id
-        ), f=utils.function_name(), path=__path__)
-    utils.log("Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.function_name(), path=__path__)
+        ), f=utils.fname(), path=__path__)
+    utils.log("Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.fname(), path=__path__)
 
     # ---------------- Do stuff ------------------------------------------ #
 
@@ -213,7 +220,7 @@ def ask_firm_active_consumer_choices(player_id, t):
             consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                state.go_to_next_round(player_id=player_id)
+                player.dialog.go_to_next_round(player_id=player_id, called_from=utils.fname())
 
             return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
 
@@ -221,5 +228,5 @@ def ask_firm_active_consumer_choices(player_id, t):
             return parameters.error["wait"],  # Tuple is necessary!!
 
     else:
-        utils.log("Error: Time is superior!!!!", f=utils.function_name(), path=__path__, level=3)
+        utils.log("Error: Time is superior!!!!", f=utils.fname(), path=__path__, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
