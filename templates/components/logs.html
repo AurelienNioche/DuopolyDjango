@@ -54,8 +54,7 @@
     setInterval(RefreshLogs, 1000);
 
     function GoToLog (filename) {
-        window.location = '/logs/?refresh_logs=1&filename=' + filename;
-        ScrollToBottom();
+        RefreshLogs(filename, 0);
     }
 
     function Stop () {
@@ -68,11 +67,15 @@
 
     }
 
-    function RefreshLogs(){
+    function RefreshLogs(filename, n_lines) {
 
-        if (refresh) {
-            var filename = $("#logfile").find(":selected").text();
-            var n_lines = $("#logs").text().split("\n").length;
+            if (!n_lines) {
+                n_lines = $("#logs").text().split("\n").length;
+            }
+
+            if (!filename) {
+                filename = $("#logfile").find(":selected").text();
+            }
 
             $.ajax({
                 type: "GET",
@@ -85,9 +88,8 @@
                 }
 
             });
-        }
-
     }
+
 
     function ScrollToBottom() {
          // Make the scrollbar go down

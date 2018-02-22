@@ -169,11 +169,8 @@ class LogsView(TemplateView):
         if "refresh_logs" in request.GET:
             if request.GET["refresh_logs"]:
 
-                # If refresh, we need a filename
                 filename = request.GET["filename"]
-                # n_lines is optional, so we use get method to obtain None
-                # in case of KeyError
-                n_lines = request.GET.get("n_lines")
+                n_lines = request.GET["n_lines"]
 
                 return JsonResponse(
                     {
