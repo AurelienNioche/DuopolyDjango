@@ -100,6 +100,9 @@ def get_list():
         for p in players:
 
             user = Users.objects.filter(player_id=p.player_id).first()
+
+            room.corrupted = True if user.deserter else False
+
             cp = ConnectedPlayer(
                 username=user.username,
                 deserter=user.deserter,
