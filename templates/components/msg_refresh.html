@@ -1,0 +1,37 @@
+{% load staticfiles %}
+{% for msg in messages %}
+<!-- display admin msg ----->
+{% if msg.author == "admin" %}
+<div class="row msg_container base_sent">
+    <div class="col-md-10 col-xs-10" align="right">
+
+                <div class="messages msg_sent" style="display: inline-block;">
+                    <p> {{ msg.message }}</p><br>
+                    <a style="font-size: 10px">{{ msg.time_stamp }}</a>
+
+                </div>
+{#                <div class="avatar">#}
+{#                    <img src="{% static 'img/heidegger.jpg' %}" class="img-responsive"#}
+{#                         style="border: 60px none #f5f5f5; border-radius: 50%;" >#}
+{#                </div>#}
+    </div>
+</div>
+{% endif  %}
+
+<!-- display user msg ----->
+{% if msg.author == current_user %}
+<div class="row msg_container base_receive">
+    <div class="col-md-10 col-xs-10">
+{#        <div class="col-md-2 col-xs-2 avatar">#}
+{#        </div>#}
+        <div class="messages msg_receive" style="display: inline-block; margin-left: 10px">
+            <p> {{ msg.message }}</p><br>
+            <a style="font-size: 10px">{{ msg.time_stamp }}</a>
+        </div>
+    </div>
+</div>
+{% endif  %}
+{% endfor %}
+
+
+

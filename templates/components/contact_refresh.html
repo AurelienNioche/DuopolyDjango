@@ -1,0 +1,38 @@
+ <tbody>
+    {% for user in users %}
+        <tr onclick="ClickedOnContact({{ user.id }})">
+            <td>
+                {{ user.username }}
+                {% if user.room_id %}
+                <a id="label_progression" class="label" style="background-color: #F4821C;">room {{ user.room_id }}</a>
+                {% endif %}
+                {% if user.state %}
+                <a id="label_state" class="label">{{ user.state }}</a>
+                    {% if user.state != "end" %}
+                        <a id="label_progression" class="label">{{ user.progression }}%</a>
+                    {% endif %}
+                {% endif %}
+                {% if user.deserter == 1 %}
+                    <a id="label_state" class="label" style="background-color: black;">banned</a>
+                {% endif %}
+                {% if user.n_unread %}
+                    {% if current_user == user.username %}
+                        <script>
+                            notifyMe({{ user.id }}, "{{ user.username }}");
+                            RefreshMsg();
+                        </script>
+                    {% else %}
+                        <script>
+                            notifyMe({{ user.id }}, "{{ user.username }}");
+                        </script>
+                    {% endif %}
+                <a id="label_n_unread" class="label">{{ user.n_unread }}</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+        <tr>
+        <td style="background-color: #FFFFFF"></td>
+        </tr>
+
+</tbody>
