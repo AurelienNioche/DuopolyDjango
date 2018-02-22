@@ -153,7 +153,6 @@ def proceed_to_registration_as_player(request):
 def tutorial_done(request):
 
     player_id = request.POST["player_id"]
-    player.client.set_time_last_request(player_id, utils.fname())
     tutorial.client.tutorial_done(player_id=player_id)
     return "reply", utils.fname()
 
@@ -163,7 +162,6 @@ def submit_tutorial_progression(request):
 
     player_id = request.POST["player_id"]
     tutorial_progression = float(request.POST["tutorial_progression"].replace(",", "."))
-    player.client.set_time_last_request(player_id, utils.fname())
     tutorial.client.record_tutorial_progression(player_id=player_id, tutorial_progression=tutorial_progression)
     return "reply", utils.fname()
 
@@ -175,7 +173,6 @@ def submit_tutorial_progression(request):
 def missing_players(request):
 
     player_id = request.POST["player_id"]
-    player.client.set_time_last_request(player_id, utils.fname())
     n = room.client.missing_players(player_id=player_id)
     return "reply", utils.fname(), n
 
@@ -186,8 +183,6 @@ def missing_players(request):
 def ask_firm_init(request):
 
     player_id = request.POST["player_id"]
-
-    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_init(
         player_id=player_id
@@ -208,8 +203,6 @@ def ask_firm_passive_opponent_choice(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    player.client.set_time_last_request(player_id, utils.fname())
-
     to_reply = round.client.ask_firm_passive_opponent_choice(
         player_id=player_id,
         t=t
@@ -227,8 +220,6 @@ def ask_firm_passive_consumer_choices(request):
 
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
-
-    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_passive_consumer_choices(
         player_id=player_id,
@@ -251,8 +242,6 @@ def ask_firm_active_choice_recording(request):
     position = int(request.POST["position"])
     price = int(request.POST["price"])
 
-    player.client.set_time_last_request(player_id, utils.fname())
-
     to_reply = round.client.ask_firm_active_choice_recording(
         player_id=player_id,
         t=t,
@@ -272,8 +261,6 @@ def ask_firm_active_consumer_choices(request):
 
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
-
-    player.client.set_time_last_request(player_id, utils.fname())
 
     to_reply = round.client.ask_firm_active_consumer_choices(
         player_id=player_id,

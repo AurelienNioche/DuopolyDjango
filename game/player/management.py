@@ -9,6 +9,7 @@ from dashboard.models import IntParameters
 from utils import utils
 from parameters import parameters
 from game import room, tutorial, round
+from . import management
 
 
 __path__ = os.path.relpath(__file__)
@@ -174,7 +175,7 @@ def _opponent_has_done_tutorial(player_id):
 # --------------------------------------- Info regarding time and disconnection ------------------------------------- #
 
 
-def set_time_last_request(player_id, function_name):
+def _set_time_last_request(player_id, function_name):
     """
     called by game.views via player.client
     """
@@ -210,7 +211,7 @@ def banned(f):
 
             opp_id = get_opponent_player_id(player_id)
 
-            if _player_has_quit(player_id):
+            if _player_has_quit(player_id, f.__name__):
                 utils.log(
                     "The current player is a deserter.",
                     f=f.__name__,
@@ -219,7 +220,7 @@ def banned(f):
                 )
                 return "reply", f.__name__, parameters.error["player_quit"]
 
-            elif opp_id and _player_has_quit(opp_id):
+            elif opp_id and _player_has_quit(opp_id, f.__name__):
                 utils.log(
                     "The other player is a deserter.",
                     f=f.__name__,
@@ -243,7 +244,7 @@ def get_opponent_player_id(player_id):
     return opp.player_id if opp else None
 
 
-def _player_has_quit(player_id):
+def _player_has_quit(player_id, function_name):
 
     p = Players.objects.get(player_id=player_id)
     rm = Room.objects.get(room_id=p.room_id)
@@ -264,8 +265,14 @@ def _player_has_quit(player_id):
     u = Users.objects.get(player_id=p.player_id)
     u.deserter = int(has_quit)
     u.save(force_update=True)
-    # If there is a deserter, close the concerned room
+
+    # If player is a deserter, close the concerned room
     if has_quit:
         room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+
+    # else record its last request
+    else:
+        # Save last request
+        _set_time_last_request(player_id, function_name)
 
     return has_quit
