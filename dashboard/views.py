@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 import os
+import subprocess
 
 from .forms import RoomForm
 from utils import utils
@@ -151,7 +152,15 @@ class LogsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context.update({"subtitle": "Logs"})
-        context.update({"logs": self.refresh_logs()})
+
+        filename = subprocess.getoutput("echo $(date +%F).log")
+
+        context.update({"logs": self.refresh_logs(filename)})
+
+        files = [f for f in os.listdir(parameters.logs_path)
+                 if os.path.isfile("".join([parameters.logs_path, f]))]
+
+        context.update({"files": files})
 
         return context
 
@@ -159,14 +168,18 @@ class LogsView(TemplateView):
 
         if "refresh_logs" in request.GET:
             if request.GET["refresh_logs"]:
-                return JsonResponse({"logs": self.refresh_logs()})
+                return JsonResponse(
+                    {
+                        "logs": self.refresh_logs(request.GET["filename"])
+                     }
+                )
 
         return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
-    def refresh_logs():
+    def refresh_logs(filename):
 
-        with open(parameters.logs_path, "r") as f:
+        with open(parameters.logs_path + filename, "r") as f:
             logs = f.read()
             f.close()
         return logs
