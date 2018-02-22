@@ -34,7 +34,7 @@ def create(data):
 
     round.dialog.create_rounds(
         room_id=room_id, ending_t=ending_t, trial=is_trial,
-        called_from=__path__ + "." + utils.function_name()
+        called_from=__path__ + "." + utils.fname()
     )
 
     rm = Room(
@@ -68,7 +68,7 @@ def delete(room_id):
     if entries.count():
         entries.delete()
 
-    round.dialog.delete_rounds(room_id=room_id, called_from=__path__+":"+utils.function_name())
+    round.dialog.delete_rounds(room_id=room_id, called_from=__path__+":"+utils.fname())
 
 
 def close(room_id):
@@ -76,7 +76,7 @@ def close(room_id):
     entry = Room.objects.get(room_id=room_id)
     entry.opened = 0
     entry.save(force_update=True)
-    utils.log("The room {} is now closed.".format(room_id), f=utils.function_name(), path=__path__)
+    utils.log("The room {} is now closed.".format(room_id), f=utils.fname(), path=__path__)
 
 
 def get_list():

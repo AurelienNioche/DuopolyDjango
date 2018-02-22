@@ -37,7 +37,7 @@ class LoginView(TemplateView):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            utils.log("Logging {} user.".format(user), f=utils.function_name(), path=__path__)
+            utils.log("Logging {} user.".format(user), f=utils.fname(), path=__path__)
             login(request, user)
             return redirect("/room_management/")
 
@@ -86,7 +86,7 @@ class NewRoomView(TemplateView):
                         # Create room
                         room.dashboard.create(form.get_data())
                     except IntegrityError:
-                        utils.log("Room already exists!", f=utils.function_name(), path=__path__, level=2)
+                        utils.log("Room already exists!", f=utils.fname(), path=__path__, level=2)
 
                 return redirect("/room_management")
 
@@ -119,7 +119,7 @@ class RoomManagementView(TemplateView):
 
         if "delete" in request.POST:
             room_id = request.POST["delete"]
-            utils.log("Delete room {}.".format(room_id), f=utils.function_name(), path=__path__)
+            utils.log("Delete room {}.".format(room_id), f=utils.fname(), path=__path__)
 
             # Delete room
             room.dashboard.delete(room_id=room_id)
@@ -168,19 +168,26 @@ class LogsView(TemplateView):
 
         if "refresh_logs" in request.GET:
             if request.GET["refresh_logs"]:
+
+                filename = request.GET["filename"]
+                n_lines = request.GET["n_lines"]
+
                 return JsonResponse(
                     {
-                        "logs": self.refresh_logs(request.GET["filename"])
+                        "logs": self.refresh_logs(filename, n_lines)
                      }
                 )
 
         return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
-    def refresh_logs(filename):
+    def refresh_logs(filename, n_lines=None):
 
         with open(parameters.logs_path + filename, "r") as f:
-            logs = f.read()
+            if n_lines:
+                logs = "".join(f.readlines()[int(n_lines):])
+            else:
+                logs = f.read()
             f.close()
         return logs
 

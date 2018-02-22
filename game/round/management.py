@@ -70,4 +70,4 @@ def close_round(round_id):
     entry.save(force_update=True)
 
     # Log
-    utils.log("The round {} is now closed.".format(round_id), f=utils.function_name(), path=__path__)
+    utils.log("The round {} is now closed.".format(round_id), f=utils.fname(), path=__path__)

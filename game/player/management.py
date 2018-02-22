@@ -1,15 +1,17 @@
-import utils.utils as utils
-from parameters import parameters
+import os
 from builtins import round as rnd
 import datetime
 from django.utils import timezone
 
-from game.models import Round, Room, Players, RoundComposition, RoundState, Users
+from game.models import Round, Room, Players, RoundComposition, Users
 from dashboard.models import IntParameters
 
+from utils import utils
+from parameters import parameters
 from game import room, tutorial, round
 
-from . import bots
+
+__path__ = os.path.relpath(__file__)
 
 
 def client_has_to_wait_over_player(player_id):
@@ -53,79 +55,13 @@ def get_opponent_progression(player_id):
     return str(rnd(progression))
 
 
-def check_if_bot_firm_has_to_play(round_id, t):
-
-    # Log
-    utils.log("Called", f=utils.function_name(), path=__path__)
-
-    # Get round
-    rd = Round.objects.filter(round_id=round_id).first()
-
-    # Check if round contains bots
-    if rd.real_players < parameters.n_firms:
-
-        # Get round state
-        round_state = RoundState.objects.get(round_id=round_id, t=t)
-
-        # Get firm bot
-        firm_bot = RoundComposition.objects.filter(round_id=round_id, bot=1, role="firm").first()
-
-        # If active firm did not play and bot firms not already played
-        if firm_bot.agent_id == round_state.firm_active \
-                and not round_state.firm_active_played:
-
-            bots.firm.play(round_id=round_id, t=t)
-
-            round_state.firm_active_played = 1
-
-            round_state.save(force_update=True)
-
-            utils.log("Bot firm played.",
-                      f=utils.function_name(), path=__path__)
-
-            return True
-
-        else:
-            utils.log("Bot firm has already played (or is not active).",
-                      f=utils.function_name(), path=__path__)
-
-    else:
-        utils.log("Round does not contain bots.", f=utils.function_name(), path=__path__)
-
-    return False
-
-
-def check_if_consumers_have_to_play(round_id, t):
-
-    # Log
-    utils.log("Called", f=utils.function_name(), path=__path__)
-
-    # Get room state
-    round_state = RoundState.objects.get(round_id=round_id, t=t)
-
-    # Then consumers need to choose a perimeter as well as a firm to buy from
-    if round_state.firm_active_played and not round_state.consumers_played:
-
-        bots.consumer.play(round_id=round_id, t=t)
-
-        round_state.consumers_played = 1
-        round_state.save(force_update=True)
-
-        round.dialog.compute_scores(round_id=round_id, t=t)
-        round.dialog.advance_of_one_time_step(round_id=round_id, t=t)
-        return True
-
-    else:
-        return False
-
-
 def go_to_next_round(player_id):
 
     p = Players.objects.get(player_id=player_id)
     room_id = Round.objects.get(round_id=p.round_id).room_id
     room_state = Room.objects.get(room_id=room_id).state
 
-    utils.log("Going to next round: room.state = {}".format(room_state), f=utils.function_name(), path=__path__)
+    utils.log("Going to next round: room.state = {}".format(room_state), f=utils.fname(), path=__path__)
 
     if room_state == room.state.tutorial and p.state == room.state.tutorial:
         _tutorial_is_done(player_id=player_id)
@@ -153,7 +89,12 @@ def _tutorial_is_done(player_id):
 
     # if other player has done tutorial, set rm.state to pve
     if rm.trial or _opponent_has_done_tutorial(player_id=player_id):
-        room.dialog.update_state(room_id=rm.room_id, room_state=room.state.pve)
+
+        room.dialog.update_state(
+            room_id=rm.room_id,
+            room_state=room.state.pve,
+            called_from=utils.fname()
+        )
 
 
 def _pve_is_done(player_id):
@@ -161,7 +102,7 @@ def _pve_is_done(player_id):
     p = Players.objects.get(player_id=player_id)
 
     # As player is alone, once he finished, we can close the r
-    round.dialog.close_round(round_id=p.round_id)
+    round.dialog.close_round(round_id=p.round_id, called_from=utils.fname())
 
     # load objects
     next_round = Round.objects.get(room_id=p.room_id, state=room.state.pvp)
@@ -175,7 +116,7 @@ def _pve_is_done(player_id):
 
     # set room state
     if rm.trial or _opponent_has_done_pve(player_id=player_id):
-        room.dialog.update_state(room_id=p.room_id, room_state=room.state.pvp)
+        room.dialog.update_state(room_id=p.room_id, room_state=room.state.pvp, called_from=utils.fname())
 
 
 def _pvp_is_done(player_id):
@@ -191,11 +132,11 @@ def _pvp_is_done(player_id):
     if rm.trial or _opponent_has_done_pvp(player_id=player_id):
 
         # Close round
-        round.dialog.close_round(round_id=p.round_id)
+        round.dialog.close_round(round_id=p.round_id, called_from=utils.fname())
 
         # Close room and set state
-        room.dialog.close(room_id=p.room_id, called_from=__path__ + ":" + utils.function_name())
-        room.dialog.update_state(room_id=p.room_id, room_state=room.state.end)
+        room.dialog.close(room_id=p.room_id, called_from=__path__ + ":" + utils.fname())
+        room.dialog.update_state(room_id=p.room_id, room_state=room.state.end, called_from=utils.fname())
 
 
 # --------------------------------------- Info regarding the opponent --------------------------------------------- #
@@ -233,7 +174,7 @@ def _opponent_has_done_tutorial(player_id):
 
 def set_time_last_request(player_id, function_name):
     """
-    called by game.views
+    called by game.views via player.client
     """
 
     player = Players.objects.get(player_id=player_id)
@@ -251,18 +192,21 @@ def banned(f):
     def new_f(request):
 
         player_id = request.POST["player_id"]
-        opp_id = get_opponent_player_id(player_id)
+        decorator_name = "player.management.banned"
 
-        # check if trial (if trial we do not want to ban players)
-        trial = room.dialog.is_trial(player_id)
+        # check if trial (if trial we do not want to ban player
+        trial = room.dialog.is_trial(player_id, called_from=decorator_name)
         # check if room is not in end state (meaning we
         # do not want to ban players because they already
         # completed the game but have tried to reconnect)
 
         p = Players.objects.get(player_id=player_id)
-        already_ended = room.dialog.get_state(room_id=p.room_id) == room.state.end
+        already_ended = \
+            room.dialog.get_state(room_id=p.room_id, called_from=decorator_name) == room.state.end
 
         if not trial and not already_ended:
+
+            opp_id = get_opponent_player_id(player_id)
 
             if _player_has_quit(player_id):
                 utils.log(
@@ -320,6 +264,6 @@ def _player_has_quit(player_id):
     u.save(force_update=True)
     # If there is a deserter, close the concerned room
     if has_quit:
-        room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.function_name())
+        room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
 
     return has_quit

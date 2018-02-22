@@ -27,7 +27,7 @@ def play(round_id, t):
     positions, prices = round.dialog.get_positions_and_prices(round_id=round_id, t=t)
 
     positions_seen = room.dialog.compute_field_of_view(
-        room_id=room_id, to_send=False, called_from=__path__ + "." + utils.function_name())
+        room_id=room_id, to_send=False, called_from=__path__ + "." + utils.fname())
 
     entries = RoundComposition.objects.filter(round_id=round_id, bot=1, role="consumer")
 

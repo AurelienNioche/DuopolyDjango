@@ -112,7 +112,7 @@ def proceed_to_registration_as_player(username):
 
             utils.log(
                 "{} is already registered but I will do as if it is not the case".format(username),
-                f=utils.function_name(), path=__path__)
+                f=utils.fname(), path=__path__)
 
         else:
             pp = _register_as_player(username=username)
@@ -130,7 +130,7 @@ def connect(username, password):
 
 def _register_as_player(username):
 
-    utils.log("I registered {}".format(username), f=utils.function_name(), path=__path__)
+    utils.log("I registered {}".format(username), f=utils.fname(), path=__path__)
 
     rm = Room.objects.exclude(missing_players=0).exclude(opened=0).order_by("missing_players").first()
 
@@ -154,7 +154,7 @@ def _register_as_player(username):
     rm.save(force_update=True)
 
     round_id = round.dialog.include_players_into_round_compositions(
-        room_id=rm.room_id, player_id=player_id, called_from=__path__ + ":" + utils.function_name())
+        room_id=rm.room_id, player_id=player_id, called_from=__path__ + ":" + utils.fname())
 
     # When we create player entry, we associate him to a pve round id
     # because he needs to pass it in order to do pvp

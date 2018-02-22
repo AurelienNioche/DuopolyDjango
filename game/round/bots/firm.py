@@ -5,6 +5,7 @@ import os
 from builtins import round as rnd
 
 from parameters import parameters
+from utils import utils
 
 from game.models import Room, RoundComposition, FirmPositions, FirmPrices, Round
 
@@ -49,7 +50,8 @@ def play(round_id, t):
         agent_id=bot_id,
         t=t,
         price=price,
-        position=position
+        position=position,
+        called_from=utils.fname()
     )
 
 
