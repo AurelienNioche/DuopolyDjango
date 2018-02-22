@@ -211,7 +211,9 @@ def banned(f):
 
             opp_id = get_opponent_player_id(player_id)
 
-            if _player_has_quit(player_id, f.__name__):
+            # First, we check that the current player is not
+            # a deserter
+            if _player_has_quit(player_id):
                 utils.log(
                     "The current player is a deserter.",
                     f=f.__name__,
@@ -220,7 +222,11 @@ def banned(f):
                 )
                 return "reply", f.__name__, parameters.error["player_quit"]
 
-            elif opp_id and _player_has_quit(opp_id, f.__name__):
+            # If the player is not a deserter, we can save its last request
+            _set_time_last_request(player_id, f.__name__)
+
+            # Then, we check if the opponent is still connected
+            if opp_id and _player_has_quit(opp_id):
                 utils.log(
                     "The other player is a deserter.",
                     f=f.__name__,
@@ -244,7 +250,7 @@ def get_opponent_player_id(player_id):
     return opp.player_id if opp else None
 
 
-def _player_has_quit(player_id, function_name):
+def _player_has_quit(player_id):
 
     p = Players.objects.get(player_id=player_id)
     rm = Room.objects.get(room_id=p.room_id)
@@ -269,10 +275,5 @@ def _player_has_quit(player_id, function_name):
     # If player is a deserter, close the concerned room
     if has_quit:
         room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
-
-    # else record its last request
-    else:
-        # Save last request
-        _set_time_last_request(player_id, function_name)
 
     return has_quit
