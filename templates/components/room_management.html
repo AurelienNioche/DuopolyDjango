@@ -53,7 +53,9 @@ if (document.referrer.indexOf("new_room") !== -1){
                                         style="cursor: pointer;">
                                             <h4 class="panel-title">
                                                 <a style="font-size: 22px; pointer-events: none; cursor: default;">Room {{ room.att.room_id }}</a>
-                                                <a id="label_state" style="margin-left: 25px; background-color: #0f0f0f">Corrupted</a>
+                                                {% if room.corrupted %}
+                                                    <a class="label" style="margin-left: 25px; background-color: #0f0f0f">Corrupted</a>
+                                                {% endif %}
                                             </h4>
                                         </div>
                                     <div id="collapse{{ room.att.room_id }}" class="panel-collapse collapse" align="middle">
