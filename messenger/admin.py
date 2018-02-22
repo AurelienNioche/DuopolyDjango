@@ -50,7 +50,7 @@ class Admin:
             user_list.append(u)
 
         # Then we add the other users to the user list
-        for u in users.exclude(player_id="null"):
+        for u in users.filter(player_id="null"):
             u.state = None
             u.progression = None
             u.room_id = None
