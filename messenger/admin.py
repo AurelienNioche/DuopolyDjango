@@ -22,35 +22,42 @@ class Admin:
     @classmethod
     def get_all_users(cls):
 
+        players = Players.objects.all().order_by("room_id")
         users = Users.objects.all().order_by("username")
+        user_list = []
 
-        for u in users:
+        # We sort users by room ids
+        for p in players:
 
-            player = Players.objects.filter(player_id=u.player_id).first()
+            u = users.get(player_id=p.player_id)
 
-            if player is not None:
+            # Set state
+            u.state = p.state
 
-                u.state = player.state
+            # set progression
+            if u.state == room.state.tutorial:
+                progression = round(p.tutorial_progression)
+                u.progression = progression if progression != -1 else 0
 
-                # set progression
-                if u.state == room.state.tutorial:
-                    progression = round(player.tutorial_progression)
-                    u.progression = progression if progression != -1 else 0
+            elif u.state == room.state.pve or u.state == room.state.pvp:
+                rd = Round.objects.get(round_id=p.round_id)
+                u.progression = round((rd.t / rd.ending_t) * 100)
 
-                elif u.state == room.state.pve or u.state == room.state.pvp:
-                    rd = Round.objects.get(round_id=player.round_id)
-                    u.progression = round((rd.t / rd.ending_t) * 100)
-
-                u.room_id = player.room_id
-
-            else:
-                u.state = None
-                u.progression = None
-                u.room_id = None
+            u.room_id = p.room_id
 
             u.n_unread = cls.get_unread_msg(u.username)
 
-        return list(u for u in users)
+            user_list.append(u)
+
+        # Then we add the other users to the user list
+        for u in users.exclude(player_id="null"):
+            u.state = None
+            u.progression = None
+            u.room_id = None
+            u.n_unread = cls.get_unread_msg(u.username)
+            user_list.append(u)
+
+        return user_list
 
     @classmethod
     def get_user_from_id(cls, user_id):
