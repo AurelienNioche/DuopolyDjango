@@ -1,0 +1,89 @@
+{% extends "layout/base.html" %}
+{%  load staticfiles %}
+
+{% block basecontent %}
+<div id="wrapper">
+        <a class="navbar-brand" href="/" style="color: #abb9d3;">
+            Duopoly Experiment</a>
+        <br>
+        <br>
+
+        <!-- /.navbar-top-links -->
+
+        <div class="navbar-default sidebar" role="navigation" style="background-color: #343A40; border-color: #343A40;">
+            <div class="sidebar-nav navbar-collapse">
+                <ul class="nav" id="side-menu">
+                    <img src="{% static 'img/heidegger.jpg' %}"
+                         class="img-responsive" style="border: 2px solid #d4d4d4; width:
+                         140px;margin-left: 50px;margin-top: 40px;" >
+                    <br>
+                    <a href="/logout" ><i class="fa fa-sign-out" style="margin-left: 83px; font-size: 15px;
+                     font-family: FontAwesome, sans-serif;">Logout</i></a>
+                    <br>
+                    <br>
+                    <br>
+                    <li>
+                    <a id="room_management_tab" href="{% url 'dashboard:room_management' %}">
+                        <i class="fa fa-group fa-fw"></i> Room management</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'messenger:messenger_view' %}"><i class="fa fa-comments fa-fw"></i> Chat
+                            <span id="label_n_unread"
+                               style="visibility: hidden; display: inline;
+                                margin-left: 60%; font-weight: bold; padding: 5px; border-radius: 2px;"></span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin:index' %}"><i class="fa fa-table fa-fw"></i> Tables</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard:data' %}"><i class="fa fa-line-chart fa-fw"></i> Data</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard:logs' %}"><i class="fa fa-file-text fa-fw"></i> Logs</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.sidebar-collapse -->
+        </div>
+</div>
+
+    <!-- Page Content -->
+    <div id="page-wrapper">
+    <div class="fadeIn">
+        {% block page_content %}
+        {% endblock page_content %}
+    </div>
+    </div>
+    <!-- /#page-wrapper -->
+<!-- /#wrapper -->
+    <script>
+
+    setInterval(RefreshMsgUnreadCount, 3000);
+
+    function RefreshMsgUnreadCount(){
+        if (!window.location.href.match("messenger")) {
+            $.ajax({
+                type: "GET",
+                url: '/refresh_messenger/?user_id=null&type=all_unread_msg',
+                success: function (data) {
+                    var label = document.getElementById("label_n_unread");
+                    // REFRESH sidebar
+                    if (data["count"] > 0){
+                        label.innerHTML = data["count"];
+                        label.style.visibility = "visible";
+                        console.log(data["count"]);
+                    }
+                    else{
+                        console.log("do not display");
+                        label.style.visibility = "hidden";
+                    }
+
+                }
+
+            });
+        }
+    }
+
+    </script>
+
+{% endblock basecontent %}

@@ -1,0 +1,223 @@
+{% extends "dashboard/base.html" %}
+{% load staticfiles %}
+
+
+<style>
+    img {
+        display: block;
+        width: 100%;
+    }
+
+    body {
+        height: 400px;
+        position: fixed;
+        bottom: 0;
+    }
+
+</style>
+
+{% block page_content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+                <h1 class="page-header"> {{ title }}</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-12">
+                    <div class="row">
+                       <div class="container" id="msg">
+                           <div class="row">
+                             <div class="col-sm-4">
+                              <div class="panel panel-primary" style="border-color: #dddddd; width: 111%;">
+                                    <div class="panel-heading top-bar" style="background-color: #F5F5F5; border-color: #dddddd; color: #333">
+                                            <div class="col-md-8 col-xs-8">
+                                                <h3 class="panel-title"><span class="fa fa-book"></span> Contacts</h3>
+                                            </div>
+                                    </div>
+                                    <div id="contacts-wrapper">
+                                    <table class="table table-striped table-hover" id="contacts" style="cursor: pointer;">
+                                        {% include 'components/contact_refresh.html'%}
+                                    </table>
+                                    </div>
+                                </div>
+                             </div>
+                     <div class="col-sm-8">
+                        <div class="chatbody" style="width: 100%; height:100%; margin-left: 15px;">
+                            <div class="panel panel-primary" style="border-color: #dddddd; height: 100%">
+                                <div class="panel-heading top-bar" style="background-color: #F5F5F5; border-color: #dddddd; color: #333">
+                                    <div class="col-md-8 col-xs-8">
+                                        <h3 class="panel-title">
+                                            <span class="fa fa-comments"></span>
+                                            Chat with {{ current_user }}
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div class="panel-body msg_container_base" id="chat" style="height:100%">
+                                    {% include 'components/msg_refresh.html' %}
+                                </div>
+                                <div class="panel-footer">
+                                    <form id="chatForm" class="input-group">
+                                        {% csrf_token %}
+                                        <input name="user" type="text" style="display: none;" value="{{ current_user }}" />
+                                        <input name="msg" id="btn-input" type="text" autocomplete="off"
+                                               class="form-control input-sm chat_input" placeholder="Write your message here..." />
+                                        <span class="input-group-btn">
+                                        <div class="btn btn-primary btn-sm" id="btn-chat" style="background-color: #3f903f; border-color: #3f903f">
+                                            <i class="fa fa-send fa-1x" aria-hidden="true"></i></div>
+                                        </span>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- Rounded switch -->
+                            <br>
+                            <div align="right">
+{#                                <span style="color: #abb9d3; margin-bottom: 8px;">Auto reply</span>#}
+                                <label class="switch">
+                                    <p>Auto Reply</p>
+                                  <input id="auto_reply" value="Auto reply" type="checkbox" {{ auto_reply }}>
+                                  <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                     </div>
+                        <!-- /.row (nested) -->
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    // used in order to refresh msg
+    setInterval(RefreshContacts, 2000);
+    // define chat element as a global variable
+    var chat = document.getElementById("chat");
+    // Scroll to bottom when page loads
+    ScrollToBottom();
+
+    // request permission on page load
+    document.addEventListener('DOMContentLoaded', function () {
+
+      if (!Notification) {
+        alert('Desktop notifications not available in your browser. Try Chromium.');
+        return;
+      }
+
+      if (Notification.permission !== "granted") {
+          Notification.requestPermission();
+      }
+
+    });
+
+    previous_user_id = -1;
+
+    function notifyMe(user_id, username) {
+
+        // avoid notification spam
+        if (user_id !== previous_user_id) {
+            previous_user_id = user_id;
+
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+            else {
+                var notification = new Notification('Duopoly Messenger', {
+                    body: "New message from " + username
+                });
+
+                notification.onclick = function () {
+                    window.location = "/messenger_view/?user_id=" + user_id;
+                }
+
+            }
+        }
+    }
+
+    function RefreshMsg() {
+
+        // Get current user
+        var url = new URL(window.location.href);
+        var user_id = url.searchParams.get("user_id");
+
+        $.ajax({
+            type: "GET",
+            url: '/refresh_messenger/?user_id=' + user_id + '&type=msg',
+            success: function (data) {
+                // REFRESH MSG
+                $('#chat').html(data);
+                ScrollToBottom();
+            }
+
+        });
+    }
+
+    function RefreshContacts(){
+        // Get current user
+        var url = new URL(window.location.href);
+        var user_id = url.searchParams.get("user_id");
+        var auto_reply = $('#auto_reply').prop("checked") ? 1 : 0;
+
+        $.ajax({
+            type: "GET",
+            url: '/refresh_messenger/?user_id=' + user_id + '&type=contacts' + '&auto_reply=' + auto_reply,
+            success: function (data) {
+                // REFRESH CONTACTS
+                $('#contacts').html(data)
+            }
+
+        });
+
+    }
+
+    // Used in order to send msg
+    document.getElementById("btn-input").addEventListener('keypress', function (e) {
+        var input = document.getElementById("btn-input").value;
+        var key = e.which || e.keyCode;
+        //if k == enter, send message
+        if (key === 13 && input.length > 0){
+            var data = $('#chatForm').serialize();
+            SendMessage(input);
+            $.ajax({
+                type: "POST",
+                url: '/messenger_view/',
+                data: data,
+                success: function (data) {
+                    console.log("Successfully sent!");
+                    RefreshMsg();
+                }
+            });
+        }
+    });
+
+     function SendMessage (msg) {
+         document.getElementById("btn-input").value = "";
+         chat.innerHTML += "<div class='row msg_container base_sent'> \
+                            '<div class='col-md-10 col-xs-10' align='right'> \
+                            <div class='messages msg_sent' style='display: inline-block;'> \
+                                <p>" + msg +  "</p><br> \
+                            </div>\
+                            </div>\
+                            </div>";
+         ScrollToBottom();
+
+     }
+     function ScrollToBottom() {
+         // Make the scrollbar go down
+         chat.scrollTop = chat.scrollHeight;
+     }
+
+     function ClickedOnContact(user_id){
+         window.location='/messenger_view/?user_id=' +  user_id ;
+     }
+
+
+</script>
+
+
+{% endblock page_content %}
