@@ -66,7 +66,8 @@ def register_firm_choices(round_id, agent_id, t, price, position, called_from):
     )
 
 
-def get_positions_and_prices(round_id, t):
+def get_positions_and_prices(round_id, t, called_from):
+    utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
     return data.get_positions_and_prices(round_id=round_id, t=t)
 
 

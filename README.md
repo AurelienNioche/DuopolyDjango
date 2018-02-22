@@ -17,9 +17,10 @@ __________________________________________________
 * postgresql
 * postgresql_dir (just once after start up)
 
+
 The server runs using the command
 
-    python manage.py 0:8000 |& tee -a log/DuopolyDjango.log &
+    python manage.py 0:8000 |& tee -a log/$(date +%F).log &
   
 
 ## Start and stop a service
