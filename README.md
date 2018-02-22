@@ -1,5 +1,5 @@
 # DuopolyDjango
-Server part of Duopoly Game. Based on Django framework.
+Server part of Duopoly Game. Developed using Django web framework.
 
 __________________________________________________
 
