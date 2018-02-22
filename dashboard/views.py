@@ -108,7 +108,7 @@ class RoomManagementView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({'subtitle': "Room list"})
 
-        # Get list of existing rooms
+        # Get list of existing rooms and players
         rooms_list = room.dashboard.get_list()
 
         context.update({"rooms": rooms_list})
