@@ -6,8 +6,9 @@ from . models import Users, FirmProfits, FirmPositions, FirmPrices, \
 
 
 class UsersAdmin(admin.ModelAdmin):
-    list_display = ("username", "player_id", "password", "deserter",
-                    "email", "gender", "mechanical_id", "age", "nationality", "last_request", "time_last_request")
+    list_display = ("username", "player_id", "password",
+                    "email", "gender", "mechanical_id", "age", "nationality",
+                    "last_request", "time_last_request", "connected", "deserter")
 
 
 class PlayersAdmin(admin.ModelAdmin):
