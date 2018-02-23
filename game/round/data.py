@@ -241,9 +241,14 @@ def convert_data_to_sql():
 
             # loop and insert into sqlite
             for row in rows:
+
+                sqlite_cursor.execute("CREATE TABLE {}".format(table))
+                sqlite_connection.commit()
+
+                colnames = [desc[0] for desc in sqlite_cursor.description]
+
                 sqlite_cursor.execute(
-                    "INSERT INTO {} (id, title ) VALUES (:id, :title)".format(table),
-                    {"id": row[0], "title": row[1]}
+                    "INSERT INTO {} (".format(table) + ",".join(colnames) + ") VALUES (" + ",".join((str(r) for r in row)) + ")"
                 )
                 sqlite_connection.commit()
 
