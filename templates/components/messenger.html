@@ -92,13 +92,13 @@
 
     });
 
-    previous_user_id = -1;
+    previous_username = -1;
 
-    function notifyMe(user_id, username) {
+    function notifyMe(username, username) {
 
         // avoid notification spam
-        if (user_id !== previous_user_id) {
-            previous_user_id = user_id;
+        if (username !== previous_username) {
+            previous_username = username;
 
             if (Notification.permission !== "granted") {
                 Notification.requestPermission();
@@ -109,20 +109,17 @@
                 });
 
                 notification.onclick = function () {
-                    window.location = "/messenger_view/?user_id=" + user_id;
+                    window.location = "/messenger_view/?username=" + username;
                 }
 
             }
         }
     }
 
-    function RefreshMsg(user_id) {
-        if (user_id === undefined) {
-            user_id = document.getElementById("user").value
-        }
+    function RefreshMsg(username) {
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=' + user_id + '&type=msg',
+            url: '/refresh_messenger/?username=' + username + '&type=msg',
             success: function (data) {
                 // REFRESH MSG
                 $('#chatbody').html(data);
@@ -134,10 +131,9 @@
 
     function RefreshContacts(){
         var auto_reply = $('#auto_reply').prop("checked") ? 1 : 0;
-
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=null'+ '&type=contacts' + '&auto_reply=' + auto_reply,
+            url: '/refresh_messenger/?username=null'+ '&type=contacts' + '&auto_reply=' + auto_reply,
             success: function (data) {
                 // REFRESH CONTACTS
                 $('#contacts').html(data)
@@ -184,9 +180,9 @@
          chat.scrollTop = chat.scrollHeight;
      }
 
-     function ClickedOnContact(user_id){
-         console.log("ClickedOnContact " + user_id);
-         RefreshMsg(user_id);
+     function ClickedOnContact(username){
+         console.log("ClickedOnContact " + username);
+         RefreshMsg(username);
      }
 
 </script>

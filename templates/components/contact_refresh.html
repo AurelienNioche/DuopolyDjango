@@ -1,6 +1,6 @@
  <tbody>
     {% for user in users %}
-        <tr onclick="ClickedOnContact({{ user.id }});">
+        <tr onclick="ClickedOnContact({{ user.username }});">
             <td>
                {% if user.connected %}
                     <span class="fa fa-circle" style="color: #3F903F; font-size: 9px;"></span>
@@ -9,16 +9,14 @@
                 {% endif %}
                 <span style="font-weight: bold">{{ user.username }}</span>
                 {% if user.n_unread %}
-                    {% if current_user == user.username %}
                         <script>
-                            notifyMe({{ user.id }}, "{{ user.username }}");
-                            RefreshMsg();
+                            if (document.getElementById("user").value === {{ user.username }}) {
+                                notifyMe({{ user.id }}, "{{ user.username }}");
+                                RefreshMsg({{ user.username }});
+                            } else {
+                                notifyMe({{ user.id }}, "{{ user.username }}");
+                            }
                         </script>
-                    {% else %}
-                        <script>
-                            notifyMe({{ user.id }}, "{{ user.username }}");
-                        </script>
-                    {% endif %}
                         <a id="label_n_unread" class="label" style="font-size: 14px; margin-left: 29%;">{{ user.n_unread }}</a>
                 {% endif %}
                 <br>
