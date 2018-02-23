@@ -53,15 +53,13 @@ class MessengerView(TemplateView):
                 {"current_user": self.user}
             )
 
-        # take the first
-        elif users:
-            Admin.set_user_msg_as_read(users[0].username)
+        else:
             context.update(
-                {"current_user": users[0].username}
+                {"current_user": Admin.get_latest_msg_author()}
             )
 
         # update context with messages
-        messages = Admin.get_all_messages_from_user(context.get('current_user'))
+        messages = Admin.get_all_messages_from_user(context['current_user'])
         context.update({'messages': messages})
 
         return context
