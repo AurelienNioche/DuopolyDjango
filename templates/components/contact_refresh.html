@@ -3,6 +3,7 @@
         <tr onclick="ClickedOnContact({{ user.id }})">
             <td>
                 {{ user.username }}
+                <br>
                 {% if user.room_id %}
                 <a id="label_progression" class="label" style="background-color: #F4821C;">room {{ user.room_id }}</a>
                 {% endif %}
@@ -14,6 +15,11 @@
                 {% endif %}
                 {% if user.deserter == 1 %}
                     <a id="label_state" class="label" style="background-color: black;">banned</a>
+                {% endif %}
+                {% if user.connected == 1%}
+                    <a id="label_state" class="label">connected</a>
+                {% else %}
+                    <a id="label_state" class="label" style="background-color: #D9534F;">disconnected</a>
                 {% endif %}
                 {% if user.n_unread %}
                     {% if current_user == user.username %}

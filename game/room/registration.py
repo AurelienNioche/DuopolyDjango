@@ -1,6 +1,6 @@
 import os
-import secrets
 import numpy as np
+from django.utils import timezone
 
 import utils.utils as utils
 
@@ -31,6 +31,8 @@ def register_as_user(user_mail, nationality, gender, age, mechanical_id):
                 gender=gender,
                 age=age,
                 mechanical_id=mechanical_id,
+                time_last_request=timezone.now(),
+                last_request=utils.fname()
             )
             entry.save()
 
@@ -63,7 +65,9 @@ def send_password_again(user_mail, nationality, gender, age, mechanical_id):
                 nationality=nationality,
                 gender=gender,
                 age=age,
-                mechanical_id=mechanical_id
+                mechanical_id=mechanical_id,
+                time_last_request=timezone.now(),
+                last_request=utils.fname()
             )
             entry.save()
 
@@ -154,7 +158,8 @@ def _register_as_player(username):
     rm.save(force_update=True)
 
     round_id = round.dialog.include_players_into_round_compositions(
-        room_id=rm.room_id, player_id=player_id, called_from=__path__ + ":" + utils.fname())
+        room_id=rm.room_id, player_id=player_id, called_from=__path__ + ":" + utils.fname()
+    )
 
     # When we create player entry, we associate him to a pve round id
     # because he needs to pass it in order to do pvp
@@ -162,7 +167,8 @@ def _register_as_player(username):
         player_id=player_id,
         room_id=rm.room_id,
         round_id=round_id,
-        state=state.tutorial
+        state=state.tutorial,
+        registration_time=timezone.now(),
     )
 
     pp.save()

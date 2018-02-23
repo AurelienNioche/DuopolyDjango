@@ -82,9 +82,10 @@ def close(room_id):
 def get_list():
 
     class ConnectedPlayer:
-        def __init__(self, username, deserter, p_state, last_request, time_last_request):
+        def __init__(self, username, connected, deserter, p_state, last_request, time_last_request):
             self.username = username
             self.deserter = deserter
+            self.connected = connected
             self.state = p_state
             self.last_request = last_request
             self.time_last_request = time_last_request
@@ -99,17 +100,17 @@ def get_list():
 
         for p in players:
 
-            user = Users.objects.filter(player_id=p.player_id).first()
-
-            room.corrupted = True if user.deserter else False
+            u = Users.objects.filter(player_id=p.player_id).first()
 
             cp = ConnectedPlayer(
-                username=user.username,
-                deserter=user.deserter,
+                username=u.username,
+                connected=u.connected,
+                deserter=u.deserter,
                 p_state=p.state,
-                last_request=p.last_request,
-                time_last_request=p.time_last_request
+                last_request=u.last_request,
+                time_last_request=u.time_last_request
             )
+
             connected_players.append(cp)
 
         dic = {"att": room, "connected_players": connected_players}

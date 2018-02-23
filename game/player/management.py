@@ -9,7 +9,6 @@ from dashboard.models import IntParameters
 from utils import utils
 from parameters import parameters
 from game import room, tutorial, round
-from . import management
 
 
 __path__ = os.path.relpath(__file__)
@@ -175,45 +174,64 @@ def _opponent_has_done_tutorial(player_id):
 # --------------------------------------- Info regarding time and disconnection ------------------------------------- #
 
 
-def _set_time_last_request(player_id, function_name):
+def _set_time_last_request(player_id, function_name, username=None):
     """
     called by game.views via player.client
     """
 
-    player = Players.objects.get(player_id=player_id)
-    player.time_last_request = timezone.now()
-    player.last_request = function_name
-    player.save(force_update=True)
+    if username:
+        user = Users.objects.get(username=username)
+    else:
+        user = Users.objects.get(player_id=player_id)
+
+    user.time_last_request = timezone.now()
+    user.last_request = function_name
+    user.save(force_update=True)
 
 
-def banned(f):
+def connection_checker(f):
     """
     decorator used in game.round.client
-    in order to check if opponent/player is still playing
+    in order to check if opponent/player is connected
     or is AFK
     """
     def new_f(request):
 
-        player_id = request.POST["player_id"]
-        decorator_name = "player.management.banned"
+        decorator_name = "player.management.connection_checker"
+        player_id = request.POST.get("player_id")
+        username = request.POST.get("username")
+
+        # Refresh  list of connected users
+        check_connected_users()
+
+        # ----------  If user has not joined a room yet ----------------- #
+        if username:
+            _set_time_last_request(None, f.__name__, username=username)
+            return f(request)
+
+        # ----------  If user has joined a room ------------------------- #
 
         # check if trial (if trial we do not want to ban player
         trial = room.dialog.is_trial(player_id, called_from=decorator_name)
+
         # check if room is not in end state (meaning we
         # do not want to ban players because they already
         # completed the game but have tried to reconnect)
-
         p = Players.objects.get(player_id=player_id)
         already_ended = \
             room.dialog.get_state(room_id=p.room_id, called_from=decorator_name) == room.state.end
 
         if not trial and not already_ended:
 
-            opp_id = get_opponent_player_id(player_id)
+            # First, we check that the function called is missing players
+            # if we reach the missing opponent timeout then return error
+            if f.__name__ == "missing_players" and _no_opponent_found(player_id):
 
-            # First, we check that the current player is not
+                return "reply", f.__name__, parameters.error["no_opponent_found"]
+
+            # Then, we check that the current player is not
             # a deserter
-            if _player_has_quit(player_id):
+            if _player_is_banned(player_id):
                 utils.log(
                     "The current player is a deserter.",
                     f=f.__name__,
@@ -225,8 +243,9 @@ def banned(f):
             # If the player is not a deserter, we can save its last request
             _set_time_last_request(player_id, f.__name__)
 
-            # Then, we check if the opponent is still connected
-            if opp_id and _player_has_quit(opp_id):
+            # Then, we check if the opponent has reached banishment timeout
+            opp_id = get_opponent_player_id(player_id)
+            if opp_id and _player_is_banned(opp_id):
                 utils.log(
                     "The other player is a deserter.",
                     f=f.__name__,
@@ -250,30 +269,57 @@ def get_opponent_player_id(player_id):
     return opp.player_id if opp else None
 
 
-def _player_has_quit(player_id):
+def _player_is_banned(player_id):
+
+    u = Users.objects.get(player_id=player_id)
+    p = Players.objects.get(player_id=player_id)
+    rm = Room.objects.get(room_id=p.room_id)
+
+    if _is_timed_out(u.time_last_request, "banishment_timeout"):
+
+        # Set the opponent as a deserter
+        # and return that info to the player
+        u.deserter = 1
+        u.save(force_update=True)
+
+        room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+
+        return True
+
+
+def check_connected_users():
+
+    for u in Users.objects.all():
+        u.connected = int(_is_timed_out(u.time_last_request, "disconnected_timeout"))
+        u.save(force_update=True)
+
+
+def _no_opponent_found(player_id):
 
     p = Players.objects.get(player_id=player_id)
     rm = Room.objects.get(room_id=p.room_id)
 
-    # First get time of the last request
-    t_last_request = p.time_last_request
+    return rm.missing_players and _is_timed_out(p.registration_time, "no_opponent_timeout")
+
+
+def _is_timed_out(reference_time, timeout_parameter):
+
     # Then get the timezone
-    tz_info = p.time_last_request.tzinfo
+    tz_info = reference_time.tzinfo
     # Get time now using timezone info
     t_now = datetime.datetime.now(tz_info)
     # Generate a timedelta
-    minutes = IntParameters.objects.get(name="disconnected_timeout").value
-    five_min = datetime.timedelta(minutes=minutes)
-    # If more than 5 min since the last request
-    has_quit = t_now > t_last_request + five_min
-    # Set the opponent as a deserter
-    # and return that info to the player
-    u = Users.objects.get(player_id=p.player_id)
-    u.deserter = int(has_quit)
-    u.save(force_update=True)
+    minutes = IntParameters.objects.get(name=timeout_parameter).value
+    minutes_delta = datetime.timedelta(minutes=minutes)
 
-    # If player is a deserter, close the concerned room
-    if has_quit:
-        room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+    # If more than X min since the last request
+    timeout = t_now > reference_time + minutes_delta
 
-    return has_quit
+    return timeout
+
+
+
+
+
+
+

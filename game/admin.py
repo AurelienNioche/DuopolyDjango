@@ -7,12 +7,12 @@ from . models import Users, FirmProfits, FirmPositions, FirmPrices, \
 
 class UsersAdmin(admin.ModelAdmin):
     list_display = ("username", "player_id", "password", "deserter",
-                    "email", "gender", "mechanical_id", "age", "nationality")
+                    "email", "gender", "mechanical_id", "age", "nationality", "last_request", "time_last_request")
 
 
 class PlayersAdmin(admin.ModelAdmin):
     list_display = \
-        ("player_id", "room_id", "state", "last_request", "time_last_request")
+        ("player_id", "room_id", "state" )
 
 
 class FirmProfitsAdmin(admin.ModelAdmin):

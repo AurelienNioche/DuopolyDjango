@@ -8,7 +8,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from . admin import Admin
-from utils import utils
+from game import player
 
 __path__ = os.path.relpath(__file__)
 
@@ -32,6 +32,9 @@ class MessengerView(TemplateView):
         # Set titles of the page
         context.update({'subtitle': "Chat with players"})
 
+        # Update connected players
+        player.messenger.check_connected_users()
+
         # Get messages
         users = Admin.get_all_users()
         # update context with users
@@ -43,8 +46,9 @@ class MessengerView(TemplateView):
 
         # get current user if a user is selected
         if self.user is not None:
+
             Admin.set_user_msg_as_read(self.user)
-            utils.log("I detected {} as user".format(self.user), f=utils.fname(), path=__path__)
+
             context.update(
                 {"current_user": self.user}
             )
@@ -55,9 +59,6 @@ class MessengerView(TemplateView):
             context.update(
                 {"current_user": users[0].username}
             )
-
-        else:
-            utils.log("No user sent message.", f=utils.fname(), path=__path__)
 
         # update context with messages
         messages = Admin.get_all_messages_from_user(context.get('current_user'))

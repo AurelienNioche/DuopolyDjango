@@ -98,6 +98,7 @@ def send_password_again(request):
 # ----------------------------------| Participation |--------------------------------------------------------------- #
 
 
+@player.management.connection_checker
 def connect(request):
 
     username = request.POST["username"]
@@ -107,6 +108,7 @@ def connect(request):
     return "reply", utils.fname(), int(went_well)
 
 
+@player.management.connection_checker
 def registered_as_player(request):
 
     username = request.POST["username"]
@@ -119,6 +121,7 @@ def registered_as_player(request):
         return "reply", utils.fname(), 0
 
 
+@player.management.connection_checker
 def room_available(request):
 
     username = request.POST["username"]
@@ -131,6 +134,7 @@ def room_available(request):
 
 
 @transaction.atomic
+@player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
     username = request.POST["username"]
@@ -149,7 +153,7 @@ def proceed_to_registration_as_player(request):
 
 # ----------------------------------| Demand relatives to Tutorial  |------------------------------------------------- #
 
-@player.management.banned
+@player.management.connection_checker
 def tutorial_done(request):
 
     player_id = request.POST["player_id"]
@@ -157,7 +161,7 @@ def tutorial_done(request):
     return "reply", utils.fname()
 
 
-@player.management.banned
+@player.management.connection_checker
 def submit_tutorial_progression(request):
 
     player_id = request.POST["player_id"]
@@ -169,7 +173,7 @@ def submit_tutorial_progression(request):
 # ------------------------| Players ask for missing players in their before starting to playing  |------------------- #
 
 @transaction.atomic
-@player.management.banned
+@player.management.connection_checker
 def missing_players(request):
 
     player_id = request.POST["player_id"]
@@ -179,7 +183,7 @@ def missing_players(request):
 
 # ------------------------| Firms ask for their init info at the beginning of each round |-------------------------- #
 
-@player.management.banned
+@player.management.connection_checker
 def ask_firm_init(request):
 
     player_id = request.POST["player_id"]
@@ -193,7 +197,7 @@ def ask_firm_init(request):
 # ----------------------------------| passive firm demands |----------------------------------------------------- #
 
 
-@player.management.banned
+@player.management.connection_checker
 def ask_firm_passive_opponent_choice(request):
 
     """
@@ -211,7 +215,7 @@ def ask_firm_passive_opponent_choice(request):
     return ("reply", utils.fname(), ) + to_reply
 
 
-@player.management.banned
+@player.management.connection_checker
 def ask_firm_passive_consumer_choices(request):
 
     """
@@ -231,7 +235,7 @@ def ask_firm_passive_consumer_choices(request):
 # -----------------------------------| active firm demands |-------------------------------------------------------- #
 
 
-@player.management.banned
+@player.management.connection_checker
 def ask_firm_active_choice_recording(request):
     """
     called by active firm
@@ -252,7 +256,7 @@ def ask_firm_active_choice_recording(request):
     return ("reply", utils.fname(), ) + to_reply
 
 
-@player.management.banned
+@player.management.connection_checker
 def ask_firm_active_consumer_choices(request):
 
     """

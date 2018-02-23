@@ -13,7 +13,8 @@ error = {
     "wait": -1,
     "time_is_superior": -2,
     "opponent_quit": -3,
-    "player_quit": -4
+    "player_quit": -4,
+    "no_opponent_found": -5,
 }
 
 
