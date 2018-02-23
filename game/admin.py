@@ -41,6 +41,7 @@ class RoomAdmin(admin.ModelAdmin):
     list_display = ("room_id", "radius", "opened", "missing_players", "trial",
                     "ending_t", "state", "player_0", "player_1")
 
+
 class RoundCompositionAdmin(admin.ModelAdmin):
     list_display = ("round_id", "player_id", "agent_id", "bot", "role")
 
