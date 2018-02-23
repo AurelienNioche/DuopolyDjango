@@ -215,46 +215,11 @@ def convert_data_to_pickle():
 
 
 def convert_data_to_sql():
-    import psycopg2
-    import sqlite3
 
     mydata = get_path("db")
-    # create a sqlite db
-    sqlite_connection = sqlite3.connect(mydata.file_path)
-    sqlite_cursor = sqlite_connection.cursor()
-    # ref: http://hakanu.net/sql/2015/08/25/sqlite-unicode-string-problem/
-    sqlite_connection.text_factory = lambda x: str(x, 'utf-8')
 
-    # connect to postgresql
-    pg_connect_string = "host='127.0.0.1' dbname='DuopolyDB' user='dasein' password=''"
-    pg_connection = psycopg2.connect(pg_connect_string)
-    pg_cursor = pg_connection.cursor()
-
-    pg_cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
-
-    for (table, ) in pg_cursor.fetchall():
-
-        if str(table).startswith("game"):
-            # select from the table
-            pg_cursor.execute("SELECT * from {}".format(table))
-            rows = pg_cursor.fetchall()
-
-            # loop and insert into sqlite
-            for row in rows:
-
-                sqlite_cursor.execute("CREATE TABLE {}".format(table))
-                sqlite_connection.commit()
-
-                colnames = [desc[0] for desc in sqlite_cursor.description]
-
-                sqlite_cursor.execute(
-                    "INSERT INTO {} (".format(table) + ",".join(colnames) + ") VALUES (" + ",".join((str(r) for r in row)) + ")"
-                )
-                sqlite_connection.commit()
-
-        # close all connections
-    sqlite_connection.close()
-    pg_connection.close()
+    subprocess.call("pg_dump -U dasein DuopolyDB > {}".format(mydata.file_path))
+    subprocess.call("pg2sqlite -d {} -o sqlite.db".format(mydata.file_path))
 
     return mydata.to_return
 
