@@ -120,12 +120,10 @@
     }
 
     function RefreshMsg() {
-        // Get current user
-        var user_id = user;
 
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=' + user_id + '&type=msg',
+            url: '/refresh_messenger/?user_id=' + user + '&type=msg',
             success: function (data) {
                 // REFRESH MSG
                 $('#chatbody').html(data);
@@ -136,13 +134,11 @@
     }
 
     function RefreshContacts(){
-        // Get current user
-        var user_id = user;
         var auto_reply = $('#auto_reply').prop("checked") ? 1 : 0;
 
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=' + user_id + '&type=contacts' + '&auto_reply=' + auto_reply,
+            url: '/refresh_messenger/?user_id=' + user + '&type=contacts' + '&auto_reply=' + auto_reply,
             success: function (data) {
                 // REFRESH CONTACTS
                 $('#contacts').html(data)
