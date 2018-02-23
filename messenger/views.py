@@ -158,6 +158,7 @@ class MessengerClientSide:
         return "reply", "done"
 
     @classmethod
+    @player.management.connection_checker
     def client_hears(cls, request):
 
         username = request.POST["username"]
