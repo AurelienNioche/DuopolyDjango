@@ -98,6 +98,8 @@
     setInterval(RefreshContacts, 2000);
     // define chat element as a global variable
     var chat = document.getElementById("chat");
+    // define default user
+    var user = 1;
     // Scroll to bottom when page loads
     ScrollToBottom();
 
@@ -140,10 +142,8 @@
     }
 
     function RefreshMsg() {
-
         // Get current user
-        var url = new URL(window.location.href);
-        var user_id = url.searchParams.get("user_id");
+        var user_id = user;
 
         $.ajax({
             type: "GET",
@@ -159,8 +159,7 @@
 
     function RefreshContacts(){
         // Get current user
-        var url = new URL(window.location.href);
-        var user_id = url.searchParams.get("user_id");
+        var user_id = user;
         var auto_reply = $('#auto_reply').prop("checked") ? 1 : 0;
 
         $.ajax({
@@ -213,9 +212,8 @@
      }
 
      function ClickedOnContact(user_id){
-         window.location='/messenger_view/?user_id=' +  user_id ;
+         user = user_id;
      }
-
 
 </script>
 
