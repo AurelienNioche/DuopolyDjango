@@ -218,7 +218,7 @@ def convert_data_to_sql():
 
     mydata = get_path("sql")
 
-    subprocess.call(["pg_dump", "-U", "dasein", "DuopolyDB", ">", mydata.file_path])
+    subprocess.call("pg_dump -U dasein DuopolyDB > " + mydata.file_path)
 
     return mydata.to_return
 
