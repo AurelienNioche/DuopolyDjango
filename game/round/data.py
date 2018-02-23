@@ -234,6 +234,7 @@ def convert_data_to_sql():
 
     for table in pg_cursor.fetchall():
 
+        raise Exception(table)
         # select from the table
         pg_cursor.execute("SELECT * from {}".format(table))
         rows = pg_cursor.fetchall()
