@@ -230,16 +230,23 @@ def convert_data_to_sql():
     pg_connection = psycopg2.connect(pg_connect_string)
     pg_cursor = pg_connection.cursor()
 
-    # select from the table
-    pg_cursor.execute("SELECT * from entry")
-    rows = pg_cursor.fetchall()
+    pg_cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
 
-    # loop and insert into sqlite
-    for row in rows:
-        sqlite_cursor.execute("INSERT INTO ENTRY (id, title ) VALUES (:id, :title)", {"id": row[0], "title": row[1]})
-        sqlite_connection.commit()
+    for table in pg_cursor.fetchall():
 
-    # close all connections
+        # select from the table
+        pg_cursor.execute("SELECT * from {}".format(table))
+        rows = pg_cursor.fetchall()
+
+        # loop and insert into sqlite
+        for row in rows:
+            sqlite_cursor.execute(
+                "INSERT INTO {} (id, title ) VALUES (:id, :title)".format(table),
+                {"id": row[0], "title": row[1]}
+            )
+            sqlite_connection.commit()
+
+        # close all connections
     sqlite_connection.close()
     pg_connection.close()
 
