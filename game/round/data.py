@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 import os
+import subprocess
 import pickle
 import numpy as np
 
@@ -167,16 +168,24 @@ def compute_scores(round_id, t):
         new_sc_entry.save()
 
 
+def get_path(dtype):
+
+    class Data:
+        time_stamp = str(timezone.datetime.now()).replace(" ", "_")
+        file_name = "{}_{}_.{}".format(dtype, time_stamp, dtype)
+        folder_name = "game_data"
+        folder_path = os.getcwd() + "/static/" + folder_name
+        file_path = folder_path + "/" + file_name
+        to_return = folder_name + "/" + file_name
+
+    os.makedirs(Data.folder_path, exist_ok=True)
+
+    return Data()
+
+
 def convert_data_to_pickle():
 
-    time_stamp = str(timezone.datetime.now()).replace(" ", "_")
-    file_name = "data_{}_.p".format(time_stamp)
-    folder_name = "game_data"
-    folder_path = os.getcwd() + "/static/" + folder_name
-    file_path = folder_path + "/" + file_name
-    to_return = folder_name + "/" + file_name
-
-    os.makedirs(folder_path, exist_ok=True)
+    mydata = get_path("p")
 
     d = {}
 
@@ -200,6 +209,16 @@ def convert_data_to_pickle():
 
         d[table.__name__] = valid_attr
 
-    pickle.dump(file=open(file_path, "wb"), obj=d)
+    pickle.dump(file=open(mydata.file_path, "wb"), obj=d)
 
-    return to_return
+    return mydata.to_return
+
+
+def convert_data_to_sql():
+
+    mydata = get_path("sql")
+
+    subprocess.call(["pg_dump", "-U", "dasein", "DuopolyDB", ">", mydata.file_path])
+
+    return mydata.to_return
+

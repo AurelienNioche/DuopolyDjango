@@ -138,10 +138,12 @@ class DataView(TemplateView):
 
         context = super().get_context_data(**kwargs)
         # Get list of existing rooms
-        url = rd.dashboard.convert_data_to_pickle()
+        url_pickle = rd.dashboard.convert_data_to_pickle()
+        url_sql = rd.dashboard.convert_data_to_sql()
 
         context.update({"subtitle": "Download data"})
-        context.update({"url": url})
+        context.update({"url_pickle": url_pickle})
+        context.update({"url_sql": url_sql})
 
         return context
 
