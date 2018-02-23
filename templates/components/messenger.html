@@ -31,43 +31,40 @@
                     <div class="row">
                        <div class="container" id="msg">
                            <div class="row">
-                             <div class="col-sm-4">
-                              <div class="panel panel-primary" style="border-color: #dddddd; width: 111%;">
-                                    <div class="panel-heading top-bar" style="background-color: #F5F5F5; border-color: #dddddd; color: #333">
-                                            <div class="col-md-8 col-xs-8">
-                                                <h3 class="panel-title"><span class="fa fa-book"></span> Contacts</h3>
-                                            </div>
-                                    </div>
-                                    <div id="contacts-wrapper">
-                                    <table class="table table-striped table-hover" id="contacts" style="cursor: pointer;">
-                                        {% include 'components/contact_refresh.html'%}
-                                    </table>
+                                <div class="col-sm-4">
+                                    <div class="panel panel-primary" style="border-color: #dddddd; width: 111%;">
+                                        <div class="panel-heading top-bar" style="background-color: #F5F5F5; border-color: #dddddd; color: #333">
+                                                <div class="col-md-8 col-xs-8">
+                                                    <h3 class="panel-title"><span class="fa fa-book"></span> Contacts</h3>
+                                                </div>
+                                        </div>
+                                        <div id="contacts-wrapper">
+                                            <table class="table table-striped table-hover" id="contacts" style="cursor: pointer;">
+                                                {% include 'components/contact_refresh.html'%}
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
-                             </div>
-                     <div class="col-sm-8">
-                        <div id="chatbody" class="chatbody" style="width: 100%; height:100%; margin-left: 15px;">
-                            <div class="panel panel-primary fadeIn" style="border-color: #dddddd; height: 100%">
-                           {% include 'components/msg_refresh.html' %}
-                            </div>
-                        </div>
-                            <!-- Rounded switch -->
-                            <br>
-                            <div align="right">
-{#                                <span style="color: #abb9d3; margin-bottom: 8px;">Auto reply</span>#}
-                                <label class="switch">
-                                    <p>Auto Reply</p>
-                                  <input id="auto_reply" value="Auto reply" type="checkbox" {{ auto_reply }}>
-                                  <span class="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
-                     </div>
-                        <!-- /.row (nested) -->
+                           <div class="col-sm-8">
+                                <div id="chatbody" class="chatbody" style="width: 100%; height:100%; margin-left: 15px;">
+                                    <div class="panel panel-primary fadeIn" style="border-color: #dddddd; height: 100%">
+                                        {% include 'components/msg_refresh.html' %}
+                                    </div>
+                                </div>
+                              <!-- Rounded switch -->
+                              <br>
+                              <div align="right">
+    {#                              <span style="color: #abb9d3; margin-bottom: 8px;">Auto reply</span>#}
+                                  <label class="switch">
+                                      <p>Auto Reply</p>
+                                    <input id="auto_reply" value="Auto reply" type="checkbox" {{ auto_reply }}>
+                                    <span class="slider round"></span>
+                                  </label>
+                              </div>
+                           </div>
+                           </div>
+                       </div>
                     </div>
-                    <!-- /.panel-body -->
-                </div>
-            </div>
         </div>
     </div>
 
