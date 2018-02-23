@@ -216,10 +216,11 @@ def convert_data_to_pickle():
 
 def convert_data_to_sql():
 
-    mydata = get_path("db")
+    sql_file = get_path("sql")
+    db_file = get_path("db")
 
-    subprocess.call("pg_dump -U dasein DuopolyDB > {}".format(mydata.file_path), shell=True)
-    subprocess.call("pg2sqlite -d {} -o {}".format(mydata.file_path, mydata.file_path), shell=True)
+    subprocess.call("pg_dump -U dasein DuopolyDB > {}".format(sql_file.file_path), shell=True)
+    subprocess.call("pg2sqlite -d {} -o {}".format(sql_file.file_path, db_file.file_path), shell=True)
 
-    return mydata.to_return
+    return db_file.to_return
 
