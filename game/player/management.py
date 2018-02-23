@@ -290,7 +290,7 @@ def _player_is_banned(player_id):
 def check_connected_users():
 
     for u in Users.objects.all():
-        u.connected = int(_is_timed_out(u.time_last_request, "disconnected_timeout"))
+        u.connected = int(not _is_timed_out(u.time_last_request, "disconnected_timeout"))
         u.save(force_update=True)
 
 
