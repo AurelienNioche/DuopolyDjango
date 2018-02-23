@@ -274,6 +274,7 @@ def _player_is_banned(player_id):
     u = Users.objects.filter(player_id=player_id).first()
 
     if u is not None:
+
         p = Players.objects.get(player_id=player_id)
         rm = Room.objects.get(room_id=p.room_id)
 
