@@ -75,10 +75,12 @@ class MessengerView(TemplateView):
         let the TemplateView do its stuff (get_context_data...)
         """
 
-        if "username" in request.GET:
+        if "user_id" in request.GET:
 
-            if request.GET["username"] != "null":
-                self.user = request.GET["username"]
+            user_id = request.GET["user_id"]
+
+            if user_id != "null":
+                self.user = Admin.get_user_from_id(user_id)
 
         if "auto_reply" in request.GET:
 
