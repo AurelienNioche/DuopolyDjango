@@ -10,11 +10,12 @@
                 <span style="font-weight: bold">{{ user.username }}</span>
                 {% if user.n_unread %}
                         <script>
-                            if (document.getElementById("user").value === {{ user.username }}) {
-                                notifyMe({{ user.id }}, "{{ user.username }}");
+                            if (document.getElementById("user").value === "{{ user.username }}") {
+                                {#notifyMe({{ user.id }}, "{{ user.username }}");#}
                                 RefreshMsg({{ user.username }});
                             } else {
-                                notifyMe({{ user.id }}, "{{ user.username }}");
+                                ;
+                                {#notifyMe({{ user.id }}, "{{ user.username }}");#}
                             }
                         </script>
                         <a id="label_n_unread" class="label" style="font-size: 14px; margin-left: 29%;">{{ user.n_unread }}</a>
