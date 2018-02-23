@@ -2,10 +2,10 @@
     {% for user in users %}
         <tr onclick="ClickedOnContact({{ user.id }})">
             <td>
-                {% if user.connected == 1%}
-                    <span class="fa fa-circle" style="color: #a94442; font-size: 9px;"></span>
+                {% if user.connected %}
+                    <span class="fa fa-circle" style="color: #3F903F}; font-size: 9px;"></span>
                 {% else %}
-                    <span class="fa fa-circle" style="color: #D9534F; font-size: 9px;"></span>
+                    <span class="fa fa-circle" style="color: #a94442; font-size: 9px;"></span>
                 {% endif %}
                 {{ user.username }}
                 <br>
