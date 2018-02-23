@@ -22,7 +22,7 @@ class Admin:
     @classmethod
     def get_all_users(cls):
 
-        players = Players.objects.all().order_by("room_id")
+        players = Players.objects.all().order_by("room_id", "player_id")
         users = Users.objects.all().order_by("username")
         user_list = []
 
