@@ -232,9 +232,8 @@ def convert_data_to_sql():
 
     pg_cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
 
-    for table in pg_cursor.fetchall():
+    for (table, ) in pg_cursor.fetchall():
 
-        raise Exception(table)
         # select from the table
         pg_cursor.execute("SELECT * from {}".format(table))
         rows = pg_cursor.fetchall()
