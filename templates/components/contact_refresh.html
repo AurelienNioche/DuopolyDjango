@@ -14,7 +14,7 @@
                                 {#notifyMe({{ user.id }}, "{{ user.username }}");#}
                                 RefreshMsg({{ user.username }});
                             } else {
-                                ;
+                                console.log("Not the right user.")
                                 {#notifyMe({{ user.id }}, "{{ user.username }}");#}
                             }
                         </script>
