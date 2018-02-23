@@ -2,26 +2,12 @@
     {% for user in users %}
         <tr onclick="ClickedOnContact({{ user.id }})">
             <td>
-                {% if user.connected %}
+               {% if user.connected %}
                     <span class="fa fa-circle" style="color: #3F903F; font-size: 9px;"></span>
                 {% else %}
                     <span class="fa fa-circle" style="color: #a94442; font-size: 9px;"></span>
                 {% endif %}
                 <span style="font-weight: bold">{{ user.username }}</span>
-                <br>
-                <br>
-                {% if user.room_id %}
-                <a id="label_progression" class="label" style="background-color: #F4821C;">room {{ user.room_id }}</a>
-                {% endif %}
-                {% if user.state %}
-                <a id="label_state" class="label">{{ user.state }}</a>
-                    {% if user.state != "end" %}
-                        <a id="label_progression" class="label">{{ user.progression }}%</a>
-                    {% endif %}
-                {% endif %}
-                {% if user.deserter == 1 %}
-                    <a id="label_state" class="label" style="background-color: black;">banned</a>
-                {% endif %}
                 {% if user.n_unread %}
                     {% if current_user == user.username %}
                         <script>
@@ -34,8 +20,21 @@
                         </script>
                     {% endif %}
                     <div align="right">
-                        <a id="label_n_unread" class="label" style="font-size: 14px; margin-bottom: 5px;">{{ user.n_unread }}</a>
+                        <a id="label_n_unread" class="label" style="font-size: 14px;">{{ user.n_unread }}</a>
                     </div>
+                {% endif %}
+                <br>
+                {% if user.room_id %}
+                <a id="label_progression" class="label" style="background-color: #F4821C;">room {{ user.room_id }}</a>
+                {% endif %}
+                {% if user.state %}
+                <a id="label_state" class="label">{{ user.state }}</a>
+                    {% if user.state != "end" %}
+                        <a id="label_progression" class="label">{{ user.progression }}%</a>
+                    {% endif %}
+                {% endif %}
+                {% if user.deserter == 1 %}
+                    <a id="label_state" class="label" style="background-color: black;">banned</a>
                 {% endif %}
             </td>
         </tr>
