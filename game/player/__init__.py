@@ -1,1 +1,1 @@
-from . import management, client, dialog
+from . import management, client, dialog, dashboard, messenger
