@@ -52,8 +52,7 @@ class Players(models.Model):
     player_id = models.TextField(max_length=20, default="null", unique=True)
     room_id = models.IntegerField(default=-1)
     round_id = models.TextField(max_length=20, default="null")
-    time_last_request = models.DateTimeField(auto_now_add=True, blank=True)
-    last_request = models.TextField(max_length=30, default="null")
+    registration_time = models.DateTimeField(auto_now_add=True, blank=True)
     state = models.TextField(max_length=30, default="null")
     tutorial_progression = models.FloatField(default=0)
 
@@ -72,6 +71,9 @@ class Users(models.Model):
     age = models.IntegerField(default=-1)
     nationality = models.TextField(max_length=30, default="null")
     deserter = models.IntegerField(default=0)
+    time_last_request = models.DateTimeField(auto_now_add=True, blank=True)
+    last_request = models.TextField(max_length=30, default="null")
+    connected = models.IntegerField(default=0)
 
 
 class Data(models.Model):

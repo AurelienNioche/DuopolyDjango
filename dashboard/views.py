@@ -12,7 +12,7 @@ import subprocess
 from .forms import RoomForm
 from utils import utils
 
-from game import room, round as rd
+from game import room, round as rd, player
 from parameters import parameters
 
 __path__ = os.path.relpath(__file__)
@@ -107,6 +107,9 @@ class RoomManagementView(TemplateView):
 
         context = super().get_context_data(**kwargs)
         context.update({'subtitle': "Room list"})
+
+        # check connected users
+        player.dashboard.check_connected_users()
 
         # Get list of existing rooms and players
         rooms_list = room.dashboard.get_list()

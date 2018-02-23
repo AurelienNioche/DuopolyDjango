@@ -53,9 +53,6 @@ if (document.referrer.indexOf("new_room") !== -1){
                                         style="cursor: pointer;">
                                             <h4 class="panel-title">
                                                 <a style="font-size: 22px; pointer-events: none; cursor: default;">Room {{ room.att.room_id }}</a>
-                                                {% if room.corrupted %}
-                                                    <a class="label" style="margin-left: 25px; background-color: #0f0f0f">Corrupted</a>
-                                                {% endif %}
                                             </h4>
                                         </div>
                                     <div id="collapse{{ room.att.room_id }}" class="panel-collapse collapse" align="middle">
@@ -79,15 +76,14 @@ if (document.referrer.indexOf("new_room") !== -1){
                                                     {% for player in room.connected_players %}
                                                         {% if player %}
 
-                                                            {% if player.state == "end"%}
-                                                                <i class="fa fa-circle" style="color: #D9534F"></i>
-                                                            {% elif player.deserter %}
+                                                            {% if player.deserter %}
                                                                 <i class="fa fa-circle" style="color: #0f0f0f"></i>
-                                                            {% elif room.corrupted %}
-                                                                <i class="fa fa-circle" style="color: #D9534F"></i>
-                                                            {% else %}
+                                                            {% elif player.connected %}
                                                                 <i class="fa fa-circle" style="color: #5CB85C"></i>
+                                                            {% else %}
+                                                                <i class="fa fa-circle" style="color: #D9534F"></i>
                                                             {% endif %}
+
                                                             <strong>{{ player.username }}</strong>
                                                             in state <strong>{{ player.state }}</strong>
                                                             with last request <strong>{{ player.last_request }}</strong>
