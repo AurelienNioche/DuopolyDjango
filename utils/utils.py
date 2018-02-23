@@ -21,7 +21,7 @@ def log(msg, f, path, level=1):
     click.echo('{}{} "{}:{}" {}'.format(stamp, click.style(log_levels[level], fg=colors[level]), path, f, msg))
 
 
-def get_time_in_france():
+def get_time_in_france(whole=False):
     naive_dt = datetime.datetime(2013, 9, 3, 16, 0)
     dt = pytz.timezone("Europe/Paris").localize(naive_dt, is_dst=None)
     now = dt.now()
@@ -33,7 +33,10 @@ def get_time_in_france():
         minute=now.minute,
         month=now.month
     )
-    return now.strftime("%I:%M %p")
 
+    if whole:
+        return now
+    else:
+        return now.strftime("%I:%M %p")
 
 

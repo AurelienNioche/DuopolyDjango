@@ -103,7 +103,13 @@ class Admin:
     @classmethod
     def new_message_from_client(cls, username, message):
 
-        new_entry = Messages(author=username, to="admin", message=message, receipt_confirmation=0)
+        new_entry = Messages(
+            author=username,
+            to="admin",
+            message=message,
+            receipt_confirmation=0,
+        )
+
         new_entry.save()
 
         cls.send_auto_reply(username)
