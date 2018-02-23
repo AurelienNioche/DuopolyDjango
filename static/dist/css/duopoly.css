@@ -107,12 +107,7 @@ select {
 
 #contacts-wrapper {
     overflow: auto;
-    height: 70%;
-}
-
-#contacts {
-    height: 70%;
-    max-height: 70%;
+    height: 351px;
 }
 
 #contacts-wrapper::-webkit-scrollbar-track
