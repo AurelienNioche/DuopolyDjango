@@ -234,17 +234,18 @@ def convert_data_to_sql():
 
     for (table, ) in pg_cursor.fetchall():
 
-        # select from the table
-        pg_cursor.execute("SELECT * from {}".format(table))
-        rows = pg_cursor.fetchall()
+        if str(table).startswith("game"):
+            # select from the table
+            pg_cursor.execute("SELECT * from {}".format(table))
+            rows = pg_cursor.fetchall()
 
-        # loop and insert into sqlite
-        for row in rows:
-            sqlite_cursor.execute(
-                "INSERT INTO {} (id, title ) VALUES (:id, :title)".format(table),
-                {"id": row[0], "title": row[1]}
-            )
-            sqlite_connection.commit()
+            # loop and insert into sqlite
+            for row in rows:
+                sqlite_cursor.execute(
+                    "INSERT INTO {} (id, title ) VALUES (:id, :title)".format(table),
+                    {"id": row[0], "title": row[1]}
+                )
+                sqlite_connection.commit()
 
         # close all connections
     sqlite_connection.close()
