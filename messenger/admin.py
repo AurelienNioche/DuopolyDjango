@@ -151,4 +151,10 @@ class Admin:
             )
             auto_reply.save()
 
-        return "checked" if  int(auto_reply.value) else "notchecked"
+        return "checked" if int(auto_reply.value) else "notchecked"
+
+    @classmethod
+    def get_latest_msg_author(cls):
+        return Messages.objects.all().exclude(author="admin").latest().author
+
+
