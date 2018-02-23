@@ -271,20 +271,24 @@ def get_opponent_player_id(player_id):
 
 def _player_is_banned(player_id):
 
-    u = Users.objects.get(player_id=player_id)
-    p = Players.objects.get(player_id=player_id)
-    rm = Room.objects.get(room_id=p.room_id)
+    u = Users.objects.filter(player_id=player_id).first()
 
-    if _is_timed_out(u.time_last_request, "banishment_timeout"):
+    if u is not None:
+        p = Players.objects.get(player_id=player_id)
+        rm = Room.objects.get(room_id=p.room_id)
 
-        # Set the opponent as a deserter
-        # and return that info to the player
-        u.deserter = 1
-        u.save(force_update=True)
+        if _is_timed_out(u.time_last_request, "banishment_timeout"):
 
-        room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+            u = Users.objects.get(player_id=player_id)
 
-        return True
+            # Set the opponent as a deserter
+            # and return that info to the player
+            u.deserter = 1
+            u.save(force_update=True)
+
+            room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+
+            return True
 
 
 def check_connected_users():
