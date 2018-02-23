@@ -94,8 +94,6 @@ select {
     background-position: right 5px center;
     -webkit-appearance: none;
     appearance: none;
-}
-#contacts tr td{
     font-size: 12px !important;
 }
 #contacts tr:hover {
