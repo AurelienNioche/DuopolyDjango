@@ -1,11 +1,11 @@
 from django.contrib import admin
 
 # Register your models here.
-from . models import IntParameters
+from . models import Parameters
 
 
-class IntParametersAdmin(admin.ModelAdmin):
+class ParametersAdmin(admin.ModelAdmin):
     list_display = ("name", "value")
 
 
-admin.site.register(IntParameters, IntParametersAdmin)
+admin.site.register(Parameters, ParametersAdmin)

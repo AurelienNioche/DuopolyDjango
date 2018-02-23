@@ -1,10 +1,10 @@
 from django.db import models
 
 
-class IntParameters(models.Model):
+class Parameters(models.Model):
 
     name = models.TextField()
-    value = models.IntegerField()
+    value = models.FloatField()
 
     class Meta:
         verbose_name_plural = "IntParameters"
