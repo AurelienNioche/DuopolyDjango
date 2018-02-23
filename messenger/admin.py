@@ -98,6 +98,12 @@ class Admin:
         entries = Messages.objects.filter(author="admin", to=username, receipt_confirmation=0)
         n_new_messages = len(entries)
         new_messages = [i.message for i in entries]
+
+        # Also set the user as connected
+        user = Users.objects.get(username=username)
+        user.connected = 1
+        user.save(force_update=True)
+
         return n_new_messages, new_messages
 
     @classmethod
