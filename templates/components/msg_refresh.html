@@ -1,6 +1,5 @@
 {% load staticfiles %}
 
-
 <div class="panel panel-primary" style="border-color: #dddddd; height: 100%">
     <div class="panel-heading top-bar" style="background-color: #F5F5F5; border-color: #dddddd; color: #333">
         <div class="col-md-8 col-xs-8">
@@ -33,9 +32,10 @@
                         <p> {{ msg.message }}</p><br>
                         <a style="font-size: 10px">{{ msg.time_stamp }}</a>
                     </div>
+                </div>
+            </div>
             {% endif  %}
             {% endfor %}
-        </div>
         <div class="panel-footer">
             <form id="chatForm" class="input-group">
                 {% csrf_token %}
@@ -44,10 +44,10 @@
                        class="form-control input-sm chat_input" placeholder="Write your message here..." />
                 <span class="input-group-btn">
                     <div class="btn btn-primary btn-sm" id="btn-chat" style="background-color: #3f903f; border-color: #3f903f">
-                        <i class="fa fa-send fa-1x" aria-hidden="true"></i></div>
+                        <i class="fa fa-send fa-1x" aria-hidden="true"></i>
+                    </div>
                 </span>
             </form>
-        </div>
         </div>
     </div>
 </div>
