@@ -1,37 +1,53 @@
 {% load staticfiles %}
-{% for msg in messages %}
-<!-- display admin msg ----->
-{% if msg.author == "admin" %}
-<div class="row msg_container base_sent">
-    <div class="col-md-10 col-xs-10" align="right">
 
-                <div class="messages msg_sent" style="display: inline-block;">
-                    <p> {{ msg.message }}</p><br>
-                    <a style="font-size: 10px">{{ msg.time_stamp }}</a>
 
-                </div>
-{#                <div class="avatar">#}
-{#                    <img src="{% static 'img/heidegger.jpg' %}" class="img-responsive"#}
-{#                         style="border: 60px none #f5f5f5; border-radius: 50%;" >#}
-{#                </div>#}
+<div class="panel panel-primary" style="border-color: #dddddd; height: 100%">
+    <div class="panel-heading top-bar" style="background-color: #F5F5F5; border-color: #dddddd; color: #333">
+        <div class="col-md-8 col-xs-8">
+            <h3 class="panel-title">
+                <span class="fa fa-comments"></span>
+                Chat with <strong>{{ current_user }}</strong>
+            </h3>
+        </div>
     </div>
-</div>
-{% endif  %}
+    <div class="panel-body msg_container_base" id="chat" style="height:100%">
+        {% for msg in messages %}
+            <!-- display admin msg ----->
+            {% if msg.author == "admin" %}
+            <div class="row msg_container base_sent">
+                <div class="col-md-10 col-xs-10" align="right">
 
-<!-- display user msg ----->
-{% if msg.author == current_user %}
-<div class="row msg_container base_receive">
-    <div class="col-md-10 col-xs-10">
-{#        <div class="col-md-2 col-xs-2 avatar">#}
-{#        </div>#}
-        <div class="messages msg_receive" style="display: inline-block; margin-left: 10px">
-            <p> {{ msg.message }}</p><br>
-            <a style="font-size: 10px">{{ msg.time_stamp }}</a>
+                    <div class="messages msg_sent" style="display: inline-block;">
+                        <p> {{ msg.message }}</p><br>
+                        <a style="font-size: 10px">{{ msg.time_stamp }}</a>
+                    </div>
+                </div>
+            </div>
+            {% endif  %}
+
+            <!-- display user msg ----->
+            {% if msg.author == current_user %}
+            <div class="row msg_container base_receive">
+                <div class="col-md-10 col-xs-10">
+                    <div class="messages msg_receive" style="display: inline-block; margin-left: 10px">
+                        <p> {{ msg.message }}</p><br>
+                        <a style="font-size: 10px">{{ msg.time_stamp }}</a>
+                    </div>
+            {% endif  %}
+            {% endfor %}
+        </div>
+        <div class="panel-footer">
+            <form id="chatForm" class="input-group">
+                {% csrf_token %}
+                <input name="user" type="text" style="display: none;" value="{{ current_user }}" />
+                <input name="msg" id="btn-input" type="text" autocomplete="off"
+                       class="form-control input-sm chat_input" placeholder="Write your message here..." />
+                <span class="input-group-btn">
+                    <div class="btn btn-primary btn-sm" id="btn-chat" style="background-color: #3f903f; border-color: #3f903f">
+                        <i class="fa fa-send fa-1x" aria-hidden="true"></i></div>
+                </span>
+            </form>
+        </div>
         </div>
     </div>
 </div>
-{% endif  %}
-{% endfor %}
-
-
-
