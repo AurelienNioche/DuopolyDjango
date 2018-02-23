@@ -102,14 +102,15 @@ def get_list():
 
             u = Users.objects.filter(player_id=p.player_id).first()
 
-            cp = ConnectedPlayer(
-                username=u.username,
-                connected=u.connected,
-                deserter=u.deserter,
-                p_state=p.state,
-                last_request=u.last_request,
-                time_last_request=u.time_last_request
-            )
+            if u is not None:
+                cp = ConnectedPlayer(
+                    username=u.username,
+                    connected=u.connected,
+                    deserter=u.deserter,
+                    p_state=p.state,
+                    last_request=u.last_request,
+                    time_last_request=u.time_last_request
+                )
 
             connected_players.append(cp)
 
