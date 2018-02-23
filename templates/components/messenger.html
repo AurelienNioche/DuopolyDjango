@@ -46,8 +46,8 @@
                                     </div>
                                 </div>
                            <div class="col-sm-8">
-                                <div id="chatbody" class="chatbody fadeIn" style="width: 100%; height:100%; margin-left: 15px;">
-                                    <div class="panel panel-primary" style="border-color: #dddddd; height: 100%">
+                                <div class="chatbody" style="width: 100%; height:100%; margin-left: 15px;">
+                                    <div id="chatbody" class="panel panel-primary" style="border-color: #dddddd; height: 100%">
                                         {% include 'components/msg_refresh.html' %}
                                     </div>
                                 </div>
@@ -74,9 +74,7 @@
     setInterval(RefreshContacts, 2000);
     // define chat element as a global variable
     var chat = document.getElementById("chat");
-    var chatbody = document.getElementById("chatbody");
-    // define default user
-    var user = 1;
+
     // Scroll to bottom when page loads
     ScrollToBottom();
 
@@ -118,10 +116,13 @@
         }
     }
 
-    function RefreshMsg() {
+    function RefreshMsg(user_id) {
+        if (user_id === undefined) {
+            user_id = document.getElementById("user").value
+        }
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=' + user + '&type=msg',
+            url: '/refresh_messenger/?user_id=' + user_id + '&type=msg',
             success: function (data) {
                 // REFRESH MSG
                 $('#chatbody').html(data);
@@ -136,7 +137,7 @@
 
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=' + user + '&type=contacts' + '&auto_reply=' + auto_reply,
+            url: '/refresh_messenger/?user_id=null'+ '&type=contacts' + '&auto_reply=' + auto_reply,
             success: function (data) {
                 // REFRESH CONTACTS
                 $('#contacts').html(data)
@@ -185,8 +186,7 @@
 
      function ClickedOnContact(user_id){
          console.log("ClickedOnContact " + user_id);
-         user = user_id;
-         RefreshMsg();
+         RefreshMsg(user_id);
      }
 
 </script>
