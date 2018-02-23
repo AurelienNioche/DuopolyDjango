@@ -215,10 +215,33 @@ def convert_data_to_pickle():
 
 
 def convert_data_to_sql():
+    import psycopg2
+    import sqlite3
 
-    mydata = get_path("sql")
+    mydata = get_path("db")
+    # create a sqlite db
+    sqlite_connection = sqlite3.connect(mydata.file_path)
+    sqlite_cursor = sqlite_connection.cursor()
+    # ref: http://hakanu.net/sql/2015/08/25/sqlite-unicode-string-problem/
+    sqlite_connection.text_factory = lambda x: str(x, 'utf-8')
 
-    subprocess.call("pg_dump -U dasein DuopolyDB > " + mydata.file_path, shell=True)
+    # connect to postgresql
+    pg_connect_string = "host='127.0.0.1' dbname='DuopolyDB' user='dasein' password=''"
+    pg_connection = psycopg2.connect(pg_connect_string)
+    pg_cursor = pg_connection.cursor()
+
+    # select from the table
+    pg_cursor.execute("SELECT * from entry")
+    rows = pg_cursor.fetchall()
+
+    # loop and insert into sqlite
+    for row in rows:
+        sqlite_cursor.execute("INSERT INTO ENTRY (id, title ) VALUES (:id, :title)", {"id": row[0], "title": row[1]})
+        sqlite_connection.commit()
+
+    # close all connections
+    sqlite_connection.close()
+    pg_connection.close()
 
     return mydata.to_return
 
