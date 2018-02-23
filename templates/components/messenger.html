@@ -120,7 +120,6 @@
     }
 
     function RefreshMsg() {
-        console.log('/refresh_messenger/?user_id=' + user + '&type=msg');
         $.ajax({
             type: "GET",
             url: '/refresh_messenger/?user_id=' + user + '&type=msg',
@@ -188,6 +187,7 @@
      function ClickedOnContact(user_id){
          console.log("ClickedOnContact " + user_id);
          user = user_id;
+         RefreshMsg();
      }
 
 </script>
