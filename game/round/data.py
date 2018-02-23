@@ -219,7 +219,7 @@ def convert_data_to_sql():
     mydata = get_path("db")
 
     subprocess.call("pg_dump -U dasein DuopolyDB > {}".format(mydata.file_path))
-    subprocess.call("pg2sqlite -d {} -o sqlite.db".format(mydata.file_path))
+    subprocess.call("pg2sqlite -d {} -o {}".format(mydata.file_path, mydata.file_path))
 
     return mydata.to_return
 
