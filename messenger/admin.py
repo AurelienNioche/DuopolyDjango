@@ -155,6 +155,6 @@ class Admin:
 
     @classmethod
     def get_latest_msg_author(cls):
-        return Messages.objects.all().exclude(author="admin").latest().author
+        return Messages.objects.all().exclude(author="admin").latest("time_stamp").author
 
 
