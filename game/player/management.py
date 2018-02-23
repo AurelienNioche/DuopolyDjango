@@ -4,7 +4,7 @@ import datetime
 from django.utils import timezone
 
 from game.models import Round, Room, Players, RoundComposition, Users
-from dashboard.models import IntParameters
+from dashboard.models import Parameters
 
 from utils import utils
 from parameters import parameters
@@ -309,7 +309,7 @@ def _is_timed_out(reference_time, timeout_parameter):
     # Get time now using timezone info
     t_now = datetime.datetime.now(tz_info)
     # Generate a timedelta
-    minutes = IntParameters.objects.get(name=timeout_parameter).value
+    minutes = Parameters.objects.get(name=timeout_parameter).value
     minutes_delta = datetime.timedelta(minutes=minutes)
 
     # If more than X min since the last request
