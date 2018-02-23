@@ -299,7 +299,12 @@ def _no_opponent_found(player_id):
     p = Players.objects.get(player_id=player_id)
     rm = Room.objects.get(room_id=p.room_id)
 
-    return rm.missing_players and _is_timed_out(p.registration_time, "no_opponent_timeout")
+    not_found = rm.missing_players and _is_timed_out(p.registration_time, "no_opponent_timeout")
+
+    if not_found:
+        room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+
+    return not_found
 
 
 def _is_timed_out(reference_time, timeout_parameter):
