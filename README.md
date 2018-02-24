@@ -5,7 +5,7 @@ __________________________________________________
 
 # How to (local) 
 
-## PostgreSQL (mac osx)
+## PostgreSQL (MacOs)
 install postgresql
 
     brew install postgresql
@@ -37,7 +37,7 @@ Then run the server
     
 Go to the interface at 127.0.0.1:8000 and create a room (room management tab). 
 To play alone, trial parameter must be checked.
-You should now be able to join the game using the unity client.
+You should now be able to join the game using the Unity client.
 
 # How to (server) 
 
