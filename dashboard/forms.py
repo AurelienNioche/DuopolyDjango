@@ -35,6 +35,12 @@ class ParametersForm(forms.Form):
         required=False,
     )
 
+    nb_of_room = forms.IntegerField(
+        label="Number of room",
+        initial=1,
+        required=True
+    )
+
     form_function = forms.Field(widget=forms.HiddenInput, initial="room_organisation")
 
 

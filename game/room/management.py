@@ -17,39 +17,42 @@ def create(data):
     is_trial = int(bool(data['trial']))
     ending_t = int(data["ending_t"])
     radius = data['radius']
+    nb_of_room = int(data["nb_of_room"])
 
     missing_players = 1 if is_trial else 2
 
-    # get room_id: if already exists, increment
-    # until it doesnt found an existing record
-    room_id = 1
+    for r in range(nb_of_room):
 
-    while True:
+        # get room_id: if already exists, increment
+        # until it doesnt found an existing record
+        room_id = 1
 
-        if Room.objects.filter(room_id=room_id).first() is None:
-            break
+        while True:
 
-        else:
-            room_id += 1
+            if Room.objects.filter(room_id=room_id).first() is None:
+                break
 
-    round.dialog.create_rounds(
-        room_id=room_id, ending_t=ending_t, trial=is_trial,
-        called_from=__path__ + "." + utils.fname()
-    )
+            else:
+                room_id += 1
 
-    rm = Room(
-        state=state.tutorial,
-        ending_t=ending_t,
-        radius=radius,
-        player_0=_generate_unique_player_id(),
-        player_1=_generate_unique_player_id(),
-        trial=is_trial,
-        missing_players=missing_players,
-        room_id=room_id,
-        opened=1
-    )
+        round.dialog.create_rounds(
+            room_id=room_id, ending_t=ending_t, trial=is_trial,
+            called_from=__path__ + "." + utils.fname()
+        )
 
-    rm.save()
+        rm = Room(
+            state=state.tutorial,
+            ending_t=ending_t,
+            radius=radius,
+            player_0=_generate_unique_player_id(),
+            player_1=_generate_unique_player_id(),
+            trial=is_trial,
+            missing_players=missing_players,
+            room_id=room_id,
+            opened=1
+        )
+
+        rm.save()
 
 
 def delete(room_id):
