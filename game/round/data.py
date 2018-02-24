@@ -217,12 +217,13 @@ def convert_data_to_pickle():
 def convert_data_to_sql():
 
     sql_file = get_path("sql")
-    db_name = "duopoly2.sqlite3"
+    db_name = "duopoly.sqlite3"
     db_path = sql_file.folder_path + "/" + db_name
     to_return = sql_file.folder_name + "/" + db_name
 
     subprocess.call("pg_dump -U dasein DuopolyDB > {}".format(sql_file.file_path), shell=True)
 
+    subprocess.call("rm {}".format(db_path), shell=True)
     subprocess.call("java -jar pg2sqlite.jar -d {} -o {}".format(sql_file.file_path, db_path), shell=True)
 
     return to_return
