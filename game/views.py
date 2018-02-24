@@ -51,7 +51,7 @@ def client_request(request):
 
 def register(request):
 
-    user_mail = request.POST["email"]
+    user_mail = request.POST["email"].lower()
     nationality = request.POST["nationality"]
     gender = request.POST["gender"]
     age = request.POST["age"]
@@ -79,7 +79,7 @@ def send_password_again(request):
     :return: 1 if it worked, 0 else
     """
 
-    user_mail = request.POST["email"]
+    user_mail = request.POST["email"].lower()
     nationality = request.POST["nationality"],
     gender = request.POST["gender"],
     age = request.POST["age"],
@@ -101,7 +101,7 @@ def send_password_again(request):
 @player.management.connection_checker
 def connect(request):
 
-    username = request.POST["username"]
+    username = request.POST["username"].lower()
     password = request.POST["password"]
 
     went_well = room.client.connect(username=username, password=password)
@@ -111,7 +111,7 @@ def connect(request):
 @player.management.connection_checker
 def registered_as_player(request):
 
-    username = request.POST["username"]
+    username = request.POST["username"].lower()
     rsp = room.client.registered_as_player(username)
 
     if rsp:
@@ -124,7 +124,7 @@ def registered_as_player(request):
 @player.management.connection_checker
 def room_available(request):
 
-    username = request.POST["username"]
+    username = request.POST["username"].lower()
     utils.log("{} asks for a room available.".format(username), f=utils.fname(), path=__path__)
 
     # 1 if a room is available, else 0
@@ -137,7 +137,7 @@ def room_available(request):
 @player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
-    username = request.POST["username"]
+    username = request.POST["username"].lower()
 
     try:
         rsp = room.client.proceed_to_registration_as_player(username=username)
