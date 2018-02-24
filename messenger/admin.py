@@ -29,25 +29,26 @@ class Admin:
         # We sort users by room ids
         for p in players:
 
-            u = users.get(player_id=p.player_id)
+            u = users.objects.filter(player_id=p.player_id).first()
 
-            # Set state
-            u.state = p.state
+            if u:
+                # Set state
+                u.state = p.state
 
-            # set progression
-            if u.state == room.state.tutorial:
-                progression = round(p.tutorial_progression)
-                u.progression = progression if progression != -1 else 0
+                # set progression
+                if u.state == room.state.tutorial:
+                    progression = round(p.tutorial_progression)
+                    u.progression = progression if progression != -1 else 0
 
-            elif u.state == room.state.pve or u.state == room.state.pvp:
-                rd = Round.objects.get(round_id=p.round_id)
-                u.progression = round((rd.t / rd.ending_t) * 100)
+                elif u.state == room.state.pve or u.state == room.state.pvp:
+                    rd = Round.objects.get(round_id=p.round_id)
+                    u.progression = round((rd.t / rd.ending_t) * 100)
 
-            u.room_id = p.room_id
+                u.room_id = p.room_id
 
-            u.n_unread = cls.get_unread_msg(u.username)
+                u.n_unread = cls.get_unread_msg(u.username)
 
-            user_list.append(u)
+                user_list.append(u)
 
         # Then we add the other users to the user list
         for u in users.filter(player_id="null"):
