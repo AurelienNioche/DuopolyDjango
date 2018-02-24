@@ -321,7 +321,18 @@ def _is_timed_out(reference_time, timeout_parameter):
     # Get time now using timezone info
     t_now = datetime.datetime.now(tz_info)
     # Generate a timedelta
-    param = IntParameters.objects.get(name=timeout_parameter)
+    param = IntParameters.objects.filter(name=timeout_parameter).first()
+    if param is None:
+
+        if timeout_parameter == "no_opponent_timeout":
+            param = IntParameters(name=timeout_parameter, value=15, unit="minutes")
+            param.save()
+        elif timeout_parameter == "disconnected_timeout":
+            param = IntParameters(name=timeout_parameter, value=30, unit="seconds")
+            param.save()
+        else:
+            param = IntParameters(name=timeout_parameter, value=15, unit="minutes")
+            param.save()
 
     if param.unit == "seconds":
         delta = datetime.timedelta(seconds=param.value)
