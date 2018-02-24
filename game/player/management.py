@@ -180,7 +180,7 @@ def _set_time_last_request(player_id, function_name, username=None):
     """
 
     if username:
-        user = Users.objects.get(username=username)
+        user = Users.objects.filter(username=username).first()
     else:
         user = Users.objects.filter(player_id=player_id).first()
 
