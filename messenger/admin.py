@@ -163,6 +163,8 @@ class Admin:
 
     @classmethod
     def get_latest_msg_author(cls):
-        return Messages.objects.all().exclude(author="admin").latest("time_stamp").author
-
-
+        msg = Messages.objects.all()
+        sort = msg.exclude(author="admin")
+        if sort:
+            sort_last = sort.latest("time_stamp")
+            return sort_last.author
