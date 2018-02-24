@@ -182,11 +182,12 @@ def _set_time_last_request(player_id, function_name, username=None):
     if username:
         user = Users.objects.get(username=username)
     else:
-        user = Users.objects.get(player_id=player_id)
+        user = Users.objects.filter(player_id=player_id).first()
 
-    user.time_last_request = timezone.now()
-    user.last_request = function_name
-    user.save(force_update=True)
+    if user:
+        user.time_last_request = timezone.now()
+        user.last_request = function_name
+        user.save(force_update=True)
 
 
 def connection_checker(f):

@@ -29,7 +29,7 @@ class Admin:
         # We sort users by room ids
         for p in players:
 
-            u = users.objects.filter(player_id=p.player_id).first()
+            u = users.filter(player_id=p.player_id).first()
 
             if u:
                 # Set state
