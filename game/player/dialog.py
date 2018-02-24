@@ -20,3 +20,9 @@ def get_opponent_progression(player_id, called_from):
 def client_has_to_wait_over_player(player_id, called_from):
     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
     return management.client_has_to_wait_over_player(player_id)
+
+
+def player_is_banned(player_id, called_from):
+    utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
+    return management.player_is_banned(player_id)
+

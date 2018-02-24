@@ -6,7 +6,7 @@ import utils.utils as utils
 
 from game.models import Players, Users, Room
 
-from game import round
+from game import round, player, room
 
 from . import mail, info, field_of_view, state
 
