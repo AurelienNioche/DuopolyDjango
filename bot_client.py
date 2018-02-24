@@ -226,8 +226,9 @@ def main():
     # Once registered, ask for missing players
     m_p = b.missing_players()
     while m_p != 0:
-         m_p = b.missing_players()
+        m_p = b.missing_players()
 
+    print("Let's play!")
 
 if __name__ == "__main__":
 
