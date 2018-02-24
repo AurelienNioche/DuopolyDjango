@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+dirname=/home/getz/DuopolyDjango
+LOGFILE=./log/$(date +%F).log
+LOGDIR=$(dirname $LOGFILE)
+LOGLEVEL=debug   # info ou warning une fois l'installation OK
+NUM_WORKERS=3    # Règle : (2 x $num_cores) + 1
+DJANGO_SETTINGS_MODULE="adminbase.settings"
+export DJANGO_SETTINGS_MODULE
+
+# user/group to run as
+USER=root
+GROUP=root
+
+# source ../bin/activate  # Cette ligne ne sert que si vous utilisez virtualenv
+test -d $LOGDIR || mkdir -p $LOGDIR
+exec gunicorn -w $NUM_WORKERS \
+  --user=$USER --group=$GROUP --log-level=$LOGLEVEL \
+  -b 0.0.0.0:8000 --reload \
+  adminbase.wsgi |& tee -a $LOGFILE #2>>$LOGFILE
