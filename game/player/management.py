@@ -231,7 +231,7 @@ def connection_checker(f):
 
             # Then, we check that the current player is not
             # a deserter
-            if _player_is_banned(player_id):
+            if player_is_banned(player_id):
                 utils.log(
                     "The current player is a deserter.",
                     f=f.__name__,
@@ -245,7 +245,7 @@ def connection_checker(f):
 
             # Then, we check if the opponent has reached banishment timeout
             opp_id = get_opponent_player_id(player_id)
-            if opp_id and _player_is_banned(opp_id):
+            if opp_id and player_is_banned(opp_id):
                 utils.log(
                     "The other player is a deserter.",
                     f=f.__name__,
@@ -269,7 +269,7 @@ def get_opponent_player_id(player_id):
     return opp.player_id if opp else None
 
 
-def _player_is_banned(player_id):
+def player_is_banned(player_id):
 
     u = Users.objects.filter(player_id=player_id).first()
 

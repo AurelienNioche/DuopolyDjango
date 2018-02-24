@@ -76,9 +76,9 @@ if (document.referrer.indexOf("new_room") !== -1){
                                                     {% for player in room.connected_players %}
                                                         {% if player %}
 
-                                                            {% if player.deserter %}
+                                                            {% if player.deserter == 1 %}
                                                                 <i class="fa fa-circle" style="color: #0f0f0f"></i>
-                                                            {% elif player.connected %}
+                                                            {% elif player.connected == 1%}
                                                                 <i class="fa fa-circle" style="color: #5CB85C"></i>
                                                             {% else %}
                                                                 <i class="fa fa-circle" style="color: #D9534F"></i>
