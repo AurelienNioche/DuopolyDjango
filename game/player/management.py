@@ -199,7 +199,7 @@ def connection_checker(f):
 
         decorator_name = "player.management.connection_checker"
         player_id = request.POST.get("player_id")
-        username = request.POST.get("username")
+        username = request.POST.get("username").lower()
 
         # Refresh  list of connected users
         check_connected_users()
