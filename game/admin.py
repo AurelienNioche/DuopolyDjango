@@ -13,7 +13,7 @@ class UsersAdmin(admin.ModelAdmin):
 
 class PlayersAdmin(admin.ModelAdmin):
     list_display = \
-        ("player_id", "room_id", "state" )
+        ("player_id", "room_id", "state", "registration_time")
 
 
 class FirmProfitsAdmin(admin.ModelAdmin):
