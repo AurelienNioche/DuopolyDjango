@@ -3,7 +3,7 @@ Server part of Duopoly Game. Developed using Django web framework.
 
 __________________________________________________
 
-# How to 
+# How to (local) 
 
 ## PostegreSQL install (mac osx)
 install postgresql
@@ -23,6 +23,8 @@ django migrations
     
     python manage.py makemigrations
     python manage.py migrate
+
+# How to (server) 
 
 ## Services required to run the game server in production
 * nginx
