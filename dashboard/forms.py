@@ -14,7 +14,7 @@ class ParametersForm(forms.Form):
     ending_t = forms.IntegerField(
         label="Duration",
         required=True,
-        initial=10,
+        initial=25,
     )
 
     radius = forms.ChoiceField(
