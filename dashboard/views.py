@@ -187,13 +187,17 @@ class LogsView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
-    def refresh_logs(filename, n_lines=1500):
+    def refresh_logs(filename, n_lines=None):
 
         with open(parameters.logs_path + filename, "r") as f:
             if n_lines:
                 logs = "".join(f.readlines()[n_lines:])
             else:
-                logs = f.read()
+                file = f.readlines()
+                if len(file) > 3000:
+                    logs = "".join(file[-1500:])
+                else:
+                    logs = f.read()
             f.close()
         return logs
 
