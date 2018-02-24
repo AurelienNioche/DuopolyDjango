@@ -187,7 +187,7 @@ class LogsView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
-    def refresh_logs(filename, n_lines=None):
+    def refresh_logs(filename, n_lines=1500):
 
         with open(parameters.logs_path + filename, "r") as f:
             if n_lines:
