@@ -141,6 +141,7 @@ def proceed_to_registration_as_player(request):
 
     try:
         rsp = room.client.proceed_to_registration_as_player(username=username)
+
     except IntegrityError:
         return "reply", "error", "player_id_is_not_unique"
 
