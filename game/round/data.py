@@ -217,7 +217,7 @@ def convert_data_to_pickle():
 def convert_data_to_sql():
 
     sql_file = get_path("sql")
-    db_name = "duopoly.sqlite3"
+    db_name = "duopoly2.sqlite3"
     db_path = sql_file.folder_path + "/" + db_name
     to_return = sql_file.folder_name + "/" + db_name
 
