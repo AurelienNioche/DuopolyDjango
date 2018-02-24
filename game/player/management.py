@@ -326,7 +326,7 @@ def _is_timed_out(reference_time, timeout_parameter):
     else:
         delta = datetime.timedelta(minutes=param.value)
 
-    # If more than X min since the last request
+    # If more than X min/seconds since the last request
     timeout = t_now > reference_time + delta
 
     return timeout

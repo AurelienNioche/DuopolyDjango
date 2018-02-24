@@ -133,7 +133,7 @@ def room_available(request):
     return "reply", utils.fname(), rsp
 
 
-@transaction.atomic
+# @transaction.atomic
 @player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
@@ -173,7 +173,7 @@ def submit_tutorial_progression(request):
 
 # ------------------------| Players ask for missing players in their before starting to playing  |------------------- #
 
-@transaction.atomic
+# @transaction.atomic
 @player.management.connection_checker
 def missing_players(request):
 
