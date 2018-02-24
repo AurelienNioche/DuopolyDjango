@@ -199,13 +199,14 @@ def connection_checker(f):
 
         decorator_name = "player.management.connection_checker"
         player_id = request.POST.get("player_id")
-        username = request.POST.get("username").lower()
+        username = request.POST.get("username")
 
         # Refresh  list of connected users
         check_connected_users()
 
         # ----------  If user has not joined a room yet ----------------- #
         if username:
+            username = username.lower()
             _set_time_last_request(None, f.__name__, username=username)
             return f(request)
 
