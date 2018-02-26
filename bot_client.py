@@ -32,7 +32,6 @@ class KeyLi:
 
 class DemandLi:
 
-    register = "register"
     connect = "connect"
 
 # -------------- Look for Playing ---------- #
