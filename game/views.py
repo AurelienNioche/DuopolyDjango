@@ -142,6 +142,7 @@ def proceed_to_registration_as_player(request):
         rsp = room.client.proceed_to_registration_as_player(username=username)
 
     except IntegrityError:
+        utils.log("IntegrityError: Player id is not unique", f=utils.fname(), path=__path__)
         transaction.set_rollback(True)
         return "reply", "error", "player_id_is_not_unique"
 
