@@ -11,6 +11,12 @@ class ParametersForm(forms.Form):
 
     error_css_class = 'has-error'
 
+    nb_of_room = forms.IntegerField(
+        label="Number of room",
+        initial=1,
+        required=True
+    )
+
     ending_t = forms.IntegerField(
         label="Duration",
         required=True,
@@ -33,12 +39,6 @@ class ParametersForm(forms.Form):
         label="Trial",
         initial=False,
         required=False,
-    )
-
-    nb_of_room = forms.IntegerField(
-        label="Number of room",
-        initial=1,
-        required=True
     )
 
     form_function = forms.Field(widget=forms.HiddenInput, initial="room_organisation")
