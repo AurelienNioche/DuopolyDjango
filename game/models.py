@@ -72,7 +72,7 @@ class Users(models.Model):
     nationality = models.TextField(max_length=30, default="null")
     deserter = models.IntegerField(default=0)
     time_last_request = models.DateTimeField(auto_now_add=True, blank=True)
-    last_request = models.TextField(max_length=30, default="null")
+    last_request = models.TextField(max_length=50, default="null")
     connected = models.IntegerField(default=0)
 
 
