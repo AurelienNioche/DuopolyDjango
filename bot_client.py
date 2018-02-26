@@ -132,7 +132,10 @@ class BotClient:
                 else:
                     return getattr(self, "reply_{}".format(rsp_parts[1]))(*rsp_parts[2:])
             else:
-                print(r.text)
+                if len(r.text) < 100:
+                    print(r.text)
+                else:
+                    print("Length is too long, probably received an error in html format")
 
         except requests.exceptions.ConnectionError as e:
             print(e)
