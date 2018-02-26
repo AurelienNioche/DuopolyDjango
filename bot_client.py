@@ -1,5 +1,8 @@
 import requests
 import enum
+import multiprocessing as ml
+import numpy as np
+import secrets
 
 
 # --------------- Sign in ----------------- #
@@ -32,6 +35,7 @@ class KeyLi:
 
 class DemandLi:
 
+    register = "register"
     connect = "connect"
 
 # -------------- Look for Playing ---------- #
@@ -84,7 +88,6 @@ class KeyF:
     tutorial_progression = "tutorial_progression"
 
 
-
 class CodeErrorF:
 
     haveToWait = -1
@@ -118,7 +121,7 @@ class BotClient:
 
         try:
 
-            url = "http://127.0.0.1:8000/client_request/"
+            url = "http://51.15.6.148/client_request/"
             r = requests.post(url, data=data)
             rsp_parts = r.text.split("/")
 
@@ -197,40 +200,119 @@ class BotClient:
         return int(args[0])
 
 
+# def main(username, password):
+#
+#     b = BotClient(username=username, password=password)
+#
+#     # Make request until connected
+#     connected = 0
+#     while not connected:
+#         connected = b.connect()
+#
+#     # Look if already registered
+#     registered = b.registered_as_player()
+#
+#     # If not already registered
+#     if not registered:
+#
+#         # While there is no room available, ask for it
+#         place = 0
+#
+#         while place == 0:
+#             place = b.room_available()
+#
+#             # If there is place, try to register
+#             if place:
+#                 registered = b.proceed_to_registration_as_player()
+#                 if registered:
+#                     break
+#
+#     # Once registered, ask for missing players
+#     m_p = b.missing_players()
+#     while m_p != 0:
+#         m_p = b.missing_players()
+#
+#     print("Let's play!")
+#
+
+
 def main():
+    n_accounts = 2
 
-    b = BotClient()
+    for n in range(1, n_accounts + 1):
+        b
+        "bot{}".format(n),
+        "password": "{}".format(n).zfill(4)
+    }
 
-    # Make request until connected
-    connected = 0
-    while not connected:
-        connected = b.connect()
+    proc = ml.Process(
+    target = main,
+    args = (account["username"], account["password"])
 
-    # Look if already registered
-    registered = b.registered_as_player()
+)
 
-    # If not already registered
-    if not registered:
+proc.start()
 
-        # While there is no room available, ask for it
-        place = 0
-        while place == 0:
-            place = b.room_available()
 
-            # If there is place, try to register
-            if place:
-                registered = b.proceed_to_registration_as_player()
-                if registered:
-                    break
+class Bot(ml.Process):
 
-    # Once registered, ask for missing players
-    m_p = b.missing_players()
-    while m_p != 0:
+    def __int__(self, event, username, password):
+        super().__init__()
+        self.event = event
+        self.username = username
+        self.password = password
+
+    def run(self):
+
+        b = BotClient(username=self.username, password=self.password)
+
+        # Make request until connected
+        connected = 0
+        while not connected:
+            connected = b.connect()
+
+        # Look if already registered
+        registered = b.registered_as_player()
+
+        # If not already registered
+        if not registered:
+
+            # While there is no room available, ask for it
+            place = 0
+
+            while place == 0:
+                place = b.room_available()
+
+                # If there is place, try to register
+                if place:
+                    self.event.wait()
+                    registered = b.proceed_to_registration_as_player()
+                    if registered:
+                        break
+
+        # Once registered, ask for missing players
         m_p = b.missing_players()
+        while m_p != 0:
+            m_p = b.missing_players()
 
-    print("Let's play!")
+        print("Let's play!")
+
 
 
 if __name__ == "__main__":
 
-    main()
+    n_accounts = 2
+
+    for n in range(1, n_accounts + 1):
+
+        b "bot{}".format(n),
+            "password": "{}".format(n).zfill(4)
+        }
+
+        proc = ml.Process(
+            target=main,
+            args=(account["username"], account["password"])
+        )
+
+        proc.start()
+
