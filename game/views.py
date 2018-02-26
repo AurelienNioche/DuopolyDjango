@@ -133,7 +133,7 @@ def room_available(request):
     return "reply", utils.fname(), rsp
 
 
-# @transaction.atomic
+@transaction.atomic
 @player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
