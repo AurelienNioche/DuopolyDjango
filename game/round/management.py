@@ -44,30 +44,29 @@ def create_rounds(room_id, ending_t, trial):
 
         rd.save()
 
-        composition.create(round_id=round_id, n_real_players=rt.n_real_players)
+        composition.create(rd=rd, n_real_players=rt.n_real_players)
 
-        data.init(round_id=round_id)
-        state.init(round_id=round_id, ending_t=ending_t)
+        data.init(rd=rd)
+        state.init(rd=rd, ending_t=ending_t)
 
 
 def delete_rounds(room_id):
 
     entries = Round.objects.filter(room_id=room_id)
 
-    for e in entries:
+    for rd in entries:
 
-        composition.delete(round_id=e.round_id)
-        state.delete(round_id=e.round_id)
-        data.delete(round_id=e.round_id)
+        composition.delete(rd=rd)
+        state.delete(rd=rd)
+        data.delete(rd=rd)
 
-        e.delete()
+        rd.delete()
 
 
-def close_round(round_id):
+def close_round(rd):
 
-    entry = Round.objects.get(round_id=round_id)
-    entry.opened = 0
-    entry.save(force_update=True)
+    rd.opened = 0
+    rd.save()
 
     # Log
-    utils.log("The round {} is now closed.".format(round_id), f=utils.fname(), path=__path__)
+    utils.log("The round {} is now closed.".format(rd), f=utils.fname(), path=__path__)

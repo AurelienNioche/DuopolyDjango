@@ -55,7 +55,7 @@ def create(data):
         rm.save()
 
 
-def delete(room_id):
+def delete(rm):
 
     """
     Get room and compositions related then delete
@@ -63,23 +63,21 @@ def delete(room_id):
     :return:
     """
 
-    entry = Room.objects.filter(room_id=room_id).first()
-    if entry is not None:
-        entry.delete()
+    if rm:
+        rm.delete()
 
-    entries = Players.objects.filter(room_id=room_id)
-    if entries.count():
+    entries = Players.objects.filter(room_id=rm.room_id)
+    if entries:
         entries.delete()
 
-    round.dialog.delete_rounds(room_id=room_id, called_from=__path__+":"+utils.fname())
+    round.dialog.delete_rounds(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
 
 
-def close(room_id):
+def close(rm):
 
-    entry = Room.objects.get(room_id=room_id)
-    entry.opened = 0
-    entry.save(force_update=True)
-    utils.log("The room {} is now closed.".format(room_id), f=utils.fname(), path=__path__)
+    rm.opened = 0
+    rm.save()
+    utils.log("The room {} is now closed.".format(rm.room_id), f=utils.fname(), path=__path__)
 
 
 def get_list():

@@ -6,7 +6,7 @@ import utils.utils as utils
 
 from game.models import Players, Users, Room
 
-from game import round, player, room
+from game import round
 
 from . import mail, info, field_of_view, state
 
@@ -150,12 +150,12 @@ def _register_as_player(username):
     if rm.missing_players == 0:
         rm.opened = 0
 
-    rm.save(force_update=True)
+    rm.save()
 
     # assign player_id to user
     user = Users.objects.get(username=username)
     user.player_id = player_id
-    user.save(force_update=True)
+    user.save()
 
     round_id = round.dialog.include_players_into_round_compositions(
         room_id=rm.room_id, player_id=player_id, called_from=__path__ + ":" + utils.fname()

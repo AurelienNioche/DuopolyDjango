@@ -21,10 +21,10 @@ def delete_rounds(room_id, called_from):
     management.delete_rounds(room_id=room_id)
 
 
-def close_round(round_id, called_from):
+def close_round(rd, called_from):
 
     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-    management.close_round(round_id=round_id)
+    management.close_round(rd=rd)
 
 
 # -------------- Relative to composition ------------------------- #
@@ -35,31 +35,14 @@ def include_players_into_round_compositions(room_id, player_id, called_from):
     return composition.include_players_into_round_compositions(room_id, player_id)
 
 
-# -------------- Relative to state ------------------------- #
-
-# def go_to_next_round(player_id, called_from):
-#
-#     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-#     state.go_to_next_round(player_id=player_id)
-
-
-# def set_time_last_request(player_id, function_name):
-#     state.set_time_last_request(player_id, function_name)
-
-# def advance_of_one_time_step(round_id, called_from):
-#
-#     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-#     state.advance_of_one_time_step(round_id)
-#
-
 # ----------------- Relative to data ---------------------- #
 
-def register_firm_choices(round_id, agent_id, t, price, position, called_from):
+def register_firm_choices(rd, agent, t, price, position, called_from):
 
     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
     data.register_firm_choices(
-        round_id=round_id,
-        agent_id=agent_id,
+        rd=rd,
+        agent=agent,
         t=t,
         price=price,
         position=position

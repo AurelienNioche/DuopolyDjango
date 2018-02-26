@@ -3,7 +3,7 @@ import numpy as np
 
 from parameters import parameters
 
-from game.models import RoundState, Round, RoundComposition
+from game.models import RoundState, RoundComposition
 
 from . import bots, data
 
@@ -13,32 +13,25 @@ from utils import utils
 __path__ = os.path.relpath(__file__)
 
 
-def check_if_bot_firm_has_to_play(round_id, t):
+def check_if_bot_firm_has_to_play(rd, rs, t):
 
     # Log
     utils.log("Called", f=utils.fname(), path=__path__)
 
-    # Get round
-    rd = Round.objects.filter(round_id=round_id).first()
-
     # Check if round contains bots
     if rd.real_players < parameters.n_firms:
 
-        # Get round state
-        round_state = RoundState.objects.get(round_id=round_id, t=t)
-
         # Get firm bot
-        firm_bot = RoundComposition.objects.filter(round_id=round_id, bot=1, role="firm").first()
+        firm_bot = RoundComposition.objects.filter(round_id=rd.round_id, bot=1, role="firm").first()
 
         # If active firm did not play and bot firms not already played
-        if firm_bot.agent_id == round_state.firm_active \
-                and not round_state.firm_active_played:
+        if firm_bot.agent_id == rs.firm_active \
+                and not rs.firm_active_played:
 
-            bots.firm.play(round_id=round_id, t=t)
+            position, price = bots.firm.play(rd=rd, t=t)
 
-            round_state.firm_active_played = 1
-
-            round_state.save(force_update=True)
+            data.register_firm_choices(rd=rd, agent=firm_bot,
+                                       t=t, position=position, price=price)
 
             utils.log("Bot firm played.",
                       f=utils.fname(), path=__path__)
@@ -55,28 +48,41 @@ def check_if_bot_firm_has_to_play(round_id, t):
     return False
 
 
-def check_if_consumers_have_to_play(round_id, t):
+# def check_if_consumers_have_to_play(round_id, t):
+#
+#     # Log
+#     utils.log("Called", f=utils.fname(), path=__path__)
+#
+#     # Get room state
+#     round_state = RoundState.objects.get(round_id=round_id, t=t)
+#
+#     # Then consumers need to choose a perimeter as well as a firm to buy from
+#     if round_state.firm_active_played and not round_state.consumers_played:
+#
+#         bots.consumer.play(round_id=round_id, t=t)
+#
+#         round_state.consumers_played = 1
+#         round_state.save()
+#
+#         data.compute_scores(round_id=round_id, t=t)
+#         _advance_of_one_time_step(round_id=round_id, t=t)
+#         return True
+#
+#     else:
+#         return False
 
-    # Log
-    utils.log("Called", f=utils.fname(), path=__path__)
+def validate_firm_choice_and_make_consumers_play(rd, rs, t):
 
-    # Get room state
-    round_state = RoundState.objects.get(round_id=round_id, t=t)
+    # table RoundComposition, ConsumerChoices are used
+    bots.consumer.play(rd, t=t)
 
-    # Then consumers need to choose a perimeter as well as a firm to buy from
-    if round_state.firm_active_played and not round_state.consumers_played:
+    rs.firm_active_played = 1
+    rs.consumers_played = 1
+    rs.save()
 
-        bots.consumer.play(round_id=round_id, t=t)
-
-        round_state.consumers_played = 1
-        round_state.save(force_update=True)
-
-        data.compute_scores(round_id=round_id, t=t)
-        _advance_of_one_time_step(round_id=round_id, t=t)
-        return True
-
-    else:
-        return False
+    data.compute_scores(round_id=rd.round_id, t=t)
+    _advance_of_one_time_step(rd=rd, t=t)
+    # rs.save()
 
 
 def init(round_id, ending_t):
@@ -96,27 +102,22 @@ def init(round_id, ending_t):
         round_state.save()
 
 
-def delete(round_id):
+def delete(rd):
 
-    rs = RoundState.objects.filter(round_id=round_id)
+    rs = RoundState.objects.filter(rd=rd)
     if rs:
         rs.delete()
 
 
-def _advance_of_one_time_step(round_id, t):
+def _advance_of_one_time_step(rd, t):
 
-    # Get the round object
-    rd = Round.objects.get(round_id=round_id)
-
-    if not is_end_of_game(round_id=round_id, t=t):
+    if not is_end_of_game(rd, t=t):
 
         # Increment time state
         rd.t += 1
-        rd.save(force_update=True)
+        rd.save()
 
 
-def is_end_of_game(round_id, t):
-
-    rd = Round.objects.get(round_id=round_id)
+def is_end_of_game(rd, t):
     return t == rd.ending_t - 1  # -1 because starts at 0
 

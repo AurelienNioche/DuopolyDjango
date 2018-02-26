@@ -12,18 +12,18 @@ from game import room
 __path__ = os.path.relpath(__file__)
 
 
-def create(round_id, n_real_players):
+def create(rd):
 
     # create composition
     roles = np.array(['firm', ] * parameters.n_firms + ['consumer', ] * parameters.n_consumers)
     n_player = len(roles)
     bots = np.ones(n_player)
 
-    bots[:n_real_players] = 0
+    bots[:rd.n_real_players] = 0
 
     for i in range(n_player):
         composition = RoundComposition(
-            round_id=round_id,
+            round_id=rd,
             agent_id=i,
             role=roles[i],
             bot=int(bots[i])
@@ -32,13 +32,13 @@ def create(round_id, n_real_players):
         composition.save()
 
 
-def delete(round_id):
+def delete(rd):
 
-    utils.log("Delete composition corresponding to 'round_id' '{}'".format(round_id),
+    utils.log("Delete composition corresponding to 'round_id' '{}'".format(rd.round_id),
               path=__path__, f=utils.fname())
 
-    rc = RoundComposition.objects.filter(round_id=round_id)
-    if rc.count():
+    rc = RoundComposition.objects.filter(round_id=rd.round_id)
+    if rc:
         rc.delete()
 
 
@@ -58,8 +58,8 @@ def include_players_into_round_compositions(room_id, player_id):
     if rd_pvp.missing_players == 0:
         rd_pvp.opened = 0
 
-    rd_pve.save(force_update=True)
-    rd_pvp.save(force_update=True)
+    rd_pve.save()
+    rd_pvp.save()
 
     # set player to agent_id firm 0 in round pve
     agent_id = 0

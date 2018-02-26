@@ -12,8 +12,10 @@ __path__ = os.path.relpath(__file__)
 
 def tutorial_done(player_id):
 
+    p = Players.objects.get(player_id=player_id)
+
     player.dialog.go_to_next_round(
-        player_id=player_id,
+        p=p,
         called_from=__path__ + ":" + utils.fname()
     )
 
@@ -22,4 +24,4 @@ def record_tutorial_progression(player_id, tutorial_progression):
 
     p = Players.objects.get(player_id=player_id)
     p.tutorial_progression = tutorial_progression * 100
-    p.save(force_update=True)
+    p.save()

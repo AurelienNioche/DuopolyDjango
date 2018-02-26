@@ -57,6 +57,7 @@ def ask_firm_passive_opponent_choice(player_id, t):
 
     p = Players.objects.get(player_id=player_id)
     rd = Round.objects.get(round_id=p.round_id)
+    rs = RoundState.objects.get(round_id=rd.round_id, t=t)
 
     # -------  Get needed variables --------------------------------------------------------------- #
 
@@ -79,11 +80,8 @@ def ask_firm_passive_opponent_choice(player_id, t):
     if t <= rd.t:
 
         # Make bot firm play if applicable
-        if state.check_if_bot_firm_has_to_play(rd.round_id, t):
-            state.check_if_consumers_have_to_play(round_id=rd.round_id, t=t)
-
-        # Get the state (possibly new)
-        rs = RoundState.objects.get(round_id=rd.round_id, t=t)
+        if state.check_if_bot_firm_has_to_play(rd=rd, rs=rs, t=t):
+            state.validate_firm_choice_and_make_consumers_play(rd=rd, rs=rs, t=t)
 
         if rs.firm_active_played:
             positions, prices = data.get_positions_and_prices(round_id=rd.round_id, t=t)
@@ -124,13 +122,13 @@ def ask_firm_passive_consumer_choices(player_id, t):
 
         if rs.consumers_played:
 
-            is_end = int(state.is_end_of_game(round_id=rd.round_id, t=t))
+            is_end = int(state.is_end_of_game(rd=rd, t=t))
 
             consumer_choices = data.get_consumer_choices(round_id=rd.round_id, t=t)
             consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                player.dialog.go_to_next_round(player_id=player_id, called_from=__path__ + ':' + utils.fname())
+                player.dialog.go_to_next_round(p=p, called_from=__path__ + ':' + utils.fname())
 
             return (t, ) + tuple((i for i in consumer_choices)) + (is_end, )
 
@@ -171,15 +169,17 @@ def ask_firm_active_choice_recording(player_id, t, position, price):
 
         if not rs.firm_active_played:
 
+            # tables FirmPositions, FirmPrices are used
             data.register_firm_choices(
-                round_id=rd.round_id,
-                agent_id=rc.agent_id,
+                rs=rs,
+                rd=rd,
+                agent=rc,
                 t=t,
                 position=position,
                 price=price
             )
 
-            state.check_if_consumers_have_to_play(round_id=rd.round_id, t=t)
+            state.validate_firm_choice_and_make_consumers_play(rs=rs, rd=rd, t=t)
 
         return t,  # ! Must be a tuple
 
@@ -195,10 +195,7 @@ def ask_firm_active_consumer_choices(player_id, t):
     p = Players.objects.get(player_id=player_id)
     rd = Round.objects.get(round_id=p.round_id)
     rs = RoundState.objects.get(round_id=rd.round_id, t=t)
-
-    # -------  Get needed variables --------------------------------------------------------------- #
-
-    agent_id = RoundComposition.objects.get(round_id=rd.round_id, player_id=player_id).agent_id
+    rc = RoundComposition.objects.get(round_id=rd.round_id, player_id=player_id)
 
     # -------  Log stuff -------------------------------------------------------------------------- #
 
@@ -212,15 +209,15 @@ def ask_firm_active_consumer_choices(player_id, t):
 
     if t <= rd.t:
 
-        is_end = int(state.is_end_of_game(round_id=rd.round_id, t=t))
+        is_end = int(state.is_end_of_game(rd=rd, t=t))
 
         if rs.firm_active_played:
 
-            consumer_choices = data.get_consumer_choices(round_id=rd.round_id, t=t)
-            consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
+            consumer_choices = data.get_consumer_choices(rd=rd, t=t)
+            consumer_choices = [1 if i == rc.agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                player.dialog.go_to_next_round(player_id=player_id, called_from=__path__ + ':' + utils.fname())
+                player.dialog.go_to_next_round(p=p, called_from=__path__ + ':' + utils.fname())
 
             return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
 

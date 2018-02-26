@@ -39,10 +39,7 @@ def get_opponent_progression(player_id):
     opp = Players.objects.filter(room_id=p.room_id).exclude(player_id=player_id).first()
 
     if p.state == room.state.pve:
-        progression = tutorial.dialog.get_tutorial_progression(
-                player_id=opp.player_id,
-                called_from=__path__ + ':' + utils.fname()
-            )
+        progression = p.tutorial_progression
     else:
         comp = RoundComposition.objects.filter(player_id=opp.player_id)
         rd = None
@@ -57,21 +54,21 @@ def get_opponent_progression(player_id):
     return str(rnd(progression))
 
 
-def go_to_next_round(player_id):
+def go_to_next_round(p, rd, rm):
 
-    p = Players.objects.get(player_id=player_id)
-    room_id = Round.objects.get(round_id=p.round_id).room_id
-    room_state = Room.objects.get(room_id=room_id).state
+    # p = Players.objects.get(player_id=player_id)
+    # room_id = Round.objects.get(round_id=p.round_id).room_id
+    # room_state = Room.objects.get(room_id=room_id).state
 
-    utils.log("Going to next round: room.state = {}".format(room_state), f=utils.fname(), path=__path__)
+    utils.log("Going to next round: room.state = {}".format(rm.room_state), f=utils.fname(), path=__path__)
 
-    if room_state == room.state.tutorial and p.state == room.state.tutorial:
-        _tutorial_is_done(player_id=player_id)
+    if rm.room_state == room.state.tutorial and p.state == room.state.tutorial:
+        _tutorial_is_done(p, rm)
 
-    elif room_state == room.state.pve and p.state == room.state.pve:
-        _pve_is_done(player_id=player_id)
+    elif rm.room_state == room.state.pve and p.state == room.state.pve:
+        _pve_is_done(p, rm, rd)
 
-    elif room_state == room.state.pvp and p.state == room.state.pvp:
+    elif rm.room_state == room.state.pvp and p.state == room.state.pvp:
         _pvp_is_done(player_id=player_id)
 
     else:
@@ -80,17 +77,14 @@ def go_to_next_round(player_id):
     return True
 
 
-def _tutorial_is_done(player_id):
+def _tutorial_is_done(p, rm):
 
     # change player.state
-    p = Players.objects.get(player_id=player_id)
     p.state = room.state.pve
-    p.save(force_update=True)
-
-    rm = Room.objects.get(room_id=p.room_id)
+    p.save()
 
     # if other player has done tutorial, set rm.state to pve
-    if rm.trial or _opponent_has_done_tutorial(player_id=player_id):
+    if rm.trial or _opponent_has_done_tutorial(p=p):
 
         room.dialog.update_state(
             room_id=rm.room_id,
@@ -99,75 +93,62 @@ def _tutorial_is_done(player_id):
         )
 
 
-def _pve_is_done(player_id):
-
-    p = Players.objects.get(player_id=player_id)
+def _pve_is_done(p, rm, rd):
 
     # As player is alone, once he finished, we can close the r
-    round.dialog.close_round(round_id=p.round_id, called_from=__path__ + ':' + utils.fname())
+    round.dialog.close_round(rd, called_from=__path__ + ':' + utils.fname())
 
     # load objects
     next_round = Round.objects.get(room_id=p.room_id, state=room.state.pvp)
-    player = Players.objects.get(player_id=player_id)
-    rm = Room.objects.get(room_id=p.room_id)
 
     # player is assigned to next round id
-    player.round_id = next_round.round_id
-    player.state = room.state.pvp
-    player.save(force_update=True)
+    p.round_id = next_round.round_id
+    p.state = room.state.pvp
+    p.save()
 
     # set room state
-    if rm.trial or _opponent_has_done_pve(player_id=player_id):
-        room.dialog.update_state(room_id=p.room_id, room_state=room.state.pvp, called_from=__path__ + ':' + utils.fname())
+    if rm.trial or _opponent_has_done_pve(player_id=p.player_id):
+        room.dialog.update_state(
+            room_id=p.room_id, room_state=room.state.pvp, called_from=__path__ + ':' + utils.fname())
 
 
-def _pvp_is_done(player_id):
-
-    p = Players.objects.get(player_id=player_id)
+def _pvp_is_done(p, rm, rd):
 
     # Modify sate of player
     p.state = room.state.end
-    p.save(force_update=True)
+    p.save()
 
-    rm = Room.objects.get(room_id=p.room_id)
-
-    if rm.trial or _opponent_has_done_pvp(player_id=player_id):
+    if rm.trial or _opponent_has_done_pvp(player_id=p.player_id):
 
         # Close round
-        round.dialog.close_round(round_id=p.round_id, called_from=__path__ + ':' + utils.fname())
+        round.dialog.close_round(rd, called_from=__path__ + ':' + utils.fname())
 
         # Close room and set state
-        room.dialog.close(room_id=p.room_id, called_from=__path__ + ":" + utils.fname())
-        room.dialog.update_state(room_id=p.room_id, room_state=room.state.end, called_from=__path__ + ':' + utils.fname())
+        room.dialog.close(rm=rm, called_from=__path__ + ":" + utils.fname())
+        room.dialog.update_state(rm=rm, room_state=room.state.end, called_from=__path__ + ':' + utils.fname())
 
 
 # --------------------------------------- Info regarding the opponent --------------------------------------------- #
 
 
-def _opponent_has_done_pve(player_id):
-
-    p = Players.objects.get(player_id=player_id)
+def _opponent_has_done_pve(p):
 
     opponent_state = \
-        Players.objects.filter(room_id=p.room_id).exclude(player_id=player_id).first().state
+        Players.objects.filter(room_id=p.room_id).exclude(player_id=p.player_id).first().state
     return opponent_state == room.state.pvp
 
 
-def _opponent_has_done_pvp(player_id):
-
-    p = Players.objects.get(player_id=player_id)
+def _opponent_has_done_pvp(p):
 
     opponent_state = \
-        Players.objects.filter(room_id=p.room_id).exclude(player_id=player_id).first().state
+        Players.objects.filter(room_id=p.room_id).exclude(player_id=p.player_id).first().state
     return opponent_state == room.state.end
 
 
-def _opponent_has_done_tutorial(player_id):
-
-    p = Players.objects.get(player_id=player_id)
+def _opponent_has_done_tutorial(p):
 
     opponent_state = \
-        Players.objects.filter(room_id=p.room_id).exclude(player_id=player_id).first().state
+        Players.objects.filter(room_id=p.room_id).exclude(player_id=p.player_id).first().state
     return opponent_state == room.state.pve
 
 
@@ -187,7 +168,7 @@ def _set_time_last_request(player_id, function_name, username=None):
     if user:
         user.time_last_request = timezone.now()
         user.last_request = function_name
-        user.save(force_update=True)
+        user.save()
 
 
 def connection_checker(f):
@@ -287,7 +268,7 @@ def player_is_banned(player_id):
             # Set the opponent as a deserter
             # and return that info to the player
             u.deserter = 1
-            u.save(force_update=True)
+            u.save()
 
             room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
 
@@ -298,13 +279,10 @@ def check_connected_users():
 
     for u in Users.objects.all():
         u.connected = int(not _is_timed_out(u.time_last_request, "disconnected_timeout"))
-        u.save(force_update=True)
+        u.save()
 
 
-def _no_opponent_found(player_id):
-
-    p = Players.objects.get(player_id=player_id)
-    rm = Room.objects.get(room_id=p.room_id)
+def _no_opponent_found(p, rm):
 
     not_found = rm.missing_players and _is_timed_out(p.registration_time, "no_opponent_timeout")
 

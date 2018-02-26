@@ -95,14 +95,14 @@ def get_positions_and_prices(round_id, t):
     return positions, prices
 
 
-def get_consumer_choices(round_id, t):
+def get_consumer_choices(rd, t):
 
-    entries = ConsumerChoices.objects.filter(t=t, round_id=round_id).order_by("agent_id")
+    entries = ConsumerChoices.objects.filter(t=t, round_id=rd.round_id).order_by("agent_id")
     consumer_choices = [i.value for i in entries]
     return consumer_choices
 
 
-def register_firm_choices(round_id, agent_id, t, position, price):
+def register_firm_choices(rd, agent, t, position, price):
 
     for i in (t, t + 1):
 
@@ -111,19 +111,19 @@ def register_firm_choices(round_id, agent_id, t, position, price):
                 (position, price)
         ):
 
-            entry = table.objects.filter(round_id=round_id, agent_id=agent_id, t=i).first()
+            entry = table.objects.filter(round_id=rd.round_id, agent_id=agent.agent_id, t=i).first()
 
             if entry is not None:
                 entry.value = value
-                entry.save(force_update=True)
-
-            else:
-                entry = table(round_id=round_id, agent_id=agent_id, t=i, value=value)
                 entry.save()
 
-    rs = RoundState.objects.get(round_id=round_id, t=t)
-    rs.firm_active_played = 1
-    rs.save(force_update=True)
+            else:
+                entry = table(round_id=rd.round_id, agent_id=agent.agent_id, t=i, value=value)
+                entry.save()
+
+    # rs = RoundState.objects.get(round_id=round_id, t=t)
+    # rs.firm_active_played = 1
+    # rs.save()
 
 
 def register_consumer_choices(round_id, agent_id, t, firm_choice):
@@ -133,6 +133,13 @@ def register_consumer_choices(round_id, agent_id, t, firm_choice):
 
 
 def compute_scores(round_id, t):
+
+    """
+    Deals with tables FirmProfits, FirmPrices, FirmProfitsPerTurn
+    :param round_id:
+    :param t:
+    :return:
+    """
 
     for agent_id in range(parameters.n_firms):
 

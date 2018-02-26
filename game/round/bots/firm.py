@@ -24,35 +24,32 @@ dir_path = os.path.dirname(os.path.realpath(__file__)) + "/data/"
 
 # --------------------------------  high level functions --------------------------- #
 
-def play(round_id, t):
+def play(rd, t):
 
     """
+    Tables Room, RoundComposition, FirmPositions, FirmPrices
     called by game.round.state.check_state
-    :param round_id:
-    :param t:
-    :return:
     """
+    r = Room.objects.get(room_id=rd.room_id).radius
 
-    room_id = Round.objects.get(round_id=round_id).room_id
-    r = Room.objects.get(room_id=room_id).radius
-
-    firm_bot = RoundComposition.objects.filter(round_id=round_id, bot=1, role="firm").first()
+    firm_bot = RoundComposition.objects.filter(round_id=rd.round_id, bot=1, role="firm").first()
     bot_id = firm_bot.agent_id
 
     opp_id = (bot_id + 1) % parameters.n_firms
 
-    opp_position = FirmPositions.objects.get(round_id=round_id, agent_id=opp_id, t=t)
-    opp_price = FirmPrices.objects.get(round_id=round_id, agent_id=opp_id, t=t)
+    opp_position = FirmPositions.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
+    opp_price = FirmPrices.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
     position, price = _choice(opp_position, opp_price, r)
+    return position, price
 
-    round.dialog.register_firm_choices(
-        round_id=round_id,
-        agent_id=bot_id,
-        t=t,
-        price=price,
-        position=position,
-        called_from=__path__ + ':' + utils.fname()
-    )
+    # round.dialog.register_firm_choices(
+    #     round_id=round_id,
+    #     agent_id=bot_id,
+    #     t=t,
+    #     price=price,
+    #     position=position,
+    #     called_from=__path__ + ':' + utils.fname()
+    # )
 
 
 # --------------------------------  protected --------------------------- #
