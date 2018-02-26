@@ -67,7 +67,7 @@ def close_round(round_id):
 
     entry = Round.objects.get(round_id=round_id)
     entry.opened = 0
-    entry.save(force_update=True)
+    entry.save()
 
     # Log
     utils.log("The round {} is now closed.".format(round_id), f=utils.fname(), path=__path__)

@@ -85,7 +85,7 @@ def _tutorial_is_done(player_id):
     # change player.state
     p = Players.objects.get(player_id=player_id)
     p.state = room.state.pve
-    p.save(force_update=True)
+    p.save()
 
     rm = Room.objects.get(room_id=p.room_id)
 
@@ -114,7 +114,7 @@ def _pve_is_done(player_id):
     # player is assigned to next round id
     player.round_id = next_round.round_id
     player.state = room.state.pvp
-    player.save(force_update=True)
+    player.save()
 
     # set room state
     if rm.trial or _opponent_has_done_pve(player_id=player_id):
@@ -127,7 +127,7 @@ def _pvp_is_done(player_id):
 
     # Modify sate of player
     p.state = room.state.end
-    p.save(force_update=True)
+    p.save()
 
     rm = Room.objects.get(room_id=p.room_id)
 
@@ -187,7 +187,7 @@ def _set_time_last_request(player_id, function_name, username=None):
     if user:
         user.time_last_request = timezone.now()
         user.last_request = function_name
-        user.save(force_update=True)
+        user.save()
 
 
 def connection_checker(f):
@@ -287,7 +287,7 @@ def player_is_banned(player_id):
             # Set the opponent as a deserter
             # and return that info to the player
             u.deserter = 1
-            u.save(force_update=True)
+            u.save()
 
             room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
 
@@ -298,7 +298,7 @@ def check_connected_users():
 
     for u in Users.objects.all():
         u.connected = int(not _is_timed_out(u.time_last_request, "disconnected_timeout"))
-        u.save(force_update=True)
+        u.save()
 
 
 def _no_opponent_found(player_id):

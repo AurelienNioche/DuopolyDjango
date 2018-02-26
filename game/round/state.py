@@ -38,7 +38,7 @@ def check_if_bot_firm_has_to_play(round_id, t):
 
             round_state.firm_active_played = 1
 
-            round_state.save(force_update=True)
+            round_state.save()
 
             utils.log("Bot firm played.",
                       f=utils.fname(), path=__path__)
@@ -69,7 +69,7 @@ def check_if_consumers_have_to_play(round_id, t):
         bots.consumer.play(round_id=round_id, t=t)
 
         round_state.consumers_played = 1
-        round_state.save(force_update=True)
+        round_state.save()
 
         data.compute_scores(round_id=round_id, t=t)
         _advance_of_one_time_step(round_id=round_id, t=t)
@@ -112,7 +112,7 @@ def _advance_of_one_time_step(round_id, t):
 
         # Increment time state
         rd.t += 1
-        rd.save(force_update=True)
+        rd.save()
 
 
 def is_end_of_game(round_id, t):

@@ -58,8 +58,8 @@ def include_players_into_round_compositions(room_id, player_id):
     if rd_pvp.missing_players == 0:
         rd_pvp.opened = 0
 
-    rd_pve.save(force_update=True)
-    rd_pvp.save(force_update=True)
+    rd_pve.save()
+    rd_pvp.save()
 
     # set player to agent_id firm 0 in round pve
     agent_id = 0

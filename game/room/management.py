@@ -78,7 +78,7 @@ def close(room_id):
 
     entry = Room.objects.get(room_id=room_id)
     entry.opened = 0
-    entry.save(force_update=True)
+    entry.save()
     utils.log("The room {} is now closed.".format(room_id), f=utils.fname(), path=__path__)
 
 

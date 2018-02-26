@@ -11,7 +11,7 @@ def update(room_id, state):
 
     rm = Room.objects.get(room_id=room_id)
     rm.state = state
-    rm.save(force_update=True)
+    rm.save()
 
 
 def get(room_id):

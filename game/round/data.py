@@ -115,7 +115,7 @@ def register_firm_choices(round_id, agent_id, t, position, price):
 
             if entry is not None:
                 entry.value = value
-                entry.save(force_update=True)
+                entry.save()
 
             else:
                 entry = table(round_id=round_id, agent_id=agent_id, t=i, value=value)
@@ -123,7 +123,7 @@ def register_firm_choices(round_id, agent_id, t, position, price):
 
     rs = RoundState.objects.get(round_id=round_id, t=t)
     rs.firm_active_played = 1
-    rs.save(force_update=True)
+    rs.save()
 
 
 def register_consumer_choices(round_id, agent_id, t, firm_choice):

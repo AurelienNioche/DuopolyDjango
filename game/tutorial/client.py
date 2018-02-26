@@ -22,4 +22,4 @@ def record_tutorial_progression(player_id, tutorial_progression):
 
     p = Players.objects.get(player_id=player_id)
     p.tutorial_progression = tutorial_progression * 100
-    p.save(force_update=True)
+    p.save()

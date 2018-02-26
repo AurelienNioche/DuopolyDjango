@@ -50,7 +50,7 @@ def play(round_id, t):
         )
         new_entry.save()
 
-        entry.save(force_update=True)
+        entry.save()
 
 
 # --------------------------------  protected --------------------------- #
