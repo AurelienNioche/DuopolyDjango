@@ -139,11 +139,7 @@ def proceed_to_registration_as_player(request):
 
     username = request.POST["username"].lower()
 
-    try:
-        rsp = room.client.proceed_to_registration_as_player(username=username)
-
-    except IntegrityError:
-        return "reply", "error", "player_id_is_not_unique"
+    rsp = room.client.proceed_to_registration_as_player(username=username)
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp
