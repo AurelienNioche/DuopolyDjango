@@ -283,11 +283,11 @@ class BotProcess(ml.Process):
 
 def main():
 
-    n_accounts = 10
+    n_accounts = 11
 
     start_event = ml.Event()
 
-    for n in range(1, n_accounts + 1):
+    for n in range(n_accounts):
 
         pwd = "{}".format(n).zfill(4)
         username = "bot{}".format(n)
