@@ -1,5 +1,6 @@
 from game.models import Room
 
+
 none = "none"
 tutorial = "tutorial"
 pve = "pve"

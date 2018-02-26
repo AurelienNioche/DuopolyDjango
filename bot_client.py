@@ -103,10 +103,13 @@ class FirmState:
     passive = "passive"
     active = "active"
 
+
 def print_reply(f):
+
     def wrapper(*args):
-        print("{}: {}".format(f.__name__, *args[1:]))
+        print("{} {}: {}".format(args[0].username, f.__name__, *args[1:]))
         return f(*args)
+
     return wrapper
 
 
@@ -145,9 +148,9 @@ class BotClient:
                     return getattr(self, "reply_{}".format(rsp_parts[1]))(*rsp_parts[2:])
             else:
                 if len(r.text) < 100:
-                    print(r.text)
+                    print(self.username, r.text)
                 else:
-                    print("Length is too long, probably received an error in html format")
+                    print(self.username, "Length is too long, probably received an error in html format")
 
         except requests.exceptions.ConnectionError as e:
             print(e)
@@ -398,7 +401,7 @@ class BotProcess(ml.Process):
 
 def main():
 
-    n_accounts = 2
+    n_accounts = 8
 
     start_event = ml.Event()
 
