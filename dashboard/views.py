@@ -192,11 +192,7 @@ class LogsView(TemplateView):
             if n_lines:
                 logs = "".join(f.readlines()[n_lines:])
             else:
-                file = f.readlines()
-                if len(file) > 1500:
-                    logs = "".join(file[-1500:])
-                else:
-                    logs = f.read()
+                logs = f.read()
             f.close()
         return logs
 
