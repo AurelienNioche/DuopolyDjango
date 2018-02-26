@@ -133,20 +133,13 @@ def room_available(request):
     return "reply", utils.fname(), rsp
 
 
-@transaction.atomic
+@player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
     username = request.POST["username"].lower()
 
-    # try:
-    #     rsp = room.client.proceed_to_registration_as_player(username=username)
-    #
-    # except IntegrityError:
-    #     utils.log("IntegrityError: Player id is not unique", f=utils.fname(), path=__path__)
-    #     transaction.set_rollback(True)
-    #     return "reply", "error", "player_id_is_not_unique"
-
-    rsp = room.client.proceed_to_registration_as_player(username=username)
+    with transaction.atomic():
+        rsp = room.client.proceed_to_registration_as_player(username=username)
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp
