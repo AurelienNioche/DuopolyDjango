@@ -64,6 +64,7 @@ def register(request):
         age=age,
         mechanical_id=mechanical_id
     )
+
     if went_well:
         return "reply", utils.fname(), 1
 
@@ -139,7 +140,13 @@ def proceed_to_registration_as_player(request):
     username = request.POST["username"].lower()
 
     with transaction.atomic():
-        rsp = room.client.proceed_to_registration_as_player(username=username)
+
+        try:
+            rsp = room.client.proceed_to_registration_as_player(username=username)
+
+        except IntegrityError:
+            transaction.rollback()
+            return "reply", "error", "player_is_not_unique"
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp

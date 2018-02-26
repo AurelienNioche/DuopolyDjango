@@ -3,7 +3,7 @@ set -e
 dirname=/home/getz/DuopolyDjango
 LOGFILE=./log/$(date +%F).log
 LOGDIR=$(dirname $LOGFILE)
-LOGLEVEL=debug   # info ou warning une fois l'installation OK
+LOGLEVEL=error   # info ou warning une fois l'installation OK
 NUM_WORKERS=3    # Règle : (2 x $num_cores) + 1
 DJANGO_SETTINGS_MODULE="adminbase.settings"
 export DJANGO_SETTINGS_MODULE

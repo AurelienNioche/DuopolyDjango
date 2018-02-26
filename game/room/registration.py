@@ -13,7 +13,7 @@ from . import mail, info, field_of_view, state
 __path__ = os.path.relpath(__file__)
 
 
-def register_as_user(user_mail, nationality, gender, age, mechanical_id):
+def register_as_user(user, user_mail, nationality, gender, age, mechanical_id):
 
     user = Users.objects.filter(username=user_mail).first()
 
