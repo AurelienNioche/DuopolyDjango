@@ -134,7 +134,6 @@ def room_available(request):
 
 
 @transaction.atomic
-@player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
     username = request.POST["username"].lower()
