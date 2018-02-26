@@ -1,9 +1,6 @@
 import requests
 import enum
 import multiprocessing as ml
-import numpy as np
-import secrets
-
 
 # --------------- Sign in ----------------- #
 
@@ -121,7 +118,7 @@ class BotClient:
 
         try:
 
-            url = "http://51.15.6.148/client_request/"
+            url = "http://51.15.6.148:8000/client_request/"
             r = requests.post(url, data=data)
             rsp_parts = r.text.split("/")
 
@@ -237,21 +234,20 @@ class BotClient:
 
 
 def main():
-    n_accounts = 2
+
+    n_accounts = 10
+
+    start_event = ml.Event()
 
     for n in range(1, n_accounts + 1):
-        b
-        "bot{}".format(n),
-        "password": "{}".format(n).zfill(4)
-    }
 
-    proc = ml.Process(
-    target = main,
-    args = (account["username"], account["password"])
+        b = Bot(event=start_event, username="bot{}".format(n),
+                password="{}".format(n).zfill(4))
+        b.start()
 
-)
+    ml.Event().wait(2)
 
-proc.start()
+    start_event.set()
 
 
 class Bot(ml.Process):
@@ -298,21 +294,6 @@ class Bot(ml.Process):
         print("Let's play!")
 
 
-
 if __name__ == "__main__":
 
-    n_accounts = 2
-
-    for n in range(1, n_accounts + 1):
-
-        b "bot{}".format(n),
-            "password": "{}".format(n).zfill(4)
-        }
-
-        proc = ml.Process(
-            target=main,
-            args=(account["username"], account["password"])
-        )
-
-        proc.start()
-
+    main()
