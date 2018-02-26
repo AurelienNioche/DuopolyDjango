@@ -240,8 +240,11 @@ def main():
 
     for n in range(1, n_accounts + 1):
 
-        b = Bot(event=start_event, username="bot{}".format(n),
-                password="{}".format(n).zfill(4))
+        b = Bot(
+            event=start_event,
+            username="bot{}".format(n),
+            password="{}".format(n).zfill(4)
+        )
         b.start()
 
     ml.Event().wait(2)
@@ -251,7 +254,7 @@ def main():
 
 class Bot(ml.Process):
 
-    def __int__(self, event, username, password):
+    def __init__(self, event, username, password):
         super().__init__()
         self.event = event
         self.username = username
