@@ -123,7 +123,10 @@ class BotClient:
 
             if len(rsp_parts) > 1 and rsp_parts[0] == "reply":
 
-                if len(rsp_parts) <= 2:
+                if rsp_parts[1] == "error":
+                    self._request(data)
+
+                elif len(rsp_parts) <= 2:
                     return getattr(self, rsp_parts[1])()
 
                 else:
@@ -231,29 +234,11 @@ class BotClient:
 #     print("Let's play!")
 #
 
+class BotProcess(ml.Process):
 
-def main():
-
-    n_accounts = 10
-
-    start_event = ml.Event()
-
-    for n in range(1, n_accounts + 1):
-
-        b = Bot(event=start_event, username="bot{}".format(n),
-                password="{}".format(n).zfill(4))
-        b.start()
-
-    ml.Event().wait(2)
-
-    start_event.set()
-
-
-class Bot(ml.Process):
-
-    def __int__(self, event, username, password):
+    def __init__(self, start_event, username, password):
         super().__init__()
-        self.event = event
+        self.start_event = start_event
         self.username = username
         self.password = password
 
@@ -280,7 +265,7 @@ class Bot(ml.Process):
 
                 # If there is place, try to register
                 if place:
-                    self.event.wait()
+                    self.start_event.wait()
                     registered = b.proceed_to_registration_as_player()
                     if registered:
                         break
@@ -291,6 +276,27 @@ class Bot(ml.Process):
             m_p = b.missing_players()
 
         print("Let's play!")
+
+
+def main():
+
+    n_accounts = 10
+
+    start_event = ml.Event()
+
+    for n in range(1, n_accounts + 1):
+
+        pwd = "{}".format(n).zfill(4)
+        username = "bot{}".format(n)
+
+        b = BotProcess(
+            start_event=start_event, username=username,
+            password=pwd)
+        b.start()
+
+    ml.Event().wait(2)
+
+    start_event.set()
 
 
 if __name__ == "__main__":
