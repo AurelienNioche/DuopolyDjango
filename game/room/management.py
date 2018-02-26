@@ -115,7 +115,7 @@ def get_list():
                     time_last_request=u.time_last_request
                 )
 
-            connected_players.append(cp)
+                connected_players.append(cp)
 
         dic = {"att": room, "connected_players": connected_players}
         rooms_list.append(dic)
