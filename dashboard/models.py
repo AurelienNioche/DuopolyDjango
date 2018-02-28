@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class IntParameters(models.Model):
+class IntParameter(models.Model):
 
     name = models.TextField()
     value = models.IntegerField()

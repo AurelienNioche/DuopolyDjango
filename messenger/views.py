@@ -7,7 +7,7 @@ import os
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from . admin import Admin
+from . import management
 from game import player
 
 __path__ = os.path.relpath(__file__)
@@ -36,32 +36,32 @@ class MessengerView(TemplateView):
         player.messenger.check_connected_users()
 
         # Get messages
-        users = Admin.get_all_users()
+        users = management.get_all_users()
         # update context with users
         context.update({"users": users})
         # Get slide auto_reply value
-        auto_reply = Admin.get_auto_reply()
+        auto_reply = management.get_auto_reply()
         # update context with auto_reply
         context.update({"auto_reply": auto_reply})
 
         # get current user if a user is selected
         if self.user is not None:
 
-            Admin.set_user_msg_as_read(self.user)
+            management.set_user_msg_as_read(self.user)
 
             context.update(
                 {"current_user": self.user}
             )
 
         else:
-            user = Admin.get_latest_msg_author()
-            Admin.set_user_msg_as_read(user)
+            user = management.get_latest_msg_author()
+            management.set_user_msg_as_read(user)
             context.update(
                 {"current_user": user}
             )
 
         # update context with messages
-        messages = Admin.get_all_messages_from_user(context['current_user'])
+        messages = management.get_all_messages_from_user(context['current_user'])
         context.update({'messages': messages})
 
         return context
@@ -80,11 +80,11 @@ class MessengerView(TemplateView):
             user_id = request.GET["user_id"]
 
             if user_id != "null":
-                self.user = Admin.get_user_from_id(user_id)
+                self.user = management.get_user_from_id(user_id)
 
         if "auto_reply" in request.GET:
 
-            Admin.set_auto_reply(request.GET["auto_reply"])
+            management.set_auto_reply(request.GET["auto_reply"])
 
         if "type" in request.GET:
 
@@ -104,7 +104,7 @@ class MessengerView(TemplateView):
         """
         used when sending a msg
         """
-        Admin.send_message(username=request.POST["user"], message=request.POST["msg"])
+        management.send_message(username=request.POST["user"], message=request.POST["msg"])
 
         return HttpResponse("Sent!")
 
@@ -114,7 +114,7 @@ class MessengerView(TemplateView):
 
     @staticmethod
     def refresh_all_unread_msg(request, **kwargs):
-        return JsonResponse({"count": Admin.get_unread_msg()})
+        return JsonResponse({"count": management.get_unread_msg()})
 
     def refresh_contacts(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -153,7 +153,7 @@ class MessengerClientSide:
         username = request.POST["username"]
         message = request.POST["message"]
 
-        Admin.new_message_from_client(username=username, message=message)
+        management.new_message_from_client(username=username, message=message)
 
         return "reply", "done"
 
@@ -162,7 +162,7 @@ class MessengerClientSide:
 
         username = request.POST["username"]
 
-        n_new_messages, new_messages = Admin.get_messages_for_client(username=username)
+        n_new_messages, new_messages = management.get_messages_for_client(username=username)
 
         return ("reply", n_new_messages,) + tuple((i for i in new_messages))
 
@@ -173,6 +173,6 @@ class MessengerClientSide:
         messages_list = request.POST["message"]
         messages = [i for i in messages_list.split("/") if len(i)]
 
-        Admin.receipt_confirmation_from_client(username, messages)
+        management.receipt_confirmation_from_client(username, messages)
 
         return "reply", "done."

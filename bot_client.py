@@ -160,6 +160,18 @@ class BotClient:
         self.t += 1
         self.state = "active" if self.state == "passive" else "passive"
 
+    def register_(self):
+
+        return self._request({
+            KeySi.demand: DemandSi.register,
+            KeySi.email: self.username,
+        })
+
+    @print_reply
+    def reply_register(self, *args):
+        return int(args[0])
+
+
     def connect(self):
 
         return self._request({
@@ -312,7 +324,9 @@ class BotProcess(ml.Process):
 
     def run(self):
 
-        self.before_playing()
+        self.b.register_as_user()
+
+        # self.before_playing()
         # self.tutorial()
 
         # end = False
@@ -405,7 +419,7 @@ def main():
     url = "http://127.0.0.1:8000/client_request/"
     # url = "http://51.15.6.148/client_request/",
 
-    n_accounts = 8
+    n_accounts = 1
 
     start_event = ml.Event()
 
@@ -423,7 +437,7 @@ def main():
 
         b.start()
 
-    ml.Event().wait(2)
+    # ml.Event().wait(2)
 
     start_event.set()
 

@@ -111,5 +111,6 @@ round/bots/data
 game/migrations/
 game/player/bots/data/
 messenger/migrations/
+dashboard/migrations
 
 static/game_data/
