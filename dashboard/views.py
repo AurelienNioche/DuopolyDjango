@@ -85,11 +85,8 @@ class NewRoomView(TemplateView):
             if form.is_valid():
 
                 with transaction.atomic():
-                    try:
-                        # Create room
-                        game.room.dashboard.create(form.get_data())
-                    except IntegrityError:
-                        utils.log("Room already exists!", f=utils.fname(), path=__path__, level=2)
+                    # Create room
+                    game.room.dashboard.create(form.get_data())
 
                 return redirect("/room_management")
 

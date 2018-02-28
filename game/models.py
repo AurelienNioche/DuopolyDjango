@@ -5,22 +5,26 @@ class Room(models.Model):
 
     opened = models.BooleanField(default=False)
     missing_players = models.IntegerField(default=-1)
-    user_id_0 = models.IntegerField(default=-1)
-    user_id_1 = models.IntegerField(default=-1)
     radius = models.FloatField(default=-1)
     trial = models.BooleanField(default=False)
     ending_t = models.IntegerField(default=-1)
     state = models.TextField(max_length=30, default="null")
 
 
+class RoomComposition(models.Model):
+
+    room_id = models.IntegerField(db_index=True, default=-1)
+    user_id = models.IntegerField(default=-1)
+    available = models.BooleanField(default=True)
+
+
 class Round(models.Model):
 
     room_id = models.IntegerField(default=-1)
+    pvp = models.BooleanField(default=False)
     missing_players = models.IntegerField(default=-1)
-    real_players = models.IntegerField(default=-1)
-    state = models.TextField(max_length=30, default="null")
     ending_t = models.IntegerField(default=20)
-    radius = models.IntegerField(default=20)
+    radius = models.FloatField(default=-1)
     t = models.IntegerField(default=0)
 
 
@@ -30,6 +34,7 @@ class RoundComposition(models.Model):
     user_id = models.IntegerField(default=-1)
     firm_id = models.IntegerField(default=-1)
     bot = models.BooleanField(default=False)
+    available = models.BooleanField(default=True)
 
 
 class RoundState(models.Model):
@@ -75,30 +80,16 @@ class Data(models.Model):
 
 
 class FirmProfit(Data):
-
-    class Meta:
-        pass
-
-
-class FirmProfitPerTurn(Data):
-
-    class Meta:
-        pass
+    pass
 
 
 class FirmPrice(Data):
-
-    class Meta:
-        pass
+    pass
 
 
 class FirmPosition(Data):
-
-    class Meta:
-        pass
+    pass
 
 
 class ConsumerChoice(Data):
-
-    class Meta:
-        pass
+    pass

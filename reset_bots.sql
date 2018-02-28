@@ -5,6 +5,5 @@ TRUNCATE game_roundcomposition;
 TRUNCATE game_firmprice;
 TRUNCATE game_firmposition;
 TRUNCATE game_firmprofit;
-TRUNCATE game_firmprofitperturn;
 TRUNCATE game_consumerchoice;
 TRUNCATE game_user;

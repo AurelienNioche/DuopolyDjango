@@ -4,7 +4,7 @@ import os
 import subprocess
 import pickle
 
-from game.models import FirmPosition, FirmPrice, FirmProfit, FirmProfitPerTurn, \
+from game.models import FirmPosition, FirmPrice, FirmProfit, \
     ConsumerChoice, Round, RoundState, RoundComposition, User, Room
 
 
@@ -39,7 +39,6 @@ def convert_data_to_pickle():
             FirmPosition,
             FirmPrice,
             FirmProfit,
-            FirmProfitPerTurn,
             ConsumerChoice
     ):
         # Convert all entries to valid pure python

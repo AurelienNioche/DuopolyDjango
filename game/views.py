@@ -1,14 +1,17 @@
 from django.http import HttpResponse
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
 import os
 
 from utils import utils
 
-from game.models import User, Room, Round, RoundComposition, RoundState
+from game.models import User, Room, Round, RoundComposition, RoundState, RoomComposition
 
-from . import room, round, player
+import game.player.connection
+import game.player.registration
+import game.player.management
+import game.player.mail
+import game.round.client
 
 __path__ = os.path.relpath(__file__)
 
@@ -33,6 +36,7 @@ def client_request(request):
         functions = {f_name: f for f_name, f in globals().items() if not f_name.startswith("_")}
         # Retrieve demanded function
         func = functions[demand]
+
     except KeyError:
         raise Exception("Bad demand")
 
@@ -61,26 +65,25 @@ def register(request):
 
     # Get data from table
     users = User.objects.all()
-
-    u = users.filter(email=email).first()
-
-    # Check connection
-    player.connection.check(
-        called_from=connect.__name__,
-        users=users,
-        u=u
-    )
+    u = users.filter(email=email).first()  # Could be None
 
     # Do stuff
     if u:
+        # Check connection (basic as 'rm' will be None)
+        game.player.connection.check(
+            called_from=connect.__name__,
+            users=users,
+            u=u
+        )
         return "reply", utils.fname(), 0, "already_exists"
 
-    if player.registration.register_as_user(
+    if game.player.registration.register_as_user(
             email=email,
             nationality=nationality,
             gender=gender,
             age=age,
             mechanical_id=mechanical_id):
+
         return "reply", utils.fname(), 1
 
     else:
@@ -106,18 +109,18 @@ def send_password_again(request):
 
     u = users.filter(email=email).first()
 
-    # Check connection
-    player.connection.check(
-        called_from=connect.__name__,
-        users=users,
-        u=u
-    )
-
+    # If already registered
     if u:
-        went_well = player.mail.send(email=email, password=u.password)
+        # Check connection (basic as 'rm' will be None)
+        game.player.connection.check(
+            called_from=connect.__name__,
+            users=users,
+            u=u
+        )
+        went_well = game.player.mail.send(email=email, password=u.password)
 
     else:
-        went_well = player.registration.register_as_user(
+        went_well = game.player.registration.register_as_user(
             email=email,
             nationality=nationality,
             gender=gender,
@@ -130,62 +133,6 @@ def send_password_again(request):
 # ----------------------------------| Participation |--------------------------------------------------------------- #
 
 
-def connect(request):
-
-    # Get info from POST
-    username = request.POST["username"].lower()
-    password = request.POST["password"]
-
-    # Get data from table
-    users = User.objects.all()
-
-    # Check connection
-    player.connection.check(
-        called_from=connect.__name__,
-        users=users,
-        username=username
-    )
-
-    went_well = player.registration.connect(users=users, username=username, password=password)
-
-    return "reply", utils.fname(), int(went_well)
-
-
-def registered_as_player(request):
-
-    # Get info from POST
-    username = request.POST["username"].lower()
-
-    # Get data from table
-    users = User.objects.all()
-
-    u = users.filter(username=username).first()  # Could be None
-
-    # Check connection
-    raise_an_error, type_of_error = player.connection.check(
-        called_from=connect.__name__,
-        users=users,
-        u=u
-    )
-    if raise_an_error:
-        return "reply", utils.fname(), type_of_error
-
-    # Get data from table
-    users = User.objects.se.all()
-    rooms = Room.objects.select_for_update().all()
-    rounds = Round.objects.select_for_update().all()
-    round_compositions = RoundComposition.objects.select_for_update().all()
-
-    rsp = player.registration.registered_as_player(
-        users=users, rooms=rooms, rounds=rounds, round_compositions=round_compositions, username=username)
-
-    if rsp:
-        return ("reply", utils.fname(), 1) + rsp
-
-    else:
-        return "reply", utils.fname(), 0
-
-
 def room_available(request):
 
     # Get info from POST
@@ -193,19 +140,22 @@ def room_available(request):
 
     # Get data from table
     users = User.objects.all()
-    rooms = Room.objects.all()
-
     u = users.filter(username=username).first()
 
-    # Check connection
-    player.connection.check(
+    # Check connection (basic as 'rm' will be None)
+    game.player.connection.check(
         called_from=connect.__name__,
         users=users,
         u=u
     )
 
-    # 1 if a room is available, else 0
-    rsp = player.registration.room_available(rooms, users)
+    # Do specific stuff --------------------- #
+
+    # Get data from table
+    rooms = Room.objects.all()
+
+    # Return 'True' if a room is available
+    rsp = game.player.registration.room_available(rooms=rooms, users=users)
 
     return "reply", utils.fname(), int(rsp)
 
@@ -217,15 +167,13 @@ def proceed_to_registration_as_player(request):
 
     # Get data from table
     users = User.objects.all()
-
     u = users.filter(username=username).first()
 
-    # Check connection
-    player.connection.check(
+    # Check connection (basic as 'rm' will be None)
+    game.player.connection.check(
         called_from=connect.__name__,
         users=users,
-        u=u
-    )
+        u=u)
 
     with transaction.atomic():
 
@@ -233,9 +181,12 @@ def proceed_to_registration_as_player(request):
         rooms = Room.objects.select_for_update().all()
         rounds = Round.objects.select_for_update().all()
         round_compositions = RoundComposition.objects.select_for_update().all()
+        room_compositions = RoomComposition.objects.select_for_update().all()
 
-        rsp = player.registration.proceed_to_registration_as_player(
-            users=users, rooms=rooms, rounds=rounds, round_compositions=round_compositions, username=username)
+        rsp = game.player.registration.proceed_to_registration_as_player(
+            users=users, rooms=rooms, rounds=rounds, round_compositions=round_compositions,
+            room_compositions=room_compositions,
+            username=username)
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp
@@ -244,22 +195,117 @@ def proceed_to_registration_as_player(request):
         return "reply", utils.fname(), 0
 
 
+def connect(request):
+
+    # Get info from POST
+    username = request.POST["username"].lower()
+    password = request.POST["password"]
+
+    # Get data from table
+    users = User.objects.all()
+    u = users.filter(username=username, password=password).first()  # Could be None
+
+    if u:
+        # Check connection (basic as 'rm' will be None)
+        game.player.connection.check(
+            called_from=connect.__name__,
+            users=users,
+            u=u
+        )
+        return "reply", utils.fname(), 1
+
+    else:
+        return "reply", utils.fname(), 0
+
+
+def registered_as_player(request):
+
+    # Get info from POST
+    username = request.POST["username"].lower()
+
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(username=username).first()
+    rm = Room.objects.filter(id=u.room_id).first()  # Could be None
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first() if rm is not None else None
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
+    )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff ------------------------------- #
+
+    if u.registered:
+
+        rsp = game.player.registration.get_init_info(u=u, opp=opp, rm=rm)
+        return ("reply", utils.fname(), 1) + rsp
+
+    else:
+        return "reply", utils.fname(), 0
+
+
+def missing_players(request):
+
+    player_id = request.POST["player_id"]
+
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
+    )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    return "reply", utils.fname(), rm.missing_players
+
+
 # ----------------------------------| Demand relatives to Tutorial  |------------------------------------------------- #
 
 def tutorial_done(request):
 
     player_id = request.POST["player_id"]
 
-    u = User.objects.get(id=player_id)
-    rd = Round.objects.get(round_id=u.round_id)
-    rm = Room.objects.get(room_id=u.room_id)
+    # Get data from table
+    users = User.objects.all()
 
-    player.management.go_to_next_round(
-        p=u,
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
         rm=rm,
-        rd=rd,
-        called_from=__path__ + ":" + utils.fname()
+        opp=opp
     )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    game.player.management.go_to_next_round(u=u, opp=opp, rm=rm)
 
     return "reply", utils.fname()
 
@@ -269,25 +315,30 @@ def submit_tutorial_progression(request):
     player_id = request.POST["player_id"]
     tutorial_progression = float(request.POST["tutorial_progression"].replace(",", "."))
 
-    p = User.objects.get(id=player_id)
+    # Get data from table
+    users = User.objects.all()
 
-    p.tutorial_progression = tutorial_progression * 100
-    p.save()
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
+    )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    u.tutorial_progression = tutorial_progression * 100
+    u.save(update_fields=("tutorial_progression", ))
 
     return "reply", utils.fname()
-
-
-# ------------------------| Players ask for missing players in their before starting to playing  |------------------- #
-
-
-def missing_players(request):
-
-    player_id = request.POST["player_id"]
-
-    u = User.objects.get(id=player_id)
-    rm = Room.objects.get(id=u.room_id)
-
-    return "reply", utils.fname(), rm.missing_players
 
 
 # ------------------------| Firms ask for their init info at the beginning of each round |-------------------------- #
@@ -296,9 +347,31 @@ def ask_firm_init(request):
 
     player_id = request.POST["player_id"]
 
-    to_reply = round.client.ask_firm_init(
-        player_id=player_id
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
     )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    rd = Round.objects.get(id=u.round_id)
+    rd_opp = Round.objects.filter(id=opp.round_id).first() if opp is not None else None
+    rs = RoundState.objects.get(round_id=u.round_id, t=rd.t)
+
+    to_reply = game.round.client.ask_firm_init(u=u, rd_opp=rd_opp, rm=rm, rd=rd, rs=rs)
 
     return ("reply", utils.fname(), ) + to_reply
 
@@ -314,9 +387,31 @@ def ask_firm_passive_opponent_choice(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    to_reply = round.client.ask_firm_passive_opponent_choice(
-        player_id=player_id,
-        t=t
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
+    )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    rd = Round.objects.get(id=u.round_id)
+    rs = RoundState.objects.get(round_id=u.round_id, t=t)
+
+    to_reply = game.round.client.ask_firm_passive_opponent_choice(
+        u=u, rd=rd, rs=rs, t=t
     )
 
     return ("reply", utils.fname(), ) + to_reply
@@ -331,17 +426,30 @@ def ask_firm_passive_consumer_choices(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    u = User.objects.get(id=player_id)
+    # Get data from table
+    users = User.objects.all()
 
-    rd = Round.objects.get(round_id=u.round_id)
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
+    )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    rd = Round.objects.get(id=u.round_id)
     rs = RoundState.objects.get(round_id=u.round_id, t=t)
 
-    to_reply = round.client.ask_firm_passive_consumer_choices(
-        p=u,
-        rd=rd,
-        rs=rs,
-        t=t
-    )
+    to_reply = game.round.client.ask_firm_passive_consumer_choices(u=u, opp=opp, rm=rm, rd=rd, rs=rs, t=t)
 
     return ("reply", utils.fname(), ) + to_reply
 
@@ -349,6 +457,7 @@ def ask_firm_passive_consumer_choices(request):
 
 
 def ask_firm_active_choice_recording(request):
+
     """
     called by active firm
     """
@@ -358,11 +467,31 @@ def ask_firm_active_choice_recording(request):
     position = int(request.POST["position"])
     price = int(request.POST["price"])
 
-    to_reply = round.client.ask_firm_active_choice_recording(
-        player_id=player_id,
-        t=t,
-        position=position,
-        price=price
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
+    )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    rd = Round.objects.get(id=u.round_id)
+    rs = RoundState.objects.get(round_id=u.round_id, t=t)
+
+    to_reply = game.round.client.ask_firm_active_choice_recording(
+        u=u, rd=rd, rs=rs, t=t, position=position, price=price
     )
 
     return ("reply", utils.fname(), ) + to_reply
@@ -377,9 +506,29 @@ def ask_firm_active_consumer_choices(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
-    to_reply = round.client.ask_firm_active_consumer_choices(
-        player_id=player_id,
-        t=t
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(id=player_id).first()
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    # Check connection
+    ok, error = game.player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u,
+        rm=rm,
+        opp=opp
     )
+    if not ok:
+        return "reply", utils.fname(), error
+
+    # Do specific stuff --------------------- #
+
+    rd = Round.objects.get(id=u.round_id)
+    rs = RoundState.objects.get(round_id=u.round_id, t=t)
+
+    to_reply = game.round.client.ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t)
 
     return ("reply", utils.fname(), ) + to_reply

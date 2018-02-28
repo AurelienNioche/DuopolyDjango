@@ -1,7 +1,7 @@
 import numpy as np
 
 from game.models import Room, Round, RoundState, RoundComposition, FirmPosition, FirmPrice, FirmProfit, \
-    FirmProfitPerTurn, ConsumerChoice, User
+    ConsumerChoice, User, RoomComposition
 
 from parameters import parameters
 
@@ -11,6 +11,9 @@ from . import state
 def delete(room_id):
 
     rm = Room.objects.filter(id=room_id).first()
+    rmc = RoomComposition.objects.filter(room_id=room_id)
+    if rmc:
+        rmc.delete()
     rds = Round.objects.filter(room_id=rm.id)
 
     for rd in rds:
@@ -19,12 +22,11 @@ def delete(room_id):
             rs = RoundState.objects.filter(round_id=rd.id)
             rc = RoundComposition.objects.filter(round_id=rd.id)
             fpr = FirmProfit.objects.filter(round_id=rd.id)
-            fpr_t = FirmProfitPerTurn.objects.filter(round_id=rd.id)
             fpc = FirmPrice.objects.filter(round_id=rd.id)
             fp = FirmPosition.objects.filter(round_id=rd.id)
             cc = ConsumerChoice.objects.filter(round_id=rd.id)
 
-            for i in (rs, rc, fpr, fpr_t, fpc, fp, cc):
+            for i in (rs, rc, fpr, fpc, fp, cc):
                 if i.exists():
                     i.delete()
 
@@ -51,8 +53,6 @@ def create(data):
             state=state.tutorial,
             ending_t=ending_t,
             radius=radius,
-            user_id_0=-1,
-            user_id_1=-1,
             trial=trial,
             missing_players=missing_players,
             opened=True
@@ -60,61 +60,54 @@ def create(data):
 
         rm.save()
 
+        # Create room composition -------------------------- #
+
+        rmc1 = RoomComposition(room_id=rm.id)
+        rmc1.save()
+
+        if not trial:
+            rmc2 = RoomComposition(room_id=rm.id, available=True, user_id=-1)
+            rmc2.save()
+
         # Create rounds and their composition ------------------------------ #
 
-        class Pvp:
-            real_players = missing_players
-            name = "pvp"
+        if trial:
+            rounds_are_pvp = (False, True)
+        else:
+            rounds_are_pvp = (False, False, True)
 
-        class Pve:
-            real_players = 1
-            name = "pve"
-
-        # noinspection PyTypeChecker
-        round_types = (Pve,) * 2 + (Pvp,)
-
-        for rt in round_types:
+        for pvp in rounds_are_pvp:
 
             # Create round --------------------------- #
 
+            there_is_a_bot = not pvp or trial
+
             rd = Round(
                 room_id=rm.id,
-                real_players=rt.real_players,
-                missing_players=rt.real_players,
+                missing_players=parameters.n_firms - int(there_is_a_bot),
                 ending_t=ending_t,
-                state=rt.name,
+                pvp=pvp,
+                radius=radius,
                 t=0,
             )
 
             rd.save()  # Have to save before access to id
 
             # Create composition ----------------------------#
-            bots = np.ones(parameters.n_firms)
-
-            bots[:rd.real_players] = 0
 
             for i in range(parameters.n_firms):
+
+                bot = True if i == 0 and there_is_a_bot else False
+
                 composition = RoundComposition(
                     round_id=rd.id,
                     user_id=-1,
                     firm_id=i,
-                    bot=bool(bots[i])
+                    bot=bot,
+                    available=not bot
                 )
 
                 composition.save()
-
-            # Create data --------------------------------- #
-
-            for firm_id in range(parameters.n_firms):
-
-                for (table, value) in zip(
-                        (FirmProfit, FirmPrice, FirmPosition),
-                        (0,
-                         np.random.randint(1, parameters.n_prices + 1),
-                         np.random.randint(parameters.n_positions))
-                ):
-                    entry = table(round_id=rd.id, agent_id=firm_id, t=0, value=value)
-                    entry.save()
 
             # Create state ---------------------------------- #
 
@@ -130,6 +123,48 @@ def create(data):
                 )
 
                 round_state.save()
+
+            # Create data --------------------------------- #
+
+            # Initialize position, price, profit for t = 0
+            for firm_id in range(parameters.n_firms):
+
+                price = np.random.randint(1, parameters.n_prices + 1)
+                position = np.random.randint(parameters.n_positions)
+                profit = 0
+
+                e = FirmPrice(round_id=rd.id, agent_id=firm_id, t=0, value=price)
+                e.save()
+
+                e = FirmPosition(round_id=rd.id, agent_id=firm_id, t=0, value=position)
+                e.save()
+
+                e = FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit)
+                e.save()
+
+            # Create entries for other t
+            for table in FirmProfit, FirmPrice, FirmPosition:
+
+                # Add a supplementary line for avoiding multiple test for knowing when this is the end
+                for t in range(1, ending_t + 1):
+
+                    for firm_id in range(parameters.n_firms):
+
+                        entry = table(round_id=rd.id, agent_id=firm_id, t=t, value=-1)
+                        entry.save()
+
+            # Create entries for consumer t
+            for t in range(0, ending_t):
+
+                for agent_id in range(parameters.n_positions):
+
+                    new_entry = ConsumerChoice(
+                        round_id=rd.id,
+                        agent_id=agent_id,
+                        t=t,
+                        value=-1
+                    )
+                    new_entry.save()
 
 
 def get_list():

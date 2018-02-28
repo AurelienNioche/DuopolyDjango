@@ -2,11 +2,11 @@ import numpy as np
 import os
 
 from parameters import parameters
-from utils import utils
 
-from game.models import RoundComposition, ConsumerChoice, Round
+from game.models import ConsumerChoice
 
-from game import room, round
+import game.round.data
+import game.room.field_of_view
 
 __path__ = os.path.relpath(__file__)
 
@@ -15,30 +15,19 @@ __path__ = os.path.relpath(__file__)
 
 def play(rd, t):
 
-    #
-    positions, prices = round.dialog.get_positions_and_prices(
-        round_id=rd.round_id,
-        t=t,
-        called_from=__path__ + ':' + utils.fname()
-    )
+    positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=t)
 
-    positions_seen = room.dialog.compute_field_of_view(
-        room_id=rd.room_id, to_send=False, called_from=__path__ + "." + utils.fname())
+    positions_seen = game.room.field_of_view.compute(radius=rd.radius, to_send=False)
 
-    for agent_id in parameters.n_positions:
-
-        consumer_position = agent_id
+    for agent_id in range(parameters.n_positions):
 
         choice = _choice(
-            positions=positions, prices=prices, positions_seen=positions_seen[consumer_position])
+            positions=positions, prices=prices, positions_seen=positions_seen[agent_id])
 
-        new_entry = ConsumerChoice(
-            round_id=rd.round_id,
-            agent_id=agent_id,
-            t=t,
-            value=choice
-        )
-        new_entry.save()
+        # Save choice
+        e = ConsumerChoice.objects.get(round_id=rd.id, agent_id=agent_id, t=t)
+        e.value = choice
+        e.save(update_fields=("value",))
 
 
 # --------------------------------  protected --------------------------- #

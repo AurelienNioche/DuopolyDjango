@@ -5,11 +5,8 @@ import os
 from builtins import round as rnd
 
 from parameters import parameters
-from utils import utils
 
-from game.models import Room, RoundComposition, FirmPosition, FirmPrice, Round
-
-from game import round
+from game.models import FirmPosition, FirmPrice
 
 __path__ = os.path.relpath(__file__)
 
@@ -24,26 +21,15 @@ dir_path = os.path.dirname(os.path.realpath(__file__)) + "/data/"
 
 # --------------------------------  high level functions --------------------------- #
 
-def play(rd, t):
+def play(firm_bot, rd, t):
 
-    firm_bot = RoundComposition.objects.filter(round_id=rd.round_id, bot=1, role="firm").first()
-    bot_id = firm_bot.agent_id
+    opp_id = (firm_bot.firm_id + 1) % parameters.n_firms  # 0 or 1
 
-    opp_id = (bot_id + 1) % parameters.n_firms
-
-    opp_position = FirmPosition.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
-    opp_price = FirmPrice.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
+    opp_position = FirmPosition.objects.get(round_id=rd.id, agent_id=opp_id, t=t)
+    opp_price = FirmPrice.objects.get(round_id=rd.id, agent_id=opp_id, t=t)
     position, price = _choice(opp_position, opp_price, rd.radius)
-    return position, price
 
-    # round.dialog.register_firm_choices(
-    #     round_id=round_id,
-    #     agent_id=bot_id,
-    #     t=t,
-    #     price=price,
-    #     position=position,
-    #     called_from=__path__ + ':' + utils.fname()
-    # )
+    return position, price
 
 
 # --------------------------------  protected --------------------------- #

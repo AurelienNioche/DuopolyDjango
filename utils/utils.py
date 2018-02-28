@@ -22,6 +22,7 @@ def log(msg, f, path, level=1):
 
 
 def get_time_in_france():
+
     naive_dt = datetime.datetime(2013, 9, 3, 16, 0)
     dt = pytz.timezone("Europe/Paris").localize(naive_dt, is_dst=None)
     now = dt.now()

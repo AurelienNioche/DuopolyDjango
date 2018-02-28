@@ -7,6 +7,7 @@ from utils import utils
 from game.models import User
 
 import game.room.state
+import game.room.field_of_view
 
 from . import mail, connection
 
@@ -36,33 +37,28 @@ def register_as_user(email, nationality, gender, age, mechanical_id):
         return False
 
 
-def registered_as_player(users, rooms, username):
+def get_init_info(u, opp, rm):
 
-    u = users.filter(username=username).first()
+    consumer_seen_positions = game.room.field_of_view.compute(radius=rm.radius, to_send=True)
 
-    if u.registered:
-
-        rm = rooms.get(room_id=u.room_id)
-        consumer_seen_positions = game.room.field_of_view.compute(room_id=rm.radius, to_send=True)
+    # If room state is not end
+    if rm.state != game.room.state.end:
 
         # get player's state
         end_vs_continue = u.state
 
-        # If room state is not end
-        if rm.state != game.room.state.end:
+        # Check if one of the player is a deserter
+        if (u and u.deserter) or (opp and opp.deserter):
+            # Return that the game ends
+            end_vs_continue = game.room.state.end
 
-            # Check if one of the player is a deserter
-            player_0 = users.filter(id=rm.user_id_0).first()
-            player_1 = users.filter(id=rm.user_id_1).first()
+    else:
+        end_vs_continue = game.room.state.end
 
-            if (player_0 and player_0.deserter) or (player_1 and player_1.deserter):
-                # Return that the game ends
-                end_vs_continue = game.room.state.end
-
-        return u.id, end_vs_continue, consumer_seen_positions
+    return u.id, end_vs_continue, consumer_seen_positions
 
 
-def proceed_to_registration_as_player(users, rooms, rounds, round_compositions, username):
+def proceed_to_registration_as_player(users, rooms, rounds, round_compositions, room_compositions, username):
 
     u = users.filter(username=username).first()
 
@@ -77,15 +73,13 @@ def proceed_to_registration_as_player(users, rooms, rounds, round_compositions, 
 
         return u.id, consumer_seen_positions
 
-    # check if a room is available
+    # check if a room is available (and remove room with deserters)
     elif room_available(rooms=rooms, users=users):
 
-        rm = rooms.exclude(missing_players=0).exclude(opened=0).order_by("missing_players").first()
+        # Room ------------------------------------- #
 
-        if rm.user_id_0 == -1:
-            rm.user_id_0 = u.id
-        else:
-            rm.user_id_1 = u.id
+        # Select the room
+        rm = rooms.exclude(missing_players=0, opened=False).order_by("missing_players").first()
 
         # Decrease missing_players
         rm.missing_players -= 1
@@ -96,46 +90,45 @@ def proceed_to_registration_as_player(users, rooms, rounds, round_compositions, 
 
         rm.save()
 
-        consumer_seen_positions = game.room.field_of_view.compute(rm.radius, to_send=True)
+        # Room composition ----------------------- #
 
-        rds = rounds.filter(room_id=rm.room_id).exclude(missing_players=0)
+        rmc = room_compositions.filter(room_id=rm.id, available=True).first()
+        rmc.user_id = u.id
+        rmc.available = False
+        rmc.save(update_fields=("user_id", "available"))
 
-        rd_pve = rds.filter(state=game.room.state.pve).first()
-        rd_pvp = rds.filter(state=game.room.state.pvp).first()
+        # Round ------------------------------------------------- #
 
-        rd_pve.missing_players -= 1
-        rd_pvp.missing_players -= 1
+        rds = rounds.filter(room_id=rm.id).exclude(missing_players=0)
 
-        # If round pve does not welcome additional players
-        if rd_pve.missing_players == 0:
-            rd_pve.opened = 0
+        rd_pve = rds.filter(pvp=False).first()
+        rd_pvp = rds.filter(pvp=True).first()
 
-        # If round pvp does not welcome additional players
-        if rd_pvp.missing_players == 0:
-            rd_pvp.opened = 0
+        # Round Composition ---------------------------------------- #
 
-        rd_pve.save()
-        rd_pvp.save()
-
-        # set player to agent_id firm 0 in round pve
-        agent_id = 0
-        rc_pve = round_compositions.filter(round_id=rd_pve.round_id, agent_id=agent_id).first()
+        rc_pve = round_compositions.filter(round_id=rd_pve.id, available=True).first()
         rc_pve.user_id = u.id
-
-        agent_id = rd_pvp.missing_players  # Since already decreased, it will be either 0 or 1
-        rc_pvp = round_compositions.filter(round_id=rd_pvp.round_id, agent_id=agent_id).first()
-        rc_pvp.user_id = u.id
-
         rc_pve.save()
+
+        rc_pvp = round_compositions.filter(round_id=rd_pvp.id, available=True).first()
+        rc_pvp.user_id = u.id
         rc_pvp.save()
 
-        # assign player_id to user
+        # User ----------------------------------------------------------------- #
+
         u.registered = True
-        u.room_id = rm.room_id
+        u.room_id = rm.id
         u.round_id = rd_pve.id
+        u.firm_id = rc_pve.firm_id
         u.state = game.room.state.tutorial
         u.registration_time = timezone.now()
         u.save()
+
+        # Get positions seen by consumers ----------------------- #
+
+        consumer_seen_positions = game.room.field_of_view.compute(rm.radius, to_send=True)
+
+        # Rounds ------------------------------------------- #
 
         utils.log("I registered {}".format(username), f=utils.fname(), path=__path__)
 
@@ -143,11 +136,6 @@ def proceed_to_registration_as_player(users, rooms, rounds, round_compositions, 
 
     else:
         return
-
-
-def connect(users, username, password):
-
-    return users.filter(username=username, password=password).exists()
 
 
 def _generate_password():
@@ -159,7 +147,7 @@ def room_available(rooms, users):
     entries = rooms.exclude(missing_players=0, opened=0)
 
     for rm in entries:
-        u_room = users.filter(room_id=rm.room_id)
+        u_room = users.filter(room_id=rm.id)
         if u_room:
             for u in u_room:
                 if connection.banned(u=u):

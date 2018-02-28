@@ -133,7 +133,8 @@ class BotClient:
         self.t = None
         self.state = None
         self.player_id = None
-        self.game_state = None
+
+        self.game_state = "tutorial"
 
     def _request(self, data):
 
@@ -145,13 +146,16 @@ class BotClient:
             if len(rsp_parts) > 1 and rsp_parts[0] == "reply":
 
                 if rsp_parts[1] == "error":
-                    self._request(data)
-
-                elif len(rsp_parts) <= 2:
-                    return getattr(self, rsp_parts[1])()
+                    raise Exception("Got an error")
 
                 else:
-                    return getattr(self, "reply_{}".format(rsp_parts[1]))(*rsp_parts[2:])
+                    f_to_call = getattr(self, "reply_{}".format(rsp_parts[1]))
+
+                    if len(rsp_parts) <= 2:
+                        return f_to_call()
+
+                    else:
+                        return f_to_call(*rsp_parts[2:])
             else:
                 if len(r.text) < 100:
                     print(self.username, r.text)
@@ -270,7 +274,7 @@ class BotClient:
         })
 
     @print_reply
-    def reply_submit_tutorial_progression(self, *args):
+    def reply_submit_tutorial_progression(self):
         return True
 
     def tutorial_done(self):
@@ -298,7 +302,8 @@ class BotClient:
     def ask_firm_passive_opponent_choice(self):
         return self._request({
             KeyF.demand: DemandF.ask_firm_passive_opponent_choice,
-            KeyF.player_id: self.player_id
+            KeyF.player_id: self.player_id,
+            KeyF.t: self.t
         })
 
     @print_reply
@@ -308,7 +313,8 @@ class BotClient:
     def ask_firm_passive_consumer_choices(self):
         return self._request({
             KeyF.demand: DemandF.ask_firm_passive_consumer_choices,
-            KeyF.player_id: self.player_id
+            KeyF.player_id: self.player_id,
+            KeyF.t: self.t
         })
 
     @print_reply
@@ -323,7 +329,8 @@ class BotClient:
             KeyF.demand: DemandF.ask_firm_active_choice_recording,
             KeyF.player_id: self.player_id,
             KeyF.position: np.random.randint(self.n_positions),
-            KeyF.price: np.random.randint(self.n_prices)
+            KeyF.price: np.random.randint(self.n_prices),
+            KeyF.t: self.t
         })
 
     @print_reply
@@ -333,7 +340,8 @@ class BotClient:
     def ask_firm_active_consumer_choices(self):
         return self._request({
             KeyF.demand: DemandF.ask_firm_active_consumer_choices,
-            KeyF.player_id: self.player_id
+            KeyF.player_id: self.player_id,
+            KeyF.t: self.t
         })
 
     @print_reply
@@ -346,25 +354,20 @@ class BotClient:
 
 class BotProcess(ml.Process):
 
-    def __init__(self, url, start_event, username, password):
+    def __init__(self, url, start_event, username, password, delay=1.0):
         super().__init__()
         self.start_event = start_event
         self.b = BotClient(url=url, username=username, password=password)
+        self.delay = delay
 
-    def run(self):
-        self.sign_in()
+    def _wait(self):
+
+        ml.Event().wait(timeout=self.delay)
 
     def sign_in(self):
 
         self.b.register()
         self.b.send_password_again()
-
-        # self.before_playing()
-        # self.tutorial()
-
-        # end = False
-        # while not end:
-        #     end = self.play()
 
     def log_in(self):
 
@@ -372,6 +375,7 @@ class BotProcess(ml.Process):
         connected = 0
         while not connected:
             connected = self.b.connect()
+            ml.Event().wait(timeout=self.delay)
 
         # Look if already registered
         registered = self.b.registered_as_player()
@@ -382,18 +386,21 @@ class BotProcess(ml.Process):
             while True:
 
                 place = self.b.room_available()
+                self._wait()
 
                 # If there is place, try to register
                 if place:
                     self.start_event.wait()
                     registered = self.b.proceed_to_registration_as_player()
+                    self._wait()
                     if registered:
                         break
 
         # Once registered, ask for missing players
-        m_p = self.b.missing_players()
+        m_p = -1
         while m_p != 0:
             m_p = self.b.missing_players()
+            self._wait()
 
         self.b.game_state = "tutorial"
 
@@ -401,9 +408,15 @@ class BotProcess(ml.Process):
 
     def tutorial(self):
 
+        submit_progress = False
+        while not submit_progress:
+            submit_progress = self.b.submit_tutorial_progression()
+            self._wait()
+
         done = False
         while not done:
             done = self.b.tutorial_done()
+            self._wait()
 
         self.b.game_state = "pve"
 
@@ -412,6 +425,7 @@ class BotProcess(ml.Process):
         init = False
         while not init:
             init = self.b.ask_firm_init()
+            self._wait()
 
         while True:
 
@@ -420,10 +434,12 @@ class BotProcess(ml.Process):
                 recorded = False
                 while not recorded:
                     recorded = self.b.ask_firm_active_choice_recording()
+                    self._wait()
 
                 consumer_choices = False
                 while not consumer_choices:
                     consumer_choices = self.b.ask_firm_active_consumer_choices()
+                    self._wait()
 
                 if consumer_choices == "end_t":
                     break
@@ -433,10 +449,12 @@ class BotProcess(ml.Process):
                 opp_choice = False
                 while not opp_choice:
                     opp_choice = self.b.ask_firm_passive_opponent_choice()
+                    self._wait()
 
                 consumer_choices = False
                 while not consumer_choices:
-                    consumer_choices = self.b.reply_ask_firm_passive_consumer_choices()
+                    consumer_choices = self.b.ask_firm_passive_consumer_choices()
+                    self._wait()
 
                 if consumer_choices == "end_t":
                     break
@@ -445,6 +463,20 @@ class BotProcess(ml.Process):
 
         if self.b.game_state == "end":
             return True
+
+    def run(self):
+
+        # # For sign in uncomment
+        # self.sign_in()
+
+        # For Log in
+        self.log_in()
+
+        # For playing
+        # self.tutorial()
+        end = False
+        while not end:
+            end = self.play()
 
 
 def main():

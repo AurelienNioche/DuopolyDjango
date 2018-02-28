@@ -4,7 +4,7 @@ import os
 from messenger.models import Message, BoolParameter
 
 from game.models import User, Round
-from game import room
+import game.room.state
 
 from utils import utils
 from parameters import parameters
@@ -27,11 +27,11 @@ def get_all_users():
         if u.registered:
 
             # set progression
-            if u.state == room.state.tutorial:
+            if u.state == game.room.state.tutorial:
                 progression = round(u.tutorial_progression)
                 u.progression = progression if progression != -1 else 0
 
-            elif u.state == room.state.pve or u.state == room.state.pvp:
+            elif u.state == game.room.state.pve or u.state == game.room.state.pvp:
                 rd = Round.objects.get(round_id=u.round_id)
                 u.progression = round((rd.t / rd.ending_t) * 100)
 

@@ -28,7 +28,7 @@ def check(called_from, users, u, opp=None, rm=None):
     # do not want to ban players because they already
     # completed the game but have tried to reconnect)
 
-    if not rm.trial and not rm.state.end:
+    if rm is not None and not rm.trial and not rm.state.end:
 
         # First, we check that the function called is missing players
         # if we reach the missing opponent timeout then return error
@@ -51,8 +51,7 @@ def check(called_from, users, u, opp=None, rm=None):
         _set_time_last_request(u, called_from)
 
         # Then, we check if the opponent has reached banishment timeout
-        opp_id = opp.player_id if opp else None
-        if opp_id and banned(opp_id):
+        if opp and banned(opp):
             utils.log(
                 "The opponent is a deserter.",
                 f=check.__name__,

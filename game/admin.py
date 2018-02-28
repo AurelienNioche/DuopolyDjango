@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from . models import User, FirmProfit, FirmPosition, FirmPrice, \
-    ConsumerChoice, Room, RoundState, Round, RoundComposition
+    ConsumerChoice, Room, RoundState, Round, RoundComposition, RoomComposition
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -30,17 +30,23 @@ class ConsumerChoiceAdmin(admin.ModelAdmin):
 
 class RoundAdmin(admin.ModelAdmin):
     list_display = (
-        "room_id", "ending_t", "missing_players", "real_players", "state", "t")
+        "room_id", "pvp", "missing_players", "ending_t", "t", "radius")
 
 
 class RoomAdmin(admin.ModelAdmin):
     list_display = (
         "opened", "missing_players", "trial", "radius",
-        "ending_t", "state", "user_id_0", "user_id_1")
+        "ending_t", "state")
+
+
+class RoomCompositionAdmin(admin.ModelAdmin):
+    list_display = (
+        "room_id", "user_id", "available"
+    )
 
 
 class RoundCompositionAdmin(admin.ModelAdmin):
-    list_display = ("round_id", "user_id", "firm_id", "bot")
+    list_display = ("round_id", "user_id", "firm_id", "bot", "available")
 
 
 class RoundStateAdmin(admin.ModelAdmin):
@@ -48,6 +54,7 @@ class RoundStateAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Room, RoomAdmin)
+admin.site.register(RoomComposition, RoomCompositionAdmin)
 admin.site.register(Round, RoundAdmin)
 admin.site.register(RoundComposition, RoundCompositionAdmin)
 admin.site.register(RoundState, RoundStateAdmin)
