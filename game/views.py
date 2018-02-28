@@ -53,20 +53,34 @@ def client_request(request):
 
 def register(request):
 
-    user_mail = request.POST["email"].lower()
+    email = request.POST["email"].lower()
     nationality = request.POST["nationality"]
     gender = request.POST["gender"]
     age = request.POST["age"]
     mechanical_id = request.POST["mechanical_id"]
 
-    went_well = room.client.register_as_user(
-        user_mail=user_mail,
-        nationality=nationality,
-        gender=gender,
-        age=age,
-        mechanical_id=mechanical_id
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(email=email).first()
+
+    # Check connection
+    player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u
     )
-    if went_well:
+
+    # Do stuff
+    if u:
+        return "reply", utils.fname(), 0, "already_exists"
+
+    if player.registration.register_as_user(
+            email=email,
+            nationality=nationality,
+            gender=gender,
+            age=age,
+            mechanical_id=mechanical_id):
         return "reply", utils.fname(), 1
 
     else:
@@ -75,32 +89,41 @@ def register(request):
 
 def send_password_again(request):
 
-    #######################
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!
-    # BROKEN
-
     """
     Get called when user wants to renew its password
     :param request:
     :return: 1 if it worked, 0 else
     """
 
-    user_mail = request.POST["email"].lower()
+    email = request.POST["email"].lower()
     nationality = request.POST["nationality"],
     gender = request.POST["gender"],
     age = request.POST["age"],
     mechanical_id = request.POST["mechanical_id"]
 
-    u = User.objects.filter(username=user_mail)
+    # Get data from table
+    users = User.objects.all()
 
-    went_well = room.client.send_password_again(
-        u=u,
-        user_mail=user_mail,
-        nationality=nationality,
-        gender=gender,
-        age=age,
-        mechanical_id=mechanical_id
+    u = users.filter(email=email).first()
+
+    # Check connection
+    player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u
     )
+
+    if u:
+        went_well = player.mail.send(email=email, password=u.password)
+
+    else:
+        went_well = player.registration.register_as_user(
+            email=email,
+            nationality=nationality,
+            gender=gender,
+            age=age,
+            mechanical_id=mechanical_id
+        )
 
     return "reply", utils.fname(), int(went_well)
 
@@ -117,13 +140,14 @@ def connect(request):
     users = User.objects.all()
 
     # Check connection
-    player.client.connection_checker(
+    player.connection.check(
         called_from=connect.__name__,
         users=users,
         username=username
     )
 
-    went_well = room.client.connect(users=users, username=username, password=password)
+    went_well = player.registration.connect(users=users, username=username, password=password)
+
     return "reply", utils.fname(), int(went_well)
 
 
@@ -135,23 +159,25 @@ def registered_as_player(request):
     # Get data from table
     users = User.objects.all()
 
+    u = users.filter(username=username).first()  # Could be None
+
     # Check connection
-    raise_an_error, type_of_error = player.client.connection_checker(
+    raise_an_error, type_of_error = player.connection.check(
         called_from=connect.__name__,
         users=users,
-        username=username
+        u=u
     )
     if raise_an_error:
         return "reply", utils.fname(), type_of_error
 
     # Get data from table
-    users = User.objects.select_for_update().all()
+    users = User.objects.se.all()
     rooms = Room.objects.select_for_update().all()
     rounds = Round.objects.select_for_update().all()
     round_compositions = RoundComposition.objects.select_for_update().all()
 
-    rsp = room.client.registered_as_player(users=users, rooms=rooms, rounds=rounds,
-                                           round_compositions=round_compositions, username=username)
+    rsp = player.registration.registered_as_player(
+        users=users, rooms=rooms, rounds=rounds, round_compositions=round_compositions, username=username)
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp
@@ -162,21 +188,54 @@ def registered_as_player(request):
 
 def room_available(request):
 
+    # Get info from POST
     username = request.POST["username"].lower()
-    utils.log("{} asks for a room available.".format(username), f=utils.fname(), path=__path__)
+
+    # Get data from table
+    users = User.objects.all()
+    rooms = Room.objects.all()
+
+    u = users.filter(username=username).first()
+
+    # Check connection
+    player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u
+    )
 
     # 1 if a room is available, else 0
-    rsp = room.client.room_available()
+    rsp = player.registration.room_available(rooms, users)
 
-    return "reply", utils.fname(), rsp
+    return "reply", utils.fname(), int(rsp)
 
 
 def proceed_to_registration_as_player(request):
 
+    # Get info from POST
     username = request.POST["username"].lower()
 
+    # Get data from table
+    users = User.objects.all()
+
+    u = users.filter(username=username).first()
+
+    # Check connection
+    player.connection.check(
+        called_from=connect.__name__,
+        users=users,
+        u=u
+    )
+
     with transaction.atomic():
-        rsp = room.client.proceed_to_registration_as_player(username=username)
+
+        users = User.objects.select_for_update().all()
+        rooms = Room.objects.select_for_update().all()
+        rounds = Round.objects.select_for_update().all()
+        round_compositions = RoundComposition.objects.select_for_update().all()
+
+        rsp = player.registration.proceed_to_registration_as_player(
+            users=users, rooms=rooms, rounds=rounds, round_compositions=round_compositions, username=username)
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp
@@ -195,7 +254,7 @@ def tutorial_done(request):
     rd = Round.objects.get(round_id=u.round_id)
     rm = Room.objects.get(room_id=u.room_id)
 
-    player.client.go_to_next_round(
+    player.management.go_to_next_round(
         p=u,
         rm=rm,
         rd=rd,

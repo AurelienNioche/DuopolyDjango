@@ -3,10 +3,11 @@ import os
 from utils import utils
 from parameters import parameters
 
-from game.models import User, RoundState, Round, RoundComposition
+from game.models import RoundComposition
 
 from . import data, state
-from game import player, room
+
+import game.player.management
 
 __path__ = os.path.relpath(__file__)
 
@@ -16,7 +17,7 @@ __path__ = os.path.relpath(__file__)
 
 
 # ----------------------------------- Ask functions ------------------------------------------------------ #
-def ask_firm_init(u, rm, rd):
+def ask_firm_init(u, opp, rm, rd):
 
     # -------  Log stuff -------------------------------------------------------------------------- #
 
@@ -26,10 +27,10 @@ def ask_firm_init(u, rm, rd):
 
     # -------  Maybe client has to wait the other player ------------------------------------------ #
 
-    if player.dialog.client_has_to_wait_over_player(player_id=u.player_id, called_from=__path__ + ':' + utils.fname()):
+    if game.player.management.client_has_to_wait_over_player(u=u, opp=opp):
 
         if not rm.trial:
-            opp_progression = player.dialog.get_opponent_progression(
+            opp_progression = game.player.management.get_opponent_progression(
                 player_id=u.player_id,
                 called_from=__path__ + ':' + utils.fname()
             )
@@ -82,24 +83,20 @@ def ask_firm_passive_opponent_choice(u, rd, rs, t):
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
-def ask_firm_passive_consumer_choices(player_id, t):
-    # -------  Get needed objects  ----------------------------------------------------------------- #
-    p = Players.objects.get(player_id=player_id)
-    rd = Round.objects.get(round_id=p.round_id)
-    rs = RoundState.objects.get(round_id=rd.round_id, t=t)
+def ask_firm_passive_consumer_choices(u, opp, rm, rd, rs, t):
 
-    agent_id = RoundComposition.objects.get(round_id=rd.round_id, player_id=player_id).agent_id
+    firm_id = RoundComposition.objects.get(round_id=rd.round_id, user_id=u.id).firm_id
     # -------  Log stuff -------------------------------------------------------------------------- #
 
     utils.log("Firm {} (passive) of room {} and round {} asks for its number of clients.".format(
-        agent_id, p.room_id, rd.round_id
+        firm_id, u.room_id, rd.id
     ),
         f=utils.fname(),
         path=__path__
     )
 
-    utils.log(
-        "Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.fname(), path=__path__)
+    # utils.log(
+    #     "Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.fname(), path=__path__)
 
     # ---------- Do stuff ------------------------------------------------------------------- #
 
@@ -110,10 +107,10 @@ def ask_firm_passive_consumer_choices(player_id, t):
             is_end = int(state.is_end_of_game(rd=rd, t=t))
 
             consumer_choices = data.get_consumer_choices(round_id=rd.round_id, t=t)
-            consumer_choices = [1 if i == agent_id else 0 if i != -1 else -1 for i in consumer_choices]
+            consumer_choices = [1 if i == firm_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                player.dialog.go_to_next_round(p=p, called_from=__path__ + ':' + utils.fname())
+                game.player.management.go_to_next_round(u=u, opp=opp, rm=rm)
 
             return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
 
@@ -127,18 +124,12 @@ def ask_firm_passive_consumer_choices(player_id, t):
 
 # -----------------------------------| active firm demands |-------------------------------------- #
 
-def ask_firm_active_choice_recording(player_id, t, position, price):
-    # -------  Get needed objects  --------------------------------------------------------------- #
-
-    p = Players.objects.get(player_id=player_id)
-    rd = Round.objects.get(round_id=p.round_id)
-    rs = RoundState.objects.get(round_id=rd.round_id, t=t)
-    rc = RoundComposition.objects.get(round_id=rd.round_id, player_id=p.player_id)
+def ask_firm_active_choice_recording(u, rd, rc, rs, t, position, price):
 
     # -------  Log stuff ------------------------------------------------------------------------- #
     utils.log(
         "Firm active {} of room {} and round {} asks to save its price and position.".format(
-            player_id, p.room_id, rd.round_id
+            u.id, u.room_id, u.round_id
         ), f=utils.fname(), path=__path__)
 
     utils.log(
@@ -171,19 +162,13 @@ def ask_firm_active_choice_recording(player_id, t, position, price):
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
-def ask_firm_active_consumer_choices(player_id, t):
-    # -------  Get needed objects  ---------------------------------------------------------------- #
-
-    p = Players.objects.get(player_id=player_id)
-    rd = Round.objects.get(round_id=p.round_id)
-    rs = RoundState.objects.get(round_id=rd.round_id, t=t)
-    rc = RoundComposition.objects.get(round_id=rd.round_id, player_id=player_id)
+def ask_firm_active_consumer_choices(u, opp, rm, rd, rs, rc, t):
 
     # -------  Log stuff -------------------------------------------------------------------------- #
 
     utils.log(
         "Firm active {} of room {} and round {} asks the number of its clients.".format(
-            player_id, p.room_id, rd.round_id
+            u.id, u.room_id, rd.round_id
         ), f=utils.fname(), path=__path__)
     utils.log("Client's time is {}, server's time is {}.".format(t, rd.t), f=utils.fname(), path=__path__)
 
@@ -199,7 +184,7 @@ def ask_firm_active_consumer_choices(player_id, t):
             consumer_choices = [1 if i == rc.agent_id else 0 if i != -1 else -1 for i in consumer_choices]
 
             if is_end:
-                player.dialog.go_to_next_round(p=p, called_from=__path__ + ':' + utils.fname())
+                game.player.management.go_to_next_round(u=u, opp=opp, rm=rm)
 
             return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
 

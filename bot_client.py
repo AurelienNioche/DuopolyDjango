@@ -9,6 +9,11 @@ import numpy as np
 class KeySi:
 
     demand = "demand"
+    email = "email"
+    nationality = "nationality"
+    gender = "gender"
+    age = "age"
+    mechanical_id = "mechanical_id"
 
 
 class DemandSi:
@@ -107,7 +112,7 @@ class FirmState:
 def print_reply(f):
 
     def wrapper(*args):
-        print("{} {}: {}".format(args[0].username, f.__name__, *args[1:]))
+        print("{} {}: {}".format(args[0].username, f.__name__, args[1:]))
         return f(*args)
 
     return wrapper
@@ -160,17 +165,39 @@ class BotClient:
         self.t += 1
         self.state = "active" if self.state == "passive" else "passive"
 
-    def register_(self):
+    # --------------------- Sign In ------------------------------------ #
+
+    def register(self):
 
         return self._request({
             KeySi.demand: DemandSi.register,
-            KeySi.email: self.username,
+            KeySi.email: "tamere{}@yopmail.com".format(self.username),
+            KeySi.nationality: "French",
+            KeySi.gender: "male",
+            KeySi.age: "31",
+            KeySi.mechanical_id: "123"
         })
 
     @print_reply
     def reply_register(self, *args):
         return int(args[0])
 
+    def send_password_again(self):
+
+        return self._request({
+            KeySi.demand: DemandSi.send_password_again,
+            KeySi.email: "tamere{}@yopmail.com".format(self.username),
+            KeySi.nationality: "French",
+            KeySi.gender: "male",
+            KeySi.age: "31",
+            KeySi.mechanical_id: "123"
+        })
+
+    @print_reply
+    def reply_send_password_again(self, *args):
+        return int(args[0])
+
+    # --------------------- Log In ------------------------------------ #
 
     def connect(self):
 
@@ -232,6 +259,8 @@ class BotClient:
     @print_reply
     def reply_missing_players(self, *args):
         return int(args[0])
+
+    # ---------------------- Play (Firm Scene) -------------------------- #
 
     def submit_tutorial_progression(self):
         return self._request({
@@ -323,8 +352,12 @@ class BotProcess(ml.Process):
         self.b = BotClient(url=url, username=username, password=password)
 
     def run(self):
+        self.sign_in()
 
-        self.b.register_as_user()
+    def sign_in(self):
+
+        self.b.register()
+        self.b.send_password_again()
 
         # self.before_playing()
         # self.tutorial()
@@ -333,7 +366,7 @@ class BotProcess(ml.Process):
         # while not end:
         #     end = self.play()
 
-    def before_playing(self):
+    def log_in(self):
 
         # Make request until connected
         connected = 0

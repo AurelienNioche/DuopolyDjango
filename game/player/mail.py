@@ -22,18 +22,18 @@ def send_mail_using_g_mail(user, pwd, recipient, subject, body):
         return False
 
 
-def send(user_mail, password):
+def send(email, password):
 
     subject = '[Mechanical Turk] Duopoly Registration'
     message = "Hi,\n\nThanks for joining our experiment.\n\n" \
-              "Your username to join the game is the email you used for register: " + user_mail + \
+              "Your username to join the game is the email you used for register: " + email + \
               "\nYour password is: " + password + \
               "\n\nPlease come back to login on Duopoly in order to play the game!"
 
     return send_mail_using_g_mail(
         user=credentials.username,
         pwd=credentials.pwd,
-        recipient=user_mail,
+        recipient=email,
         subject=subject,
         body=message
     )

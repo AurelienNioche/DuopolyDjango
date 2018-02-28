@@ -12,8 +12,11 @@ import subprocess
 from .forms import RoomForm
 from utils import utils
 
-from game import room, round as rd, player
 from parameters import parameters
+
+import game.room.dashboard
+import game.player.dashboard
+import game.round.dashboard
 
 __path__ = os.path.relpath(__file__)
 
@@ -84,7 +87,7 @@ class NewRoomView(TemplateView):
                 with transaction.atomic():
                     try:
                         # Create room
-                        room.dashboard.create(form.get_data())
+                        game.room.dashboard.create(form.get_data())
                     except IntegrityError:
                         utils.log("Room already exists!", f=utils.fname(), path=__path__, level=2)
 
@@ -109,10 +112,10 @@ class RoomManagementView(TemplateView):
         context.update({'subtitle': "Room list"})
 
         # check connected users
-        player.dashboard.check_connected_users()
+        game.player.dashboard.check_connected_users()
 
         # Get list of existing rooms and players
-        rooms_list = room.dashboard.get_list()
+        rooms_list = game.room.dashboard.get_list()
 
         context.update({"rooms": rooms_list})
 
@@ -125,7 +128,7 @@ class RoomManagementView(TemplateView):
             utils.log("Delete room {}.".format(room_id), f=utils.fname(), path=__path__)
 
             # Delete room
-            room.dashboard.delete(room_id=room_id)
+            game.room.dashboard.delete(room_id=room_id)
 
         return redirect("/room_management")
 
@@ -138,8 +141,8 @@ class DataView(TemplateView):
 
         context = super().get_context_data(**kwargs)
         # Get list of existing rooms
-        url_pickle = rd.dashboard.convert_data_to_pickle()
-        url_sql = rd.dashboard.convert_data_to_sql()
+        url_pickle = game.round.dashboard.convert_data_to_pickle()
+        url_sql = game.round.dashboard.convert_data_to_sql()
 
         context.update({"subtitle": "Download data"})
         context.update({"url_pickle": url_pickle})
@@ -203,4 +206,3 @@ class LogsView(TemplateView):
             return logs
         else:
             return ""
-

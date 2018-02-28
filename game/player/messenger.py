@@ -1,9 +1,9 @@
 from game.models import User
 
-from . import management
+from . import connection
 
 
 def check_connected_users():
 
     users = User.objects.all()
-    management.check_connected_users(users)
+    connection.check_connected_users(users)   # Called also by 'check_connection' and 'dashboard'
