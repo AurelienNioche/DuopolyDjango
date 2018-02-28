@@ -7,7 +7,7 @@ from builtins import round as rnd
 from parameters import parameters
 from utils import utils
 
-from game.models import Room, RoundComposition, FirmPositions, FirmPrices, Round
+from game.models import Room, RoundComposition, FirmPosition, FirmPrice, Round
 
 from game import round
 
@@ -26,20 +26,14 @@ dir_path = os.path.dirname(os.path.realpath(__file__)) + "/data/"
 
 def play(rd, t):
 
-    """
-    Tables Room, RoundComposition, FirmPositions, FirmPrices
-    called by game.round.state.check_state
-    """
-    r = Room.objects.get(room_id=rd.room_id).radius
-
     firm_bot = RoundComposition.objects.filter(round_id=rd.round_id, bot=1, role="firm").first()
     bot_id = firm_bot.agent_id
 
     opp_id = (bot_id + 1) % parameters.n_firms
 
-    opp_position = FirmPositions.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
-    opp_price = FirmPrices.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
-    position, price = _choice(opp_position, opp_price, r)
+    opp_position = FirmPosition.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
+    opp_price = FirmPrice.objects.get(round_id=rd.round_id, agent_id=opp_id, t=t)
+    position, price = _choice(opp_position, opp_price, rd.radius)
     return position, price
 
     # round.dialog.register_firm_choices(

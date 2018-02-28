@@ -3,67 +3,47 @@ from django.db import models
 
 class Room(models.Model):
 
-    room_id = models.IntegerField(default=-1, unique=True)
-    opened = models.IntegerField(default=-1)
+    opened = models.BooleanField(default=False)
     missing_players = models.IntegerField(default=-1)
-    player_0 = models.TextField(default="null", unique=True)
-    player_1 = models.TextField(default="null", unique=True)
+    user_id_0 = models.IntegerField(default=-1)
+    user_id_1 = models.IntegerField(default=-1)
     radius = models.FloatField(default=-1)
-    trial = models.IntegerField(default=-1)
+    trial = models.BooleanField(default=False)
     ending_t = models.IntegerField(default=-1)
     state = models.TextField(max_length=30, default="null")
 
 
 class Round(models.Model):
 
-    round_id = models.TextField(max_length=20, default="null", unique=True)
     room_id = models.IntegerField(default=-1)
-    opened = models.IntegerField(default=-1)
     missing_players = models.IntegerField(default=-1)
     real_players = models.IntegerField(default=-1)
     state = models.TextField(max_length=30, default="null")
     ending_t = models.IntegerField(default=20)
+    radius = models.IntegerField(default=20)
     t = models.IntegerField(default=0)
 
 
 class RoundComposition(models.Model):
 
-    round_id = models.TextField(max_length=20, default="null")
-    player_id = models.TextField(max_length=20, default="null")
-    agent_id = models.IntegerField(default=-1)
-    role = models.TextField(max_length=30, default="null")
-    bot = models.IntegerField(default=-1)
+    round_id = models.IntegerField(default=-1)
+    user_id = models.IntegerField(default=-1)
+    firm_id = models.IntegerField(default=-1)
+    bot = models.BooleanField(default=False)
 
 
 class RoundState(models.Model):
 
-    round_id = models.TextField(max_length=20, default="null")
+    round_id = models.IntegerField(default=-1)
     t = models.IntegerField(default=-1)
     firm_active_played = models.IntegerField(default=-1)
     firm_active = models.IntegerField(default=-1)
     consumers_played = models.IntegerField(default=-1)
 
 
-class Players(models.Model):
-
-    class Meta:
-        verbose_name_plural = "players"
-
-    player_id = models.TextField(max_length=20, default="null", unique=True)
-    room_id = models.IntegerField(default=-1)
-    round_id = models.TextField(max_length=20, default="null")
-    registration_time = models.DateTimeField(auto_now_add=True, blank=True)
-    state = models.TextField(max_length=30, default="null")
-    tutorial_progression = models.FloatField(default=0)
-
-
-class Users(models.Model):
-
-    class Meta:
-        verbose_name_plural = "users"
+class User(models.Model):
 
     username = models.TextField(max_length=30, default="null", unique=True)
-    player_id = models.TextField(max_length=20, default="null")
     password = models.TextField(max_length=30, default="null")
     email = models.TextField(max_length=30, default="null")
     gender = models.TextField(max_length=30, default="null")
@@ -74,11 +54,18 @@ class Users(models.Model):
     time_last_request = models.DateTimeField(auto_now_add=True, blank=True)
     last_request = models.TextField(max_length=50, default="null")
     connected = models.IntegerField(default=0)
+    registered = models.IntegerField(default=-1)
+    registration_time = models.DateTimeField(auto_now_add=True, blank=True)
+    state = models.TextField(max_length=30, default="null")
+    tutorial_progression = models.FloatField(default=0)
+    room_id = models.IntegerField(default=-1)
+    round_id = models.IntegerField(default=-1)
+    firm_id = models.IntegerField(default=-1)
 
 
 class Data(models.Model):
 
-    round_id = models.TextField(max_length=20, default="null")
+    round_id = models.IntegerField(default=-1)
     agent_id = models.IntegerField(default=-1)
     t = models.IntegerField(default=-1)
     value = models.IntegerField(default=-1)
@@ -87,31 +74,31 @@ class Data(models.Model):
         abstract = True
 
 
-class FirmProfits(Data):
+class FirmProfit(Data):
 
     class Meta:
-        verbose_name_plural = "firmProfits"
+        pass
 
 
-class FirmProfitsPerTurn(Data):
-
-    class Meta:
-        verbose_name_plural = "firmProfitsPerTurn"
-
-
-class FirmPrices(Data):
+class FirmProfitPerTurn(Data):
 
     class Meta:
-        verbose_name_plural = "firmPrices"
+        pass
 
 
-class FirmPositions(Data):
-
-    class Meta:
-        verbose_name_plural = "firmPositions"
-
-
-class ConsumerChoices(Data):
+class FirmPrice(Data):
 
     class Meta:
-        verbose_name_plural = "consumerChoices"
+        pass
+
+
+class FirmPosition(Data):
+
+    class Meta:
+        pass
+
+
+class ConsumerChoice(Data):
+
+    class Meta:
+        pass

@@ -1,8 +1,9 @@
 from . import management
 
 
-# def set_time_last_request(player_id, function_name):
-#     """
-#     called from game.views
-#     """
-#     management.set_time_last_request(player_id=player_id, function_name=function_name)
+def connection_checker(called_from, users, p=None, opp=None, rm=None, username=None):
+    management.connection_checker(called_from=called_from, users=users, p=p, opp=opp, rm=rm, username=username)
+
+
+def go_to_next_round(p, rd, rm):
+    management.go_to_next_round(p, rd, rm)

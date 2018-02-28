@@ -8,25 +8,25 @@ import numpy as np
 from utils import utils
 from parameters import parameters
 
-from game.models import FirmPositions, FirmPrices, FirmProfits, FirmProfitsPerTurn, \
-    ConsumerChoices, Players, Round, RoundState, RoundComposition, Users, Room
+from game.models import FirmPosition, FirmPrice, FirmProfit, FirmProfitPerTurn, \
+    ConsumerChoice, Round, RoundState, RoundComposition, User, Room
 
 
 __path__ = os.path.relpath(__file__)
 
 
-def init(round_id):
-
-    for agent_id in range(parameters.n_firms):
-
-        for (table, value) in zip(
-                (FirmProfits, FirmPrices, FirmPositions),
-                (0,
-                 np.random.randint(1, parameters.n_prices + 1),
-                 np.random.randint(parameters.n_positions))
-        ):
-            entry = table(round_id=round_id, agent_id=agent_id, t=0, value=value)
-            entry.save()
+# def init(round_id):
+#
+#     for firm_id in range(parameters.n_firms):
+#
+#         for (table, value) in zip(
+#                 (FirmProfit, FirmPrice, FirmPosition),
+#                 (0,
+#                  np.random.randint(1, parameters.n_prices + 1),
+#                  np.random.randint(parameters.n_positions))
+#         ):
+#             entry = table(round_id=round_id, agent_id=firm_id, t=0, value=value)
+#             entry.save()
 
 
 def delete(round_id):
@@ -35,27 +35,21 @@ def delete(round_id):
               path=__path__, f=utils.fname())
 
     for table in \
-            (FirmPositions, FirmPrices, FirmProfits, FirmProfitsPerTurn, ConsumerChoices):
+            (FirmPosition, FirmPrice, FirmProfit, FirmProfitPerTurn, ConsumerChoice):
         entry = table.objects.filter(round_id=round_id)
         if entry.count():
             entry.delete()
 
 
-def get_init_info(player_id):
+def get_init_info(u, rd, rs):
 
-    p = Players.objects.get(player_id=player_id)
-    rd = Round.objects.get(round_id=p.round_id)
-    rs = RoundState.objects.get(round_id=rd.round_id, t=rd.t)
-
-    agent_id = RoundComposition.objects.get(round_id=rd.round_id, player_id=player_id).agent_id
-
-    opponent_id = (agent_id + 1) % parameters.n_firms
+    opponent_id = (u.firm_id + 1) % parameters.n_firms
 
     d = {i: {"position": 0, "price": 0, "profits": 0} for i in ("opp", "player")}
-    d["firm_state"] = "active" if rs.firm_active == agent_id else "passive"
+    d["firm_state"] = "active" if rs.firm_active == u.firm_id else "passive"
 
-    tables = {"position": FirmPositions, "price": FirmPrices, "profits": FirmProfits}
-    ids = {"opp": opponent_id, "player": agent_id}
+    tables = {"position": FirmPosition, "price": FirmPrice, "profits": FirmProfit}
+    ids = {"opp": opponent_id, "player": u.agent_id}
 
     for i in ids.keys():
 
@@ -79,17 +73,17 @@ def get_init_info(player_id):
     return d
 
 
-def get_positions_and_prices(round_id, t):
+def get_positions_and_prices(rd, t):
 
     positions = []
     prices = []
 
-    for agent_id in range(parameters.n_firms):
+    for firm_id in range(parameters.n_firms):
 
-        position = FirmPositions.objects.get(round_id=round_id, agent_id=agent_id, t=t)
+        position = FirmPosition.objects.get(round_id=rd.round_id, agent_id=firm_id, t=t)
         positions.append(position.value)
 
-        price = FirmPrices.objects.get(round_id=round_id, agent_id=agent_id, t=t)
+        price = FirmPrice.objects.get(round_id=rd.round_id, agent_id=firm_id, t=t)
         prices.append(price.value)
 
     return positions, prices
@@ -97,28 +91,28 @@ def get_positions_and_prices(round_id, t):
 
 def get_consumer_choices(rd, t):
 
-    entries = ConsumerChoices.objects.filter(t=t, round_id=rd.round_id).order_by("agent_id")
+    entries = ConsumerChoice.objects.filter(t=t, round_id=rd.round_id).order_by("agent_id")
     consumer_choices = [i.value for i in entries]
     return consumer_choices
 
 
-def register_firm_choices(rd, agent, t, position, price):
+def register_firm_choices(rd, u, t, position, price):
 
     for i in (t, t + 1):
 
         for (table, value) in zip(
-                (FirmPositions, FirmPrices),
+                (FirmPosition, FirmPrice),
                 (position, price)
         ):
 
-            entry = table.objects.filter(round_id=rd.round_id, agent_id=agent.agent_id, t=i).first()
+            entry = table.objects.filter(round_id=rd.round_id, agent_id=u.firm_id, t=i).first()
 
             if entry is not None:
                 entry.value = value
                 entry.save()
 
             else:
-                entry = table(round_id=rd.round_id, agent_id=agent.agent_id, t=i, value=value)
+                entry = table(round_id=rd.round_id, agent_id=u.firm_id, t=i, value=value)
                 entry.save()
 
     # rs = RoundState.objects.get(round_id=round_id, t=t)
@@ -126,49 +120,47 @@ def register_firm_choices(rd, agent, t, position, price):
     # rs.save()
 
 
-def register_consumer_choices(round_id, agent_id, t, firm_choice):
+def register_consumer_choices(rd, consumer_choices, t):
 
-    new_entry = ConsumerChoices(round_id=round_id, agent_id=agent_id, t=t, value=firm_choice)
-    new_entry.save()
+    for agent_id, consumer_choice in enumerate(consumer_choices):
+        new_entry = ConsumerChoice(round_id=rd.id, agent_id=agent_id, t=t, value=consumer_choice)
+        new_entry.save()
 
 
-def compute_scores(round_id, t):
+def compute_scores(rd, t):
 
     """
-    Deals with tables FirmProfits, FirmPrices, FirmProfitsPerTurn
-    :param round_id:
-    :param t:
-    :return:
+    Deals with tables FirmProfit, FirmPrice, FirmProfitPerTurn
     """
 
-    for agent_id in range(parameters.n_firms):
+    for firm_id in range(parameters.n_firms):
 
-        sc = FirmProfits.objects.get(round_id=round_id, agent_id=agent_id, t=t).value
+        sc = FirmProfit.objects.get(round_id=rd.id, agent_id=firm_id, t=t).value
 
         a_consumer_choices = np.asarray(
-                    get_consumer_choices(round_id=round_id, t=t)
+                    get_consumer_choices(round_id=rd.id, t=t)
                 )
 
         n_clients = \
-            np.sum(a_consumer_choices == agent_id)
+            np.sum(a_consumer_choices == firm_id)
 
-        price = FirmPrices.objects.get(round_id=round_id, agent_id=agent_id, t=t).value
+        price = FirmPrice.objects.get(round_id=rd.id, agent_id=firm_id, t=t).value
 
         new_sc_value = sc + n_clients * price
         new_profits_per_turn_value = n_clients * price
 
-        new_profits_per_turn_entry = FirmProfitsPerTurn(
-            round_id=round_id,
-            agent_id=agent_id,
+        new_profits_per_turn_entry = FirmProfitPerTurn(
+            round_id=rd.id,
+            agent_id=firm_id,
             t=t+1,
             value=new_profits_per_turn_value
         )
 
         new_profits_per_turn_entry.save()
 
-        new_sc_entry = FirmProfits(
-            round_id=round_id,
-            agent_id=agent_id,
+        new_sc_entry = FirmProfit(
+            round_id=rd.id,
+            agent_id=firm_id,
             t=t+1,
             value=new_sc_value
         )
@@ -197,18 +189,17 @@ def convert_data_to_pickle():
     d = {}
 
     for table in (
-            Players,
-            Users,
+            User,
             Room,
             Round,
             RoundComposition,
             RoundState,
-            FirmProfits,
-            FirmPositions,
-            FirmPrices,
-            FirmProfits,
-            FirmProfitsPerTurn,
-            ConsumerChoices
+            FirmProfit,
+            FirmPosition,
+            FirmPrice,
+            FirmProfit,
+            FirmProfitPerTurn,
+            ConsumerChoice
     ):
         # Convert all entries to valid pure python
         attr = list(vars(i) for i in table.objects.all())
@@ -234,4 +225,3 @@ def convert_data_to_sql():
     subprocess.call("java -jar pg2sqlite.jar -d {} -o {}".format(sql_file.file_path, db_path), shell=True)
 
     return to_return
-

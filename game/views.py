@@ -6,7 +6,9 @@ import os
 
 from utils import utils
 
-from . import tutorial, room, round, player
+from game.models import User, Room, Round, RoundComposition, RoundState
+
+from . import room, round, player
 
 __path__ = os.path.relpath(__file__)
 
@@ -73,6 +75,10 @@ def register(request):
 
 def send_password_again(request):
 
+    #######################
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!
+    # BROKEN
+
     """
     Get called when user wants to renew its password
     :param request:
@@ -85,7 +91,10 @@ def send_password_again(request):
     age = request.POST["age"],
     mechanical_id = request.POST["mechanical_id"]
 
+    u = User.objects.filter(username=user_mail)
+
     went_well = room.client.send_password_again(
+        u=u,
         user_mail=user_mail,
         nationality=nationality,
         gender=gender,
@@ -98,21 +107,51 @@ def send_password_again(request):
 # ----------------------------------| Participation |--------------------------------------------------------------- #
 
 
-@player.management.connection_checker
 def connect(request):
 
+    # Get info from POST
     username = request.POST["username"].lower()
     password = request.POST["password"]
 
-    went_well = room.client.connect(username=username, password=password)
+    # Get data from table
+    users = User.objects.all()
+
+    # Check connection
+    player.client.connection_checker(
+        called_from=connect.__name__,
+        users=users,
+        username=username
+    )
+
+    went_well = room.client.connect(users=users, username=username, password=password)
     return "reply", utils.fname(), int(went_well)
 
 
-@player.management.connection_checker
 def registered_as_player(request):
 
+    # Get info from POST
     username = request.POST["username"].lower()
-    rsp = room.client.registered_as_player(username)
+
+    # Get data from table
+    users = User.objects.all()
+
+    # Check connection
+    raise_an_error, type_of_error = player.client.connection_checker(
+        called_from=connect.__name__,
+        users=users,
+        username=username
+    )
+    if raise_an_error:
+        return "reply", utils.fname(), type_of_error
+
+    # Get data from table
+    users = User.objects.select_for_update().all()
+    rooms = Room.objects.select_for_update().all()
+    rounds = Round.objects.select_for_update().all()
+    round_compositions = RoundComposition.objects.select_for_update().all()
+
+    rsp = room.client.registered_as_player(users=users, rooms=rooms, rounds=rounds,
+                                           round_compositions=round_compositions, username=username)
 
     if rsp:
         return ("reply", utils.fname(), 1) + rsp
@@ -121,7 +160,6 @@ def registered_as_player(request):
         return "reply", utils.fname(), 0
 
 
-@player.management.connection_checker
 def room_available(request):
 
     username = request.POST["username"].lower()
@@ -133,7 +171,6 @@ def room_available(request):
     return "reply", utils.fname(), rsp
 
 
-@player.management.connection_checker
 def proceed_to_registration_as_player(request):
 
     username = request.POST["username"].lower()
@@ -150,37 +187,52 @@ def proceed_to_registration_as_player(request):
 
 # ----------------------------------| Demand relatives to Tutorial  |------------------------------------------------- #
 
-@player.management.connection_checker
 def tutorial_done(request):
 
     player_id = request.POST["player_id"]
-    tutorial.client.tutorial_done(player_id=player_id)
+
+    u = User.objects.get(id=player_id)
+    rd = Round.objects.get(round_id=u.round_id)
+    rm = Room.objects.get(room_id=u.room_id)
+
+    player.client.go_to_next_round(
+        p=u,
+        rm=rm,
+        rd=rd,
+        called_from=__path__ + ":" + utils.fname()
+    )
+
     return "reply", utils.fname()
 
 
-@player.management.connection_checker
 def submit_tutorial_progression(request):
 
     player_id = request.POST["player_id"]
     tutorial_progression = float(request.POST["tutorial_progression"].replace(",", "."))
-    tutorial.client.record_tutorial_progression(player_id=player_id, tutorial_progression=tutorial_progression)
+
+    p = User.objects.get(id=player_id)
+
+    p.tutorial_progression = tutorial_progression * 100
+    p.save()
+
     return "reply", utils.fname()
 
 
 # ------------------------| Players ask for missing players in their before starting to playing  |------------------- #
 
-# @transaction.atomic
-@player.management.connection_checker
+
 def missing_players(request):
 
     player_id = request.POST["player_id"]
-    n = room.client.missing_players(player_id=player_id)
-    return "reply", utils.fname(), n
+
+    u = User.objects.get(id=player_id)
+    rm = Room.objects.get(id=u.room_id)
+
+    return "reply", utils.fname(), rm.missing_players
 
 
 # ------------------------| Firms ask for their init info at the beginning of each round |-------------------------- #
 
-@player.management.connection_checker
 def ask_firm_init(request):
 
     player_id = request.POST["player_id"]
@@ -194,7 +246,6 @@ def ask_firm_init(request):
 # ----------------------------------| passive firm demands |----------------------------------------------------- #
 
 
-@player.management.connection_checker
 def ask_firm_passive_opponent_choice(request):
 
     """
@@ -212,7 +263,6 @@ def ask_firm_passive_opponent_choice(request):
     return ("reply", utils.fname(), ) + to_reply
 
 
-@player.management.connection_checker
 def ask_firm_passive_consumer_choices(request):
 
     """
@@ -222,8 +272,15 @@ def ask_firm_passive_consumer_choices(request):
     player_id = request.POST["player_id"]
     t = int(request.POST["t"])
 
+    u = User.objects.get(id=player_id)
+
+    rd = Round.objects.get(round_id=u.round_id)
+    rs = RoundState.objects.get(round_id=u.round_id, t=t)
+
     to_reply = round.client.ask_firm_passive_consumer_choices(
-        player_id=player_id,
+        p=u,
+        rd=rd,
+        rs=rs,
         t=t
     )
 
@@ -232,7 +289,6 @@ def ask_firm_passive_consumer_choices(request):
 # -----------------------------------| active firm demands |-------------------------------------------------------- #
 
 
-@player.management.connection_checker
 def ask_firm_active_choice_recording(request):
     """
     called by active firm
@@ -253,7 +309,6 @@ def ask_firm_active_choice_recording(request):
     return ("reply", utils.fname(), ) + to_reply
 
 
-@player.management.connection_checker
 def ask_firm_active_consumer_choices(request):
 
     """

@@ -4,7 +4,7 @@ import os
 from parameters import parameters
 from utils import utils
 
-from game.models import RoundComposition, ConsumerChoices, Round
+from game.models import RoundComposition, ConsumerChoice, Round
 
 from game import room, round
 
@@ -25,24 +25,20 @@ def play(rd, t):
     positions_seen = room.dialog.compute_field_of_view(
         room_id=rd.room_id, to_send=False, called_from=__path__ + "." + utils.fname())
 
-    entries = RoundComposition.objects.filter(round_id=rd.round_id, bot=1, role="consumer")
+    for agent_id in parameters.n_positions:
 
-    for entry in entries:
+        consumer_position = agent_id
 
-        consumer_position = entry.agent_id - parameters.n_firms
-
-        firm_choice = _choice(
+        choice = _choice(
             positions=positions, prices=prices, positions_seen=positions_seen[consumer_position])
 
-        new_entry = ConsumerChoices(
+        new_entry = ConsumerChoice(
             round_id=rd.round_id,
-            agent_id=entry.agent_id,
+            agent_id=agent_id,
             t=t,
-            value=firm_choice
+            value=choice
         )
         new_entry.save()
-
-        entry.save()
 
 
 # --------------------------------  protected --------------------------- #

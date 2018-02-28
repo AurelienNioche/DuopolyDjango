@@ -85,21 +85,21 @@ def validate_firm_choice_and_make_consumers_play(rd, rs, t):
     # rs.save()
 
 
-def init(round_id, ending_t):
-
-    # Random turn by turn
-    first_to_play = np.random.choice(range(parameters.n_firms))
-    firm_states = np.zeros(ending_t)
-    firm_states[first_to_play:ending_t:2] = 1
-
-    for t in range(ending_t):
-
-        round_state = RoundState(
-            round_id=round_id, firm_active=firm_states[t], t=t,
-            firm_active_played=0, consumers_played=0
-        )
-
-        round_state.save()
+# def init(round_id, ending_t):
+#
+#     # Random turn by turn
+#     first_to_play = np.random.choice(range(parameters.n_firms))
+#     firm_states = np.zeros(ending_t)
+#     firm_states[first_to_play:ending_t:2] = 1
+#
+#     for t in range(ending_t):
+#
+#         round_state = RoundState(
+#             round_id=round_id, firm_active=firm_states[t], t=t,
+#             firm_active_played=0, consumers_played=0
+#         )
+#
+#         round_state.save()
 
 
 def delete(rd):
@@ -120,4 +120,3 @@ def _advance_of_one_time_step(rd, t):
 
 def is_end_of_game(rd, t):
     return t == rd.ending_t - 1  # -1 because starts at 0
-

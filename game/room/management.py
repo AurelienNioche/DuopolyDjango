@@ -1,76 +1,145 @@
 import os
-import secrets
-from utils import utils
+import numpy as np
 
-from game.models import Room, Users, Players
+from utils import utils
+from parameters import parameters
+
+from game.models import Room, User, Round, RoundComposition, RoundState, FirmProfit, FirmPrice, FirmPosition
 
 
 from game import round
 
-from . import composition, state
+from . import state
 
 __path__ = os.path.relpath(__file__)
 
 
 def create(data):
 
-    is_trial = int(bool(data['trial']))
+    """
+    Called by dashboard
+    :param data:
+    :return:
+    """
+
+    trial = int(bool(data['trial']))
     ending_t = int(data["ending_t"])
     radius = data['radius']
     nb_of_room = int(data["nb_of_room"])
 
-    missing_players = 1 if is_trial else 2
+    missing_players = 1 if trial else 2
 
     for r in range(nb_of_room):
-
-        # get room_id: if already exists, increment
-        # until it doesnt found an existing record
-        room_id = 1
-
-        while True:
-
-            if Room.objects.filter(room_id=room_id).first() is None:
-                break
-
-            else:
-                room_id += 1
-
-        round.dialog.create_rounds(
-            room_id=room_id, ending_t=ending_t, trial=is_trial,
-            called_from=__path__ + "." + utils.fname()
-        )
 
         rm = Room(
             state=state.tutorial,
             ending_t=ending_t,
             radius=radius,
-            player_0=_generate_unique_player_id(),
-            player_1=_generate_unique_player_id(),
-            trial=is_trial,
+            user_id_0=-1,
+            user_id_1=-1,
+            trial=trial,
             missing_players=missing_players,
-            room_id=room_id,
-            opened=1
+            opened=True
         )
 
         rm.save()
 
+        print("room_id", rm.id)
 
-def delete(rm):
+        # Create rounds and their composition ------------------------------ #
 
-    """
-    Get room and compositions related then delete
-    :param room_id:
-    :return:
-    """
+        class Pvp:
+            real_players = missing_players
+            name = "pvp"
 
-    if rm:
-        rm.delete()
+        class Pve:
+            real_players = 1
+            name = "pve"
 
-    entries = Players.objects.filter(room_id=rm.room_id)
-    if entries:
-        entries.delete()
+        # noinspection PyTypeChecker
+        round_types = (Pve,) * 2 + (Pvp,)
 
-    round.dialog.delete_rounds(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
+        for rt in round_types:
+
+            # Create round --------------------------- #
+
+            rd = Round(
+                room_id=rm.id,
+                real_players=rt.real_players,
+                missing_players=rt.real_players,
+                ending_t=ending_t,
+                state=rt.name,
+                t=0,
+            )
+
+            rd.save()  # Have to save before access to id
+
+            # Create composition ----------------------------#
+            bots = np.ones(parameters.n_firms)
+
+            bots[:rd.real_players] = 0
+
+            for i in range(parameters.n_firms):
+                composition = RoundComposition(
+                    round_id=rd.id,
+                    user_id=-1,
+                    firm_id=i,
+                    bot=bool(bots[i])
+                )
+
+                composition.save()
+
+            # Create data --------------------------------- #
+
+            for firm_id in range(parameters.n_firms):
+
+                for (table, value) in zip(
+                        (FirmProfit, FirmPrice, FirmPosition),
+                        (0,
+                         np.random.randint(1, parameters.n_prices + 1),
+                         np.random.randint(parameters.n_positions))
+                ):
+                    entry = table(round_id=rd.id, agent_id=firm_id, t=0, value=value)
+                    entry.save()
+
+            # Create state ---------------------------------- #
+
+            # Random turn by turn
+            first_to_play = np.random.choice(range(parameters.n_firms))
+            firm_states = np.zeros(ending_t)
+            firm_states[first_to_play:ending_t:2] = 1
+
+            for t in range(ending_t):
+                round_state = RoundState(
+                    round_id=rd.id, firm_active=firm_states[t], t=t,
+                    firm_active_played=0, consumers_played=0
+                )
+
+                round_state.save()
+
+
+# def delete(rm, rounds):
+#
+#     """
+#     Get room and compositions related then delete
+#     """
+#
+#     if rm:
+#         rm.delete()
+#
+#     # entries = Players.objects.filter(room_id=rm.room_id)
+#     # if entries:
+#     #     entries.delete()
+#
+#     entries = Round.objects.filter(room_id=rm.room_id)
+#
+#     for rd in entries:
+#
+#         composition.delete(rd=rd)
+#         state.delete(rd=rd)
+#         data.delete(rd=rd)
+#
+#         rd.delete()
 
 
 def close(rm):
@@ -80,7 +149,7 @@ def close(rm):
     utils.log("The room {} is now closed.".format(rm.room_id), f=utils.fname(), path=__path__)
 
 
-def get_list():
+def get_list(rooms):
 
     class ConnectedPlayer:
         def __init__(self, username, connected, deserter, p_state, last_request, time_last_request):
@@ -91,47 +160,30 @@ def get_list():
             self.last_request = last_request
             self.time_last_request = time_last_request
 
-    rooms = Room.objects.all().order_by("room_id")
+    rooms = rooms.order_by("id")
     rooms_list = []
 
     for room in rooms:
 
-        players = composition.get_connected_players(room_id=room.room_id)
+        users = User.objects.filter(registered=True)
         connected_players = []
 
-        for p in players:
+        for u in users:
 
-            u = Users.objects.filter(player_id=p.player_id).first()
+            cp = ConnectedPlayer(
+                username=u.username,
+                connected=u.connected,
+                deserter=u.deserter,
+                p_state=u.state,
+                last_request=u.last_request,
+                time_last_request=u.time_last_request
+            )
 
-            if u is not None:
-                cp = ConnectedPlayer(
-                    username=u.username,
-                    connected=u.connected,
-                    deserter=u.deserter,
-                    p_state=p.state,
-                    last_request=u.last_request,
-                    time_last_request=u.time_last_request
-                )
-
-                connected_players.append(cp)
+            connected_players.append(cp)
 
         dic = {"att": room, "connected_players": connected_players}
         rooms_list.append(dic)
 
     return rooms_list
 
-
-def _generate_unique_player_id():
-
-    player_id = secrets.token_hex(10)
-
-    while True:
-
-        cond0 = Room.objects.filter(player_0=player_id).first() is not None
-        cond1 = Room.objects.filter(player_1=player_id).first() is not None
-
-        if cond0 or cond1:
-            player_id = secrets.token_hex(10)
-        else:
-            return player_id
 

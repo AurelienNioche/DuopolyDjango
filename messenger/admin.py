@@ -3,7 +3,7 @@ import os
 
 from messenger.models import Messages, MessagesParameters
 
-from game.models import Users, Players, Round
+from game.models import User, Round
 from game import room
 
 from utils import utils
@@ -22,36 +22,27 @@ class Admin:
     @classmethod
     def get_all_users(cls):
 
-        players = Players.objects.all().order_by("room_id", "player_id")
-        users = Users.objects.all().order_by("username")
+        users = User.objects.all().order_by("room_id", "username")
         user_list = []
 
         # We sort users by room ids
-        for p in players:
+        for u in users.filter(registered=True):
 
-            u = users.filter(player_id=p.player_id).first()
+            # set progression
+            if u.state == room.state.tutorial:
+                progression = round(u.tutorial_progression)
+                u.progression = progression if progression != -1 else 0
 
-            if u:
-                # Set state
-                u.state = p.state
+            elif u.state == room.state.pve or u.state == room.state.pvp:
+                rd = Round.objects.get(round_id=u.round_id)
+                u.progression = round((rd.t / rd.ending_t) * 100)
 
-                # set progression
-                if u.state == room.state.tutorial:
-                    progression = round(p.tutorial_progression)
-                    u.progression = progression if progression != -1 else 0
+            u.n_unread = cls.get_unread_msg(u.username)
 
-                elif u.state == room.state.pve or u.state == room.state.pvp:
-                    rd = Round.objects.get(round_id=p.round_id)
-                    u.progression = round((rd.t / rd.ending_t) * 100)
-
-                u.room_id = p.room_id
-
-                u.n_unread = cls.get_unread_msg(u.username)
-
-                user_list.append(u)
+            user_list.append(u)
 
         # Then we add the other users to the user list
-        for u in users.filter(player_id="null"):
+        for u in users.filter(registered=False):
             u.state = None
             u.progression = None
             u.room_id = None
@@ -62,7 +53,7 @@ class Admin:
 
     @classmethod
     def get_user_from_id(cls, user_id):
-        return Users.objects.get(id=user_id).username
+        return User.objects.get(id=user_id).username
 
     @classmethod
     def set_user_msg_as_read(cls, username):
@@ -71,7 +62,7 @@ class Admin:
 
         for e in entries:
             e.receipt_confirmation = 1
-            e.save(force_update=True)
+            e.save()
 
     @classmethod
     def get_unread_msg(cls, username=None):

@@ -49,12 +49,12 @@ def register_firm_choices(rd, agent, t, price, position, called_from):
     )
 
 
-def get_positions_and_prices(round_id, t, called_from):
+def get_positions_and_prices(rd, t, called_from):
     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-    return data.get_positions_and_prices(round_id=round_id, t=t)
+    return data.get_positions_and_prices(rd=rd, t=t)
 
 
-def compute_scores(round_id, t, called_from):
+def compute_scores(rd, t, called_from):
 
     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-    compute_scores(round_id=round_id, t=t)
+    compute_scores(rd=rd, t=t)

@@ -3,13 +3,12 @@ import os
 from utils import utils
 from parameters import parameters
 
-from game.models import Players, RoundState, Round, RoundComposition
+from game.models import User, RoundState, Round, RoundComposition
 
 from . import data, state
 from game import player, room
 
 __path__ = os.path.relpath(__file__)
-
 
 """
     Here are grouped the functions called by: game.views (i.e. by client)
@@ -17,56 +16,43 @@ __path__ = os.path.relpath(__file__)
 
 
 # ----------------------------------- Ask functions ------------------------------------------------------ #
-def ask_firm_init(player_id):
-
-    # -------  Get needed objects  ----------------------------------------------------------------- #
-
-    p = Players.objects.get(player_id=player_id)
-    rd = Round.objects.get(round_id=p.round_id)
+def ask_firm_init(u, rm, rd):
 
     # -------  Log stuff -------------------------------------------------------------------------- #
 
     utils.log("Player {} for room {} and round {} ask init: t is {}.".format(
-        player_id, p.room_id, rd.round_id, rd.t),
+        u.id, u.room_id, rd.round_id, rd.t),
         f=utils.fname(), path=__path__)
 
     # -------  Maybe client has to wait the other player ------------------------------------------ #
 
-    if player.dialog.client_has_to_wait_over_player(player_id=player_id, called_from=__path__ + ':' + utils.fname()):
+    if player.dialog.client_has_to_wait_over_player(player_id=u.player_id, called_from=__path__ + ':' + utils.fname()):
 
-        if not room.dialog.is_trial(player_id, utils.fname()):
-
+        if not rm.trial:
             opp_progression = player.dialog.get_opponent_progression(
-                player_id=player_id,
+                player_id=u.player_id,
                 called_from=__path__ + ':' + utils.fname()
             )
             return parameters.error["wait"], opp_progression  # Tuple is necessary!! '-1' hold for wait
 
     # Get information necessary for firm initialization
-    d = data.get_init_info(player_id=player_id)
+    d = data.get_init_info(player_id=u.player_id)
 
     return rd.t, d["firm_state"], d["player"]["position"], d["player"]["price"], d["player"]["profits"], \
-        d["opp"]["position"], d["opp"]["price"], d["opp"]["profits"], rd.ending_t
+           d["opp"]["position"], d["opp"]["price"], d["opp"]["profits"], rd.ending_t
 
 
 # ----------------------------------| passive firm demands |-------------------------------------- #
 
-def ask_firm_passive_opponent_choice(player_id, t):
-
-    # -------  Get needed objects  ----------------------------------------------------------------- #
-
-    p = Players.objects.get(player_id=player_id)
-    rd = Round.objects.get(round_id=p.round_id)
-    rs = RoundState.objects.get(round_id=rd.round_id, t=t)
+def ask_firm_passive_opponent_choice(u, rd, rs, t):
 
     # -------  Get needed variables --------------------------------------------------------------- #
 
-    agent_id = RoundComposition.objects.get(round_id=rd.round_id, player_id=player_id).agent_id
-    opponent_id = (agent_id + 1) % parameters.n_firms
+    opponent_id = (u.agent_id + 1) % parameters.n_firms
 
     # -------  Log stuff -------------------------------------------------------------------------- #
     utils.log("Firm passive {} of room {} and round {} asks for opponent strategy.".format(
-        player_id, p.room_id, rd.round_id
+        u.player_id, u.room_id, u.round_id
     ),
         f=utils.fname(), path=__path__)
 
@@ -97,7 +83,6 @@ def ask_firm_passive_opponent_choice(player_id, t):
 
 
 def ask_firm_passive_consumer_choices(player_id, t):
-
     # -------  Get needed objects  ----------------------------------------------------------------- #
     p = Players.objects.get(player_id=player_id)
     rd = Round.objects.get(round_id=p.round_id)
@@ -130,10 +115,10 @@ def ask_firm_passive_consumer_choices(player_id, t):
             if is_end:
                 player.dialog.go_to_next_round(p=p, called_from=__path__ + ':' + utils.fname())
 
-            return (t, ) + tuple((i for i in consumer_choices)) + (is_end, )
+            return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
 
         else:
-            return parameters.error["wait"],   # Tuple is necessary!! // Have to wait
+            return parameters.error["wait"],  # Tuple is necessary!! // Have to wait
 
     else:
         utils.log("Error: Time is superior!!!!", f=utils.fname(), path=__path__, level=3)
@@ -143,7 +128,6 @@ def ask_firm_passive_consumer_choices(player_id, t):
 # -----------------------------------| active firm demands |-------------------------------------- #
 
 def ask_firm_active_choice_recording(player_id, t, position, price):
-
     # -------  Get needed objects  --------------------------------------------------------------- #
 
     p = Players.objects.get(player_id=player_id)
@@ -168,7 +152,6 @@ def ask_firm_active_choice_recording(player_id, t, position, price):
     if t <= rd.t:
 
         if not rs.firm_active_played:
-
             # tables FirmPositions, FirmPrices are used
             data.register_firm_choices(
                 rs=rs,
@@ -189,7 +172,6 @@ def ask_firm_active_choice_recording(player_id, t, position, price):
 
 
 def ask_firm_active_consumer_choices(player_id, t):
-
     # -------  Get needed objects  ---------------------------------------------------------------- #
 
     p = Players.objects.get(player_id=player_id)

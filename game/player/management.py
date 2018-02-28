@@ -3,18 +3,18 @@ from builtins import round as rnd
 import datetime
 from django.utils import timezone
 
-from game.models import Round, Room, Players, RoundComposition, Users
+from game.models import Round, RoundComposition
 from dashboard.models import IntParameters
 
 from utils import utils
 from parameters import parameters
-from game import room, tutorial, round
+from game import room, round
 
 
 __path__ = os.path.relpath(__file__)
 
 
-def client_has_to_wait_over_player(player_id):
+def client_has_to_wait_over_player(u, rm):
     """
     Check if player state is more advanced than the room state.
     The room state is changed only if both players reached this state.
@@ -22,26 +22,20 @@ def client_has_to_wait_over_player(player_id):
     :return: boolean
     """
 
-    p = Players.objects.get(player_id=player_id)
-    rm = Room.objects.get(room_id=p.room_id)
-
-    return (rm.state == room.state.tutorial and p.state == room.state.pve) or \
-        (rm.state == room.state.pve and p.state == room.state.pvp)
+    return (rm.state == room.state.tutorial and u.state == room.state.pve) or \
+        (rm.state == room.state.pve and u.state == room.state.pvp)
 
 
-def get_opponent_progression(player_id):
+def get_opponent_progression(u, opp):
     """
     :return: The percentage of opponent progression
      in the previous round
     """
 
-    p = Players.objects.get(player_id=player_id)
-    opp = Players.objects.filter(room_id=p.room_id).exclude(player_id=player_id).first()
-
-    if p.state == room.state.pve:
-        progression = p.tutorial_progression
+    if u.state == room.state.pve:
+        progression = u.tutorial_progression
     else:
-        comp = RoundComposition.objects.filter(player_id=opp.player_id)
+        comp = RoundComposition.objects.filter(player_id=opp.id)
         rd = None
 
         for c in comp:
@@ -66,10 +60,10 @@ def go_to_next_round(p, rd, rm):
         _tutorial_is_done(p, rm)
 
     elif rm.room_state == room.state.pve and p.state == room.state.pve:
-        _pve_is_done(p, rm, rd)
+        _pve_is_done(p=p, rm=rm)
 
     elif rm.room_state == room.state.pvp and p.state == room.state.pvp:
-        _pvp_is_done(player_id=player_id)
+        _pvp_is_done(p=p, rm=rm)
 
     else:
         return False
@@ -77,14 +71,14 @@ def go_to_next_round(p, rd, rm):
     return True
 
 
-def _tutorial_is_done(p, rm):
+def _tutorial_is_done(p, opp, rm):
 
     # change player.state
     p.state = room.state.pve
     p.save()
 
     # if other player has done tutorial, set rm.state to pve
-    if rm.trial or _opponent_has_done_tutorial(p=p):
+    if rm.trial or opp.state == room.state.pve:
 
         room.dialog.update_state(
             room_id=rm.room_id,
@@ -93,10 +87,7 @@ def _tutorial_is_done(p, rm):
         )
 
 
-def _pve_is_done(p, rm, rd):
-
-    # As player is alone, once he finished, we can close the r
-    round.dialog.close_round(rd, called_from=__path__ + ':' + utils.fname())
+def _pve_is_done(p, opp, rm):
 
     # load objects
     next_round = Round.objects.get(room_id=p.room_id, state=room.state.pvp)
@@ -107,177 +98,140 @@ def _pve_is_done(p, rm, rd):
     p.save()
 
     # set room state
-    if rm.trial or _opponent_has_done_pve(player_id=p.player_id):
-        room.dialog.update_state(
-            room_id=p.room_id, room_state=room.state.pvp, called_from=__path__ + ':' + utils.fname())
+    if opp.state == room.state.pvp:
+
+        rm.state = room.state.pvp
+        rm.save()
+
+        # room.dialog.update_state(
+        #     room_id=p.room_id, room_state=room.state.pvp, called_from=__path__ + ':' + utils.fname())
 
 
-def _pvp_is_done(p, rm, rd):
+def _pvp_is_done(p, opp, rm):
 
     # Modify sate of player
     p.state = room.state.end
     p.save()
 
-    if rm.trial or _opponent_has_done_pvp(player_id=p.player_id):
-
-        # Close round
-        round.dialog.close_round(rd, called_from=__path__ + ':' + utils.fname())
+    if opp.state == room.state.end:
 
         # Close room and set state
         room.dialog.close(rm=rm, called_from=__path__ + ":" + utils.fname())
-        room.dialog.update_state(rm=rm, room_state=room.state.end, called_from=__path__ + ':' + utils.fname())
 
+        rm.state = room.state.end
+        rm.save()
 
-# --------------------------------------- Info regarding the opponent --------------------------------------------- #
-
-
-def _opponent_has_done_pve(p):
-
-    opponent_state = \
-        Players.objects.filter(room_id=p.room_id).exclude(player_id=p.player_id).first().state
-    return opponent_state == room.state.pvp
-
-
-def _opponent_has_done_pvp(p):
-
-    opponent_state = \
-        Players.objects.filter(room_id=p.room_id).exclude(player_id=p.player_id).first().state
-    return opponent_state == room.state.end
-
-
-def _opponent_has_done_tutorial(p):
-
-    opponent_state = \
-        Players.objects.filter(room_id=p.room_id).exclude(player_id=p.player_id).first().state
-    return opponent_state == room.state.pve
+        # room.dialog.update_state(rm=rm, room_state=room.state.end, called_from=__path__ + ':' + utils.fname())
 
 
 # --------------------------------------- Info regarding time and disconnection ------------------------------------- #
 
 
-def _set_time_last_request(player_id, function_name, username=None):
+def _set_time_last_request(u, function_name):
     """
     called by game.views via player.client
     """
 
-    if username:
-        user = Users.objects.filter(username=username).first()
-    else:
-        user = Users.objects.filter(player_id=player_id).first()
-
-    if user:
-        user.time_last_request = timezone.now()
-        user.last_request = function_name
-        user.save()
+    u.time_last_request = timezone.now()
+    u.last_request = function_name
+    u.save()
 
 
-def connection_checker(f):
+def connection_checker(called_from, users, p=None, opp=None, rm=None, username=None):
     """
     decorator used in game.round.client
     in order to check if opponent/player is connected
     or is AFK
     """
-    def new_f(request):
 
-        decorator_name = "player.management.connection_checker"
-        player_id = request.POST.get("player_id")
-        username = request.POST.get("username")
+    # Refresh  list of connected users
+    check_connected_users(users=users)
 
-        # Refresh  list of connected users
-        check_connected_users()
+    if username:
+        u = users.filter(username=username).first()
+    else:
+        u = users.filter(player_id=p.player_id).first()
 
-        # ----------  If user has not joined a room yet ----------------- #
-        if username:
-            username = username.lower()
-            _set_time_last_request(None, f.__name__, username=username)
-            return f(request)
+    # # ----------  If user has not joined a room yet ----------------- #
+    if username:
+        _set_time_last_request(u=u, called_from=called_from)
+        return True
 
-        # ----------  If user has joined a room ------------------------- #
+    # ----------  If user has joined a room ------------------------- #
 
-        # check if trial (if trial we do not want to ban player
-        trial = room.dialog.is_trial(player_id, called_from=decorator_name)
+    # check if room is not in end state (meaning we
+    # do not want to ban players because they already
+    # completed the game but have tried to reconnect)
+    # p = Players.objects.get(player_id=player_id)
 
-        # check if room is not in end state (meaning we
-        # do not want to ban players because they already
-        # completed the game but have tried to reconnect)
-        p = Players.objects.get(player_id=player_id)
-        already_ended = \
-            room.dialog.get_state(room_id=p.room_id, called_from=decorator_name) == room.state.end
+    # already_ended = \
+    #     room.dialog.get_state(rm=rm, called_from=connection_checker.__name__) == room.state.end
 
-        if not trial and not already_ended:
+    if not rm.trial and not rm.state.end:
 
-            # First, we check that the function called is missing players
-            # if we reach the missing opponent timeout then return error
-            if f.__name__ == "missing_players" and _no_opponent_found(player_id):
+        # First, we check that the function called is missing players
+        # if we reach the missing opponent timeout then return error
+        if called_from == "missing_players" and _no_opponent_found(p=p, rm=rm):
 
-                return "reply", f.__name__, parameters.error["no_opponent_found"]
+            return True, parameters.error["no_opponent_found"]
 
-            # Then, we check that the current player is not
-            # a deserter
-            if player_is_banned(player_id):
-                utils.log(
-                    "The current player is a deserter.",
-                    f=f.__name__,
-                    path=__path__,
-                    level=3
-                )
-                return "reply", f.__name__, parameters.error["player_quit"]
+        # Then, we check that the current player is not
+        # a deserter
+        if player_is_banned(u=u, rm=rm):
+            utils.log(
+                "The current player is a deserter.",
+                f=connection_checker.__name__,
+                path=__path__,
+                level=3
+            )
+            return True, parameters.error["player_quit"]
 
-            # If the player is not a deserter, we can save its last request
-            _set_time_last_request(player_id, f.__name__)
+        # If the player is not a deserter, we can save its last request
+        _set_time_last_request(u, called_from)
 
-            # Then, we check if the opponent has reached banishment timeout
-            opp_id = get_opponent_player_id(player_id)
-            if opp_id and player_is_banned(opp_id):
-                utils.log(
-                    "The other player is a deserter.",
-                    f=f.__name__,
-                    path=__path__,
-                    level=3
-                )
-                return "reply", f.__name__, parameters.error["opponent_quit"]
-
-        return f(request)
-
-    return new_f
+        # Then, we check if the opponent has reached banishment timeout
+        opp_id = opp.player_id if opp else None
+        if opp_id and player_is_banned(opp_id):
+            utils.log(
+                "The other player is a deserter.",
+                f=connection_checker.__name__,
+                path=__path__,
+                level=3
+            )
+            return False, parameters.error["opponent_quit"]
+    else:
+        return True
 
 
-def get_opponent_player_id(player_id):
-    """
-    called by round.state.player_has_quit
-    """
-    current_player = Players.objects.get(player_id=player_id)
-    opp = Players.objects.filter(room_id=current_player.room_id).exclude(player_id=player_id).first()
+def player_is_banned(u, rm):
 
-    return opp.player_id if opp else None
+    # u = Users.objects.filter(player_id=player_id).first()
+    #
+    # if u is not None:
+    #
+    # p = Players.objects.get(player_id=player_id)
+    # rm = Room.objects.get(room_id=p.room_id)
 
+    if _is_timed_out(u.time_last_request, "banishment_timeout"):
 
-def player_is_banned(player_id):
+        # u = Users.objects.get(player_id=player_id)
 
-    u = Users.objects.filter(player_id=player_id).first()
+        # Set the opponent as a deserter
+        # and return that info to the player
+        u.deserter = 1
+        u.save()
 
-    if u is not None:
+        room.dialog.close(rm=rm, called_from=__path__+":"+utils.fname())
 
-        p = Players.objects.get(player_id=player_id)
-        rm = Room.objects.get(room_id=p.room_id)
-
-        if _is_timed_out(u.time_last_request, "banishment_timeout"):
-
-            u = Users.objects.get(player_id=player_id)
-
-            # Set the opponent as a deserter
-            # and return that info to the player
-            u.deserter = 1
-            u.save()
-
-            room.dialog.close(room_id=rm.room_id, called_from=__path__+":"+utils.fname())
-
-            return True
+        return True
+    
+    else:
+        return False
 
 
-def check_connected_users():
+def check_connected_users(users):
 
-    for u in Users.objects.all():
+    for u in users:
         u.connected = int(not _is_timed_out(u.time_last_request, "disconnected_timeout"))
         u.save()
 
@@ -321,10 +275,3 @@ def _is_timed_out(reference_time, timeout_parameter):
     timeout = t_now > reference_time + delta
 
     return timeout
-
-
-
-
-
-
-

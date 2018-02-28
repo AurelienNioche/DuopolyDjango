@@ -49,13 +49,13 @@ if (document.referrer.indexOf("new_room") !== -1){
                             {% for room in rooms %}
                                <div class="panel-group">
                                     <div class="panel panel-default">
-                                        <div class="panel-heading" data-toggle="collapse" href="#collapse{{ room.att.room_id }}"
+                                        <div class="panel-heading" data-toggle="collapse" href="#collapse{{ room.att.id }}"
                                         style="cursor: pointer;">
                                             <h4 class="panel-title">
-                                                <a style="font-size: 22px; pointer-events: none; cursor: default;">Room {{ room.att.room_id }}</a>
+                                                <a style="font-size: 22px; pointer-events: none; cursor: default;">Room {{ room.att.id }}</a>
                                             </h4>
                                         </div>
-                                    <div id="collapse{{ room.att.room_id }}" class="panel-collapse collapse" align="middle">
+                                    <div id="collapse{{ room.att.id }}" class="panel-collapse collapse" align="middle">
                                         <ul class="list-group">
                                             <li class="list-group-item">
                                                 <h4>Properties</h4>
@@ -97,11 +97,11 @@ if (document.referrer.indexOf("new_room") !== -1){
 
                                     <div class="panel-footer">
                                             <!-- Delete room button -->
-                                            <form id="delete-room-{{ room.att.room_id }}" action="" method="post">
+                                            <form id="delete-room-{{ room.att.id }}" action="" method="post">
                                                 {% csrf_token %}
-                                                <input type="text" style="display: none;" name= "delete" value="{{ room.att.room_id }}">
+                                                <input type="text" style="display: none;" name= "delete" value="{{ room.att.id }}">
                                             </form>
-                                            <button onclick="ShowModal({{ room.att.room_id }})" class="btn btn-danger">Delete room {{ room.att.room_id }}</button>
+                                            <button onclick="ShowModal({{ room.att.id }})" class="btn btn-danger">Delete room {{ room.att.id }}</button>
 
                                     </div>
                                     </div>

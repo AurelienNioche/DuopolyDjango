@@ -11,25 +11,22 @@ from game import room
 
 __path__ = os.path.relpath(__file__)
 
-
-def create(rd):
-
-    # create composition
-    roles = np.array(['firm', ] * parameters.n_firms + ['consumer', ] * parameters.n_consumers)
-    n_player = len(roles)
-    bots = np.ones(n_player)
-
-    bots[:rd.n_real_players] = 0
-
-    for i in range(n_player):
-        composition = RoundComposition(
-            round_id=rd,
-            agent_id=i,
-            role=roles[i],
-            bot=int(bots[i])
-        )
-
-        composition.save()
+#
+# def create(rd):
+#
+#     # create composition
+#     bots = np.ones(rd.real_players)
+#
+#     bots[:rd.real_players] = 0
+#
+#     for i in range(parameters.n_firms):
+#         composition = RoundComposition(
+#             round_id=rd.round_id,
+#             user_id=-1,
+#             bot=bool(bots[i])
+#         )
+#
+#         composition.save()
 
 
 def delete(rd):
@@ -42,7 +39,9 @@ def delete(rd):
         rc.delete()
 
 
-def include_players_into_round_compositions(room_id, player_id):
+def include_players_into_round_compositions(rm, player_id):
+
+    rds = Round.objects.filter(room_id=rm.room_id)
 
     rd_pve = Round.objects.filter(room_id=room_id, state=room.state.pve).exclude(missing_players=0).first()
     rd_pvp = Round.objects.filter(room_id=room_id, state=room.state.pvp).exclude(missing_players=0).first()

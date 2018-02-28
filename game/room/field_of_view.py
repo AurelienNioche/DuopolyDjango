@@ -2,18 +2,15 @@ import numpy as np
 
 from parameters import parameters
 
-from game.models import Room
 
-
-def compute(room_id, to_send=False):
+def compute(radius, to_send=False):
     """
 
-    :param room_id:
+    :param radius:
     :param to_send: if the output is intended to send it to the client, format it as needed
     :return: positions seen by a consumer
     """
 
-    radius = Room.objects.get(room_id=room_id).radius
     int_radius = round(parameters.n_positions * radius)
     positions = np.arange(parameters.n_positions)
 

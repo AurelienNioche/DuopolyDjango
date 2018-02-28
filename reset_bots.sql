@@ -1,0 +1,9 @@
+TRUNCATE game_room;
+TRUNCATE game_round;
+TRUNCATE game_roundstate;
+TRUNCATE game_roundcomposition;
+TRUNCATE game_firmprice;
+TRUNCATE game_firmposition;
+TRUNCATE game_firmprofit;
+TRUNCATE game_firmprofitperturn;
+TRUNCATE game_consumerchoice;

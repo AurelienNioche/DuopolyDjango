@@ -163,8 +163,11 @@ class LogsView(TemplateView):
         context.update({"current_file": filename})
         context.update({"logs": self.refresh_logs(filename)})
 
-        files = [f for f in os.listdir(parameters.logs_path)
-                 if os.path.isfile("".join([parameters.logs_path, f]))]
+        if os.path.exists(parameters.logs_path):
+            files = [f for f in os.listdir(parameters.logs_path)
+                     if os.path.isfile("".join([parameters.logs_path, f]))]
+        else:
+            files = []
 
         context.update({"files": files})
 
@@ -188,11 +191,16 @@ class LogsView(TemplateView):
 
     @staticmethod
     def refresh_logs(filename, n_lines=None):
-        with open(parameters.logs_path + filename, "r") as f:
-            if n_lines:
-                logs = "".join(f.readlines()[n_lines:])
-            else:
-                logs = f.read()
-            f.close()
-        return logs
+
+        f = parameters.logs_path + filename
+        if os.path.exists(f):
+            with open(parameters.logs_path + filename, "r") as f:
+                if n_lines:
+                    logs = "".join(f.readlines()[n_lines:])
+                else:
+                    logs = f.read()
+                f.close()
+            return logs
+        else:
+            return ""
 

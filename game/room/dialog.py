@@ -23,18 +23,13 @@ def close(rm, called_from):
     management.close(rm=rm)
 
 
-def is_trial(p, called_from):
-    utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-    return info.is_trial(p)
-
-
 # -------------- Relative to state ------------------------------------ #
 
-def get_state(rm, called_from):
-    utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-    return state.get(rm=rm)
-
-
-def update_state(rm, room_state, called_from):
-    utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
-    state.update(rm, state=room_state)
+# def get_state(rm, called_from):
+#     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
+#     return state.get(rm=rm)
+#
+#
+# def update_state(rm, room_state, called_from):
+#     utils.log("Called by '{}'".format(called_from), f=utils.fname(), path=__path__)
+#     state.update(rm, state=room_state)
