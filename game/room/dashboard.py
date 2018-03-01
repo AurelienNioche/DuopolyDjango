@@ -174,42 +174,20 @@ def create(data):
 
 def get_list():
 
-    rooms = Room.objects.all()
+    rooms = Room.objects.all().order_by("id")
     users = User.objects.filter(registered=True)
 
-    class ConnectedPlayer:
-        def __init__(self, username, connected, deserter, p_state, last_request, time_last_request):
-            self.username = username
-            self.deserter = deserter
-            self.connected = connected
-            self.state = p_state
-            self.last_request = last_request
-            self.time_last_request = time_last_request
-
-    rooms = rooms.order_by("id")
     rooms_list = []
 
-    for room in rooms:
+    for rm in rooms:
 
-        connected_players = []
+        users_room = [i for i in users.filter(room_id=rm.id)]
 
-        for u in users:
-
-            cp = ConnectedPlayer(
-                username=u.username,
-                connected=u.connected,
-                deserter=u.deserter,
-                p_state=u.state,
-                last_request=u.last_request,
-                time_last_request=u.time_last_request
-            )
-
-            connected_players.append(cp)
-
-        dic = {"att": room, "connected_players": connected_players}
+        dic = {"att": rm, "connected_players": users_room}
         rooms_list.append(dic)
 
     return rooms_list
+
 
 def get_path(dtype):
 

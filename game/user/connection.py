@@ -9,7 +9,7 @@ from parameters import parameters
 import game.room.state
 
 
-def check(called_from, users, u, opp=None, rm=None):
+def check(demand, users, u, opp=None, rm=None):
     """
     decorator used in game.round.client
     in order to check if opponent/player is connected
@@ -19,9 +19,15 @@ def check(called_from, users, u, opp=None, rm=None):
     # Refresh  list of connected users
     check_connected_users(users=users)
 
+    # # ----------  If user has not signed up ----------------- #
+    if not u:
+        return
+
+    _set_time_last_request(u=u, function_name=demand)
+
     # # ----------  If user has not joined a room yet ----------------- #
-    if not u or not u.registered:
-        _set_time_last_request(u=u, function_name=called_from)
+    if not u.registered:
+        return
 
     # ----------  If user has joined a room ------------------------- #
 
@@ -33,7 +39,7 @@ def check(called_from, users, u, opp=None, rm=None):
 
         # First, we check that the function called is missing players
         # if we reach the missing opponent timeout then return error
-        if called_from == "missing_players" and _no_opponent_found(u=u, rm=rm):
+        if demand == "missing_players" and _no_opponent_found(u=u, rm=rm):
             utils.log("No opponent has been found for {}".format(u.username))
             return parameters.error["no_opponent_found"]
 
@@ -44,7 +50,7 @@ def check(called_from, users, u, opp=None, rm=None):
             return parameters.error["player_quit"]
 
         # If the player is not a deserter, we can save its last request
-        _set_time_last_request(u, called_from)
+        _set_time_last_request(u, demand)
 
         # Then, we check if the opponent has reached banishment timeout
         if opp and banned(u=opp, rm=rm):
@@ -55,9 +61,10 @@ def check(called_from, users, u, opp=None, rm=None):
 def check_connected_users(users):
 
     for u in users:
-        connected = int(not _is_timed_out(u.time_last_request, "disconnected_timeout"))
+        connected = not _is_timed_out(u.time_last_request, "disconnected_timeout")
         if connected != u.connected:
-            u.save(update_fields=("connected", ))
+            u.connected = connected
+            u.save(update_fields=["connected"])
 
 
 def banned(u, rm):
@@ -66,7 +73,7 @@ def banned(u, rm):
 
         # Set the opponent as a deserter
         # and return that info to the player
-        u.deserter = 1
+        u.deserter = True
         u.save(update_fiels=["deserter"])
 
         rm.opened = False

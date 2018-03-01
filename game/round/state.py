@@ -49,17 +49,18 @@ def client_has_to_wait_over_player(u, opp, rm):
     return True
 
 
-def get_opponent_progression(u, rd_opp):
+def get_opponent_progression(u, opp, rd_opp):
+
     """
     :return: The percentage of opponent progression
      in the previous round
     """
 
-    if u.state == game.room.state.pve:
-        progression = u.tutorial_progression
+    if u.state == game.room.state.pve:  # If user is waiting opponent at pve state
+        progression = opp.tutorial_progression
 
-    else:
-        if rd_opp.state == game.room.state.pve:
+    else:  # User is waiting at pvp state...
+        if not opp.state == game.room.state.pve:
             progression = (rd_opp.t / rd_opp.ending_t) * 100
         else:
             progression = 100

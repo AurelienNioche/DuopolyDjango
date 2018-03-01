@@ -24,7 +24,7 @@ def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
     if game.round.state.client_has_to_wait_over_player(u=u, opp=opp, rm=rm):
 
         if not rm.trial:
-            opp_progression = game.round.state.get_opponent_progression(u=u, rd_opp=rd_opp)
+            opp_progression = game.round.state.get_opponent_progression(u=u, opp=opp, rd_opp=rd_opp)
             return parameters.error["wait"], opp_progression  # Tuple is necessary!! '-1' hold for wait
 
     # Get information necessary for firm initialization

@@ -88,14 +88,14 @@ def _verification(request):
                       "connect", "registered_as_player", "tutorial_done", "submit_tutorial_progression"):
             # Check connection (basic as 'rm' will be None)
             game.user.connection.check(
-                called_from=connect.__name__,
+                demand=demand,
                 users=users,
                 u=u
             )
         else:
             # Check connection
             error = game.user.connection.check(
-                called_from=connect.__name__,
+                demand=demand,
                 users=users,
                 u=u,
                 rm=rm,
