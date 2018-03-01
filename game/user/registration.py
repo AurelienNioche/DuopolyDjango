@@ -121,7 +121,7 @@ def proceed_to_registration_as_player(
 
     utils.log("I registered {}".format(u.username), f=proceed_to_registration_as_player)
 
-    return u.id, consumer_seen_positions
+    return u.id, game.room.state.tutorial, consumer_seen_positions
 
 
 def _generate_password():
