@@ -1,71 +1,106 @@
-import os
+from game.models import Round, RoundComposition
 
-from game.models import RoundComposition
-
-from . import data
-from . bots import firm, consumer
-
-from utils import utils
+import game.round.data
+import game.room.state
 
 
-__path__ = os.path.relpath(__file__)
+def end_of_turn(rd, rs, t):
 
+    rs.firm_active_rm_active_and_consumers_played = True
+    rs.save(update_fields=("firm_active_and_consumers_played", ))
 
-def check_if_bot_firm_has_to_play(rd, rs, t):
+    game.round.data.compute_scores(rd=rd, t=t)
 
-    # Log
-    utils.log("Called", f=utils.fname(), path=__path__)
-
-    # Get firm bot
-    firm_bot = RoundComposition.objects.filter(round_id=rd.id, bot=True).first()
-
-    # Check if round contains bots
-    if firm_bot:
-
-        # If active firm did not play and bot firms not already played
-        if firm_bot.firm_id == rs.firm_active and not rs.firm_active_played:
-
-            position, price = firm.play(firm_bot=firm_bot, rd=rd, t=t)
-
-            data.register_firm_choices(u=firm_bot, t=t, position=position, price=price)
-
-            utils.log("Bot firm played.",
-                      f=utils.fname(), path=__path__)
-
-            return True
-
-        else:
-            utils.log("Bot firm has already played (or is not active).",
-                      f=utils.fname(), path=__path__)
-            return False
-    else:
-        utils.log("Round does not contain bots.", f=utils.fname(), path=__path__)
-
-    return False
-
-
-def validate_firm_choice_and_make_consumers_play(rd, rs, t):
-
-    # table RoundComposition, ConsumerChoices are used
-    consumer.play(rd=rd, t=t)
-
-    rs.firm_active_played = True
-    rs.consumers_played = True
-    rs.save(update_fields=("firm_active_played", "consumers_played", ))
-
-    data.compute_scores(rd=rd, t=t)
-    _advance_of_one_time_step(rd=rd, t=t)
-    # rs.save()
-
-
-def _advance_of_one_time_step(rd, t):
-
-    if not is_end_of_game(rd=rd, t=t):
-
-        # Increment time state
+    if not is_end_of_round:
         rd.t += 1
-        rd.save()
+        rd.save(update_fields=("t", ))
 
 
-def is_end_of_game(rd, t):
+def is_end_of_round(rd, t):
+
     return t == rd.ending_t - 1  # -1 because starts at 0
+
+
+def client_has_to_wait_over_player(u, rm):
+    """
+    Check if player state is more advanced than the room state.
+    The room state is changed only if both players reached this state.
+    """
+
+    return (rm.state == game.room.state.tutorial and u.state == game.room.state.pve) or \
+        (rm.state == game.room.state.pve and u.state == game.room.state.pvp)
+
+
+def get_opponent_progression(u, rd_opp):
+    """
+    :return: The percentage of opponent progression
+     in the previous round
+    """
+
+    if u.state == game.room.state.pve:
+        progression = u.tutorial_progression
+
+    else:
+        if rd_opp.state == game.room.state.pve:
+            progression = (rd_opp.t / rd_opp.ending_t) * 100
+        else:
+            progression = 100
+
+    return str(round(progression))
+
+
+def go_to_next_round(u, opp, rm):
+
+    if rm.state == game.room.state.tutorial and u.state == game.room.state.tutorial:
+        _tutorial_is_done(u=u, opp=opp, rm=rm)
+
+    elif rm.state == game.room.state.pve and u.state == game.room.state.pve:
+        _pve_is_done(u=u, opp=opp, rm=rm)
+
+    elif rm.state == game.room.state.pvp and u.state == game.room.state.pvp:
+        _pvp_is_done(u=u, opp=opp, rm=rm)
+
+
+def _tutorial_is_done(u, opp, rm):
+
+    # change player.state
+    u.state = game.room.state.pve
+    u.save(update_fields=("state",))
+
+    # if other player has done tutorial, set rm.state to pve
+    if rm.trial or opp.state == game.room.state.pve:
+        rm.state = game.room.state.pve
+        rm.save(update_fields=("state",))
+
+
+def _pve_is_done(u, opp, rm):
+
+    # load objects
+    next_round = Round.objects.get(id=u.room_id, state=game.room.state.pvp)
+    next_role = RoundComposition.objects.get(round_id=next_round.id, user_id=u.id)
+
+    # player is assigned to next round id
+    u.round_id = next_round.id
+    u.firm_id = next_role.firm_id
+    u.state = game.room.state.pvp
+    u.save(update_fields=("state",))
+
+    # set room state
+    if rm.trial or opp.state == game.room.state.pvp:
+
+        rm.state = game.room.state.pvp
+        rm.save(update_fields=("state", ))
+
+
+def _pvp_is_done(u, opp, rm):
+
+    # Modify sate of player
+    u.state = game.room.state.end
+    u.save(update_fields=("state", ))
+
+    if rm.trial or opp.state == game.room.state.end:
+
+        # Close room and set state
+        rm.opened = False
+        rm.state = game.room.state.end
+        rm.save(update_fields=("opened", "state"))

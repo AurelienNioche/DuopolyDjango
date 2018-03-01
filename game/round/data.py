@@ -1,7 +1,6 @@
 import os
 import numpy as np
 
-
 from parameters import parameters
 
 from game.models import FirmPosition, FirmPrice, FirmProfit, ConsumerChoice

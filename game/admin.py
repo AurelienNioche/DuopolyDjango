@@ -50,7 +50,7 @@ class RoundCompositionAdmin(admin.ModelAdmin):
 
 
 class RoundStateAdmin(admin.ModelAdmin):
-    list_display = ("round_id", "t", "firm_active", "firm_active_played", "consumers_played")
+    list_display = ("round_id", "t", "firm_active", "firm_active_and_consumers_played")
 
 
 admin.site.register(Room, RoomAdmin)

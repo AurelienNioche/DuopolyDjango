@@ -119,7 +119,7 @@ def create(data):
             for t in range(ending_t):
                 round_state = RoundState(
                     round_id=rd.id, firm_active=firm_states[t], t=t,
-                    firm_active_played=0, consumers_played=0
+                    firm_active_and_consumers_played=False
                 )
 
                 round_state.save()

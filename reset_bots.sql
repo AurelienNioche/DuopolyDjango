@@ -1,4 +1,5 @@
 TRUNCATE game_room;
+TRUNCATE game_roomcomposition;
 TRUNCATE game_round;
 TRUNCATE game_roundstate;
 TRUNCATE game_roundcomposition;

@@ -418,8 +418,6 @@ class BotProcess(ml.Process):
             done = self.b.tutorial_done()
             self._wait()
 
-        self.b.game_state = "pve"
-
     def play(self):
 
         init = False
@@ -474,6 +472,9 @@ class BotProcess(ml.Process):
 
         # For playing
         # self.tutorial()
+
+        self.b.game_state = "pve"
+
         end = False
         while not end:
             end = self.play()

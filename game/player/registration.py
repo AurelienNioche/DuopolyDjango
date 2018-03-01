@@ -153,7 +153,7 @@ def room_available(rooms, users):
                 if connection.banned(u=u):
                     # management.close(room_id=e.room_id)
                     rm.opened = 0
-                    rm.save(update_fiels=("opened",))
+                    rm.save(update_fields=("opened",))
                     break
 
     entries = entries.exclude(opened=0)

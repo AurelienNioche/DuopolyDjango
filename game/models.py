@@ -20,7 +20,7 @@ class RoomComposition(models.Model):
 
 class Round(models.Model):
 
-    room_id = models.IntegerField(default=-1)
+    room_id = models.IntegerField(db_index=True, default=-1)
     pvp = models.BooleanField(default=False)
     missing_players = models.IntegerField(default=-1)
     ending_t = models.IntegerField(default=20)
@@ -41,9 +41,8 @@ class RoundState(models.Model):
 
     round_id = models.IntegerField(default=-1)
     t = models.IntegerField(default=-1)
-    firm_active_played = models.IntegerField(default=-1)
     firm_active = models.IntegerField(default=-1)
-    consumers_played = models.IntegerField(default=-1)
+    firm_active_and_consumers_played = models.BooleanField(default=False)
 
 
 class User(models.Model):
@@ -70,7 +69,7 @@ class User(models.Model):
 
 class Data(models.Model):
 
-    round_id = models.IntegerField(default=-1)
+    round_id = models.IntegerField(db_index=True, default=-1)
     agent_id = models.IntegerField(default=-1)
     t = models.IntegerField(default=-1)
     value = models.IntegerField(default=-1)

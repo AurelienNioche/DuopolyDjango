@@ -9,9 +9,9 @@ from game.models import User, Room, Round, RoundComposition, RoundState, RoomCom
 
 import game.player.connection
 import game.player.registration
-import game.player.management
 import game.player.mail
 import game.round.client
+import game.round.state
 
 __path__ = os.path.relpath(__file__)
 
@@ -227,23 +227,20 @@ def registered_as_player(request):
     users = User.objects.all()
 
     u = users.filter(username=username).first()
-    rm = Room.objects.filter(id=u.room_id).first()  # Could be None
-    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first() if rm is not None else None
 
-    # Check connection
-    ok, error = game.player.connection.check(
+    # Check connection (basic as 'rm' will be None)
+    game.player.connection.check(
         called_from=connect.__name__,
         users=users,
-        u=u,
-        rm=rm,
-        opp=opp
+        u=u
     )
-    if not ok:
-        return "reply", utils.fname(), error
 
     # Do specific stuff ------------------------------- #
 
     if u.registered:
+
+        rm = Room.objects.filter(id=u.room_id).first()
+        opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
 
         rsp = game.player.registration.get_init_info(u=u, opp=opp, rm=rm)
         return ("reply", utils.fname(), 1) + rsp
@@ -289,23 +286,20 @@ def tutorial_done(request):
     users = User.objects.all()
 
     u = users.filter(id=player_id).first()
-    rm = Room.objects.filter(id=u.room_id).first()
-    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
 
-    # Check connection
-    ok, error = game.player.connection.check(
+    # Check connection (basic as the client cannot handle error at this time point)
+    game.player.connection.check(
         called_from=connect.__name__,
         users=users,
-        u=u,
-        rm=rm,
-        opp=opp
+        u=u
     )
-    if not ok:
-        return "reply", utils.fname(), error
 
     # Do specific stuff --------------------- #
 
-    game.player.management.go_to_next_round(u=u, opp=opp, rm=rm)
+    rm = Room.objects.filter(id=u.room_id).first()
+    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+
+    game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 
     return "reply", utils.fname()
 
@@ -319,19 +313,13 @@ def submit_tutorial_progression(request):
     users = User.objects.all()
 
     u = users.filter(id=player_id).first()
-    rm = Room.objects.filter(id=u.room_id).first()
-    opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
 
-    # Check connection
-    ok, error = game.player.connection.check(
+    # Check connection (basic as the client cannot handle error at this time point)
+    game.player.connection.check(
         called_from=connect.__name__,
         users=users,
-        u=u,
-        rm=rm,
-        opp=opp
+        u=u
     )
-    if not ok:
-        return "reply", utils.fname(), error
 
     # Do specific stuff --------------------- #
 
