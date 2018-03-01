@@ -316,7 +316,10 @@ class BotClient:
 
     @print_reply
     def reply_ask_firm_passive_opponent_choice(self, *args):
-        return args[0] not in [-1, -2, -3, -4, -5]
+        have_to_wait = int(args[0]) in [-1, -2, -3, -4, -5]
+        if have_to_wait:
+            print(self.username, "I have to wait for the opponent")
+        return not have_to_wait
 
     def ask_firm_passive_consumer_choices(self):
         return self._request({

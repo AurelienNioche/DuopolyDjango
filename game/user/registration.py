@@ -91,7 +91,12 @@ def proceed_to_registration_as_player(
     rds = rounds_with_missing_players.filter(room_id=rm.id)
 
     rd_pve = rds.filter(pvp=False).first()
+    rd_pve.missing_players -= 1
+    rd_pve.save(update_fields=["missing_players"])
+
     rd_pvp = rds.filter(pvp=True).first()
+    rd_pvp.missing_players -= 1
+    rd_pvp.save(update_fields=["missing_players"])
 
     # Round Composition ---------------------------------------- #
 
@@ -102,7 +107,7 @@ def proceed_to_registration_as_player(
 
     rc_pvp = round_compositions_available.filter(round_id=rd_pvp.id).first()
     rc_pvp.user_id = u.id
-    rc_pve.available = False
+    rc_pvp.available = False
     rc_pvp.save(update_fields=["user_id", "available"])
 
     # User ----------------------------------------------------------------- #
@@ -113,7 +118,7 @@ def proceed_to_registration_as_player(
     u.firm_id = rc_pve.firm_id
     u.state = game.room.state.tutorial
     u.registration_time = timezone.now()
-    u.save(update_fields=["room_id", "round_id", "firm_id", "state", "registration_time"])
+    u.save(update_fields=["registered", "room_id", "round_id", "firm_id", "state", "registration_time"])
 
     # Get positions seen by consumers ----------------------- #
 
