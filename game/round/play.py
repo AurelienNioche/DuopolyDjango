@@ -52,7 +52,6 @@ def ask_firm_passive_opponent_choice(u, rd, rs, t):
                 game.round.bots.firm.play(firm_bot=firm_bot, rd=rd, t=t)
                 game.round.bots.consumer.play(rd=rd, t=t)
                 game.round.state.end_of_turn(rd=rd, rs=rs, t=t)
-                print(rs.firm_active_and_consumers_played)
 
         if rs.firm_active_and_consumers_played:
 
@@ -75,15 +74,16 @@ def ask_firm_passive_consumer_choices(u, opp, rm, rd, rs, t):
 
         if rs.firm_active_and_consumers_played:
 
-            round_ends = int(game.round.state.is_end_of_round(rd=rd, t=t))
-
             consumer_choices = game.round.data.get_consumer_choices(rd=rd, t=t)
             consumer_choices = [1 if i == u.firm_id else 0 if i != -1 else -1 for i in consumer_choices]
 
+            round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
+
             if round_ends:
+                utils.log("Round ends", f=ask_firm_passive_consumer_choices)
                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 
-            return (t,) + tuple((i for i in consumer_choices)) + (round_ends,)
+            return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
 
         else:
             utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_consumer_choices)
@@ -117,17 +117,18 @@ def ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t):
 
     if t <= rd.t:
 
-        is_end = int(game.round.state.is_end_of_round(rd=rd, t=t))
-
         if rs.firm_active_and_consumers_played:
 
             consumer_choices = game.round.data.get_consumer_choices(rd=rd, t=t)
             consumer_choices = [1 if i == u.firm_id else 0 if i != -1 else -1 for i in consumer_choices]
 
-            if is_end:
+            round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
+
+            if round_ends:
+                utils.log("Round ends", f=ask_firm_passive_consumer_choices)
                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 
-            return (t,) + tuple((i for i in consumer_choices)) + (is_end,)
+            return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
 
         else:
             utils.log("Have to wait: Active firm needs to play", f=ask_firm_active_consumer_choices)

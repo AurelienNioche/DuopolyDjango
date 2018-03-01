@@ -1,3 +1,5 @@
+from utils import utils
+
 from game.models import Round, RoundComposition
 
 import game.round.data
@@ -17,6 +19,8 @@ def end_of_turn(rd, rs, t):
 
 
 def is_end_of_round(rd, t):
+
+    utils.log("ending_t: {}, t: {}".format(rd.ending_t, t), f=is_end_of_round)
 
     return t == rd.ending_t - 1  # -1 because starts at 0
 
@@ -75,6 +79,8 @@ def _tutorial_is_done(u, opp, rm):
 
 def _pve_is_done(u, opp, rm):
 
+    utils.log("User {} has done pve. I will put him in pvp.", f=_pve_is_done)
+
     # load objects
     next_round = Round.objects.get(room_id=u.room_id, pvp=True)
     next_role = RoundComposition.objects.get(round_id=next_round.id, user_id=u.id)
@@ -83,7 +89,7 @@ def _pve_is_done(u, opp, rm):
     u.round_id = next_round.id
     u.firm_id = next_role.firm_id
     u.state = game.room.state.pvp
-    u.save(update_fields=["state"])
+    u.save(update_fields=["round_id", "firm_id", "state"])
 
     # set room state
     if rm.trial or opp.state == game.room.state.pvp:

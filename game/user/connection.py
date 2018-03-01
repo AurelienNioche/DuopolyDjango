@@ -6,6 +6,8 @@ from dashboard.models import IntParameter
 from utils import utils
 from parameters import parameters
 
+import game.room.state
+
 
 def check(called_from, users, u, opp=None, rm=None):
     """
@@ -27,7 +29,7 @@ def check(called_from, users, u, opp=None, rm=None):
     # do not want to ban players because they already
     # completed the game but have tried to reconnect)
 
-    if rm is not None and not rm.trial and not rm.state.end:
+    if rm is not None and not rm.trial and not rm.state == game.room.state.end:
 
         # First, we check that the function called is missing players
         # if we reach the missing opponent timeout then return error
@@ -50,7 +52,7 @@ def check(called_from, users, u, opp=None, rm=None):
         _set_time_last_request(u, called_from)
 
         # Then, we check if the opponent has reached banishment timeout
-        if opp and banned(opp):
+        if opp and banned(u=opp, rm=rm):
             utils.log(
                 "The opponent is a deserter.",
                 f=check.__name__,

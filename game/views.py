@@ -80,7 +80,9 @@ def _verification(request):
 
         rm = Room.objects.filter(id=u.room_id).first()  # Could be None
         if rm:
-            opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+            rc_opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+            if rc_opp:
+                opp = users.get(id=rc_opp.user_id)
 
         if demand in ("register", "send_password_again", "room_available", "proceed_to_registration_as_player",
                       "connect", "registered_as_player", "tutorial_done", "submit_tutorial_progression"):
@@ -222,11 +224,9 @@ def connect(**kwargs):
 
 def registered_as_player(**kwargs):
 
-    u, rm = (kwargs.get(i) for i in ("u", "rm"))
+    u, opp, rm = (kwargs.get(i) for i in ("u", "opp", "rm"))
 
     if u.registered:
-
-        opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
 
         rsp = game.user.registration.get_init_info(u=u, opp=opp, rm=rm)
         return (1, ) + rsp

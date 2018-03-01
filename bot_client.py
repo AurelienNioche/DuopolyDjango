@@ -315,7 +315,7 @@ class BotClient:
 
     @print_reply
     def reply_ask_firm_passive_opponent_choice(self, *args):
-        return True
+        return args[0] not in [-1, -2, -3, -4, -5]
 
     def ask_firm_passive_consumer_choices(self):
         return self._request({
@@ -467,8 +467,16 @@ class BotProcess(ml.Process):
 
             print(self.b.username, "t", self.b.t)
 
-        print(self.b.username, "state", self.b.game_state)
-        # self.b.game_state = "pvp" if self.b.game_state == "pve" else "end"
+        print(self.b.username, "previous state", self.b.game_state)
+
+        if self.b.game_state == "pve":
+            self.b.game_state = "pvp"
+        elif self.b.game_state == "pvp":
+            self.b.game_state = "end"
+        else:
+            raise Exception()
+
+        print(self.b.username, "new state", self.b.game_state)
 
         if self.b.game_state == "end":
             return True
@@ -498,7 +506,7 @@ def main():
     url = "http://127.0.0.1:8000/client_request/"
     # url = "http://51.15.6.148/client_request/",
 
-    n_accounts = 1
+    n_accounts = 2
 
     start_event = ml.Event()
 
