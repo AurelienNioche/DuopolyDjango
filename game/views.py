@@ -267,7 +267,7 @@ def ask_firm_init(**kwargs):
     rd_opp = Round.objects.filter(id=opp.round_id).first() if opp is not None else None
     rs = RoundState.objects.get(round_id=u.round_id, t=rd.t)
 
-    return game.round.play.ask_firm_init(u=u, rd_opp=rd_opp, rm=rm, rd=rd, rs=rs)
+    return game.round.play.ask_firm_init(u=u, opp=opp, rd_opp=rd_opp, rm=rm, rd=rd, rs=rs)
 
 # ----------------------------------| passive firm demands |----------------------------------------------------- #
 

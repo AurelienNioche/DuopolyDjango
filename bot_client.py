@@ -304,7 +304,8 @@ class BotClient:
         self.t = int(args[0])
         print(self.username, "t", self.t)
         self.state = args[1]
-        return True
+        went_well = int(args[0]) >= 0
+        return went_well
 
     def ask_firm_passive_opponent_choice(self):
         return self._request({

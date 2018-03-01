@@ -25,14 +25,28 @@ def is_end_of_round(rd, t):
     return t == rd.ending_t - 1  # -1 because starts at 0
 
 
-def client_has_to_wait_over_player(u, rm):
+def client_has_to_wait_over_player(u, opp, rm):
     """
     Check if player state is more advanced than the room state.
     The room state is changed only if both players reached this state.
     """
 
-    return (rm.state == game.room.state.tutorial and u.state == game.room.state.pve) or \
-        (rm.state == game.room.state.pve and u.state == game.room.state.pvp)
+    if u.state == game.room.state.pve and (not opp or opp.state == game.room.state.pve):
+
+        if rm.state == game.room.state.tutorial:
+            rm.state = game.room.state.pve
+            rm.save(update_fields=["state"])
+        return False
+
+    elif u.state == game.room.state.pvp and (not opp or opp.state == game.room.state.pvp):
+
+        if rm.state == game.room.state.pve:
+            rm.state = game.room.state.pvp
+            rm.save(update_fields=["state"])
+
+        return False
+
+    return True
 
 
 def get_opponent_progression(u, rd_opp):

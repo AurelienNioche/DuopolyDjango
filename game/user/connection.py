@@ -34,18 +34,13 @@ def check(called_from, users, u, opp=None, rm=None):
         # First, we check that the function called is missing players
         # if we reach the missing opponent timeout then return error
         if called_from == "missing_players" and _no_opponent_found(u=u, rm=rm):
-
+            utils.log("No opponent has been found for {}".format(u.username))
             return parameters.error["no_opponent_found"]
 
         # Then, we check that the current player is not
         # a deserter
         if banned(u=u, rm=rm):
-            utils.log(
-                "The current player is a deserter.",
-                f=check.__name__,
-                path=__path__,
-                level=3
-            )
+            utils.log("{} is a deserter.".format(u.username), f=check, level=3)
             return parameters.error["player_quit"]
 
         # If the player is not a deserter, we can save its last request
@@ -53,12 +48,7 @@ def check(called_from, users, u, opp=None, rm=None):
 
         # Then, we check if the opponent has reached banishment timeout
         if opp and banned(u=opp, rm=rm):
-            utils.log(
-                "The opponent is a deserter.",
-                f=check.__name__,
-                path=__path__,
-                level=3
-            )
+            utils.log("{} is a deserter.".format(u.username), f=check, level=3)
             return parameters.error["opponent_quit"]
 
 

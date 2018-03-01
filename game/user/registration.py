@@ -77,7 +77,7 @@ def proceed_to_registration_as_player(
     if rm.missing_players == 0:
         rm.opened = 0
 
-    rm.save()
+    rm.save(update_fields=["missing_players", "opened"])
 
     # Room composition ----------------------- #
 
@@ -97,11 +97,13 @@ def proceed_to_registration_as_player(
 
     rc_pve = round_compositions_available.filter(round_id=rd_pve.id).first()
     rc_pve.user_id = u.id
-    rc_pve.save()
+    rc_pve.available = False
+    rc_pve.save(update_fields=["user_id", "available"])
 
     rc_pvp = round_compositions_available.filter(round_id=rd_pvp.id).first()
     rc_pvp.user_id = u.id
-    rc_pvp.save()
+    rc_pve.available = False
+    rc_pvp.save(update_fields=["user_id", "available"])
 
     # User ----------------------------------------------------------------- #
 
@@ -111,7 +113,7 @@ def proceed_to_registration_as_player(
     u.firm_id = rc_pve.firm_id
     u.state = game.room.state.tutorial
     u.registration_time = timezone.now()
-    u.save()
+    u.save(update_fields=["room_id", "round_id", "firm_id", "state", "registration_time"])
 
     # Get positions seen by consumers ----------------------- #
 
@@ -149,4 +151,4 @@ def _close_rooms_with_banned_players(rooms_opened_with_missing_players, users):
                     rm.save(update_fields=("opened",))
                     break
 
-    return rooms_opened_with_missing_players.exclude(opened=False) # Exclude rooms closed above
+    return rooms_opened_with_missing_players.exclude(opened=False)  # Exclude rooms closed above

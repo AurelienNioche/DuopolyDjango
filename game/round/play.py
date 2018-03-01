@@ -18,10 +18,10 @@ import game.round.data
 
 # ----------------------------------- init ------------------------------------------------------ #
 
-def ask_firm_init(u, rd_opp, rm, rd, rs):
+def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
 
     # Maybe client has to wait the other player
-    if game.round.state.client_has_to_wait_over_player(u=u, rm=rm):
+    if game.round.state.client_has_to_wait_over_player(u=u, opp=opp, rm=rm):
 
         if not rm.trial:
             opp_progression = game.round.state.get_opponent_progression(u=u, rd_opp=rd_opp)
