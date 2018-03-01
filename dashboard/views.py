@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.shortcuts import redirect, render
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -9,16 +8,13 @@ from django.views.generic import TemplateView
 import os
 import subprocess
 
-from .forms import RoomForm
+from . forms import RoomForm
 from utils import utils
 
 from parameters import parameters
 
 import game.room.dashboard
-import game.player.dashboard
-import game.round.dashboard
-
-__path__ = os.path.relpath(__file__)
+import game.user.dashboard
 
 
 class LoginView(TemplateView):
@@ -40,7 +36,7 @@ class LoginView(TemplateView):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            utils.log("Logging {} user.".format(user), f=utils.fname(), path=__path__)
+            utils.log("Logging {} user.".format(user), f=login)
             login(request, user)
             return redirect("/room_management/")
 
@@ -109,7 +105,7 @@ class RoomManagementView(TemplateView):
         context.update({'subtitle': "Room list"})
 
         # check connected users
-        game.player.dashboard.check_connected_users()
+        game.user.dashboard.check_connected_users()
 
         # Get list of existing rooms and players
         rooms_list = game.room.dashboard.get_list()
@@ -122,7 +118,7 @@ class RoomManagementView(TemplateView):
 
         if "delete" in request.POST:
             room_id = request.POST["delete"]
-            utils.log("Delete room {}.".format(room_id), f=utils.fname(), path=__path__)
+            utils.log("Delete room {}.".format(room_id), f=self.post)
 
             # Delete room
             game.room.dashboard.delete(room_id=room_id)
@@ -138,8 +134,8 @@ class DataView(TemplateView):
 
         context = super().get_context_data(**kwargs)
         # Get list of existing rooms
-        url_pickle = game.round.dashboard.convert_data_to_pickle()
-        url_sql = game.round.dashboard.convert_data_to_sql()
+        url_pickle = game.room.dashboard.convert_data_to_pickle()
+        url_sql = game.room.dashboard.convert_data_to_sql()
 
         context.update({"subtitle": "Download data"})
         context.update({"url_pickle": url_pickle})

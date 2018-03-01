@@ -3,22 +3,31 @@ import datetime
 import pytz
 import click
 
+def get_class_that_defined_method(meth):
+    # meth must be a bound method
+    if not inspect.ismethod(meth):
+        return None
+    for cls in inspect.getmro(meth.__self__.__class__):
+        if cls.__dict__.get(meth.__name__) is meth:
+            return cls
+    return None  # not required since None would have been implicitly returned anyway
 
-def fname():
-    return inspect.stack()[1][3]
 
+def log(msg, f, level=1):
 
-def log(msg, f, path, level=1):
-
-    stamp = "{}".format(datetime.datetime.now().strftime("[%d/%m/%y %H:%M:%S]"))
+    stamp = datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S")
 
     # Colour codes for different error levels
     colors = ["cyan", "green", "yellow", "red"]
 
     # Labels for different log levels
-    log_levels = ["[Debug]", "[Info]", "[Warning]", "[Error]"]
+    log_levels = ["Debug", "Info", "Warning", "Error"]
 
-    click.echo('{}{} "{}:{}" {}'.format(stamp, click.style(log_levels[level], fg=colors[level]), path, f, msg))
+    click.echo('[{}][{}] "{}" {}'.format(
+        stamp,
+        click.style(log_levels[level], fg=colors[level]),
+        f.__name__,
+        msg))
 
 
 def get_time_in_france():
@@ -36,5 +45,3 @@ def get_time_in_france():
     )
 
     return now.strftime("%I:%M %p")
-
-

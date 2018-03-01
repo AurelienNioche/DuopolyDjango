@@ -6,14 +6,16 @@ import game.room.state
 
 def end_of_turn(rd, rs, t):
 
-    rs.firm_active_rm_active_and_consumers_played = True
-    rs.save(update_fields=("firm_active_and_consumers_played", ))
+    rs.firm_active_and_consumers_played = True
+    rs.save(update_fields=["firm_active_and_consumers_played"])
 
     game.round.data.compute_scores(rd=rd, t=t)
 
     if not is_end_of_round:
         rd.t += 1
-        rd.save(update_fields=("t", ))
+        rd.save(update_fields=["t"])
+
+    return rs, rd
 
 
 def is_end_of_round(rd, t):
@@ -65,42 +67,42 @@ def _tutorial_is_done(u, opp, rm):
 
     # change player.state
     u.state = game.room.state.pve
-    u.save(update_fields=("state",))
+    u.save(update_fields=["state"])
 
     # if other player has done tutorial, set rm.state to pve
     if rm.trial or opp.state == game.room.state.pve:
         rm.state = game.room.state.pve
-        rm.save(update_fields=("state",))
+        rm.save(update_fields=["state"])
 
 
 def _pve_is_done(u, opp, rm):
 
     # load objects
-    next_round = Round.objects.get(id=u.room_id, state=game.room.state.pvp)
+    next_round = Round.objects.get(room_id=u.room_id, pvp=True)
     next_role = RoundComposition.objects.get(round_id=next_round.id, user_id=u.id)
 
     # player is assigned to next round id
     u.round_id = next_round.id
     u.firm_id = next_role.firm_id
     u.state = game.room.state.pvp
-    u.save(update_fields=("state",))
+    u.save(update_fields=["state"])
 
     # set room state
     if rm.trial or opp.state == game.room.state.pvp:
 
         rm.state = game.room.state.pvp
-        rm.save(update_fields=("state", ))
+        rm.save(update_fields=["state"])
 
 
 def _pvp_is_done(u, opp, rm):
 
     # Modify sate of player
     u.state = game.room.state.end
-    u.save(update_fields=("state", ))
+    u.save(update_fields=["state"])
 
     if rm.trial or opp.state == game.room.state.end:
 
         # Close room and set state
         rm.opened = False
         rm.state = game.room.state.end
-        rm.save(update_fields=("opened", "state"))
+        rm.save(update_fields=["opened", "state"])

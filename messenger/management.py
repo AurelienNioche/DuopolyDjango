@@ -57,7 +57,7 @@ def set_user_msg_as_read(username):
 
     for e in entries:
         e.receipt_confirmation = True
-        e.save()
+        e.save(update_fields=["receipt_confirmation"])
 
 
 def get_unread_msg(username=None):
@@ -108,8 +108,8 @@ def receipt_confirmation_from_client(username, messages):
 
     for msg in messages:
         entry = Message.objects.filter(author="admin", to=username, message=msg, receipt_confirmation=False).first()
-        entry.receipt_confirmation = 1
-        entry.save()
+        entry.receipt_confirmation = True
+        entry.save(update_fields=["receipt_confirmation"])
 
 
 def send_auto_reply(cls, username):
@@ -129,7 +129,7 @@ def set_auto_reply(value):
 
     if int(auto_reply.value) != int(value):
         auto_reply.value = str(value)
-        auto_reply.save()
+        auto_reply.save(update_fields=["value"])
 
 
 def get_auto_reply():
@@ -148,8 +148,7 @@ def get_auto_reply():
 
 def get_latest_msg_author():
 
-    msg = Message.objects.all()
-    sort = msg.exclude(author="admin")
-    if sort:
-        sort_last = sort.latest("time_stamp")
+    msg = Message.objects.exclude(author="admin")
+    if msg:
+        sort_last = msg.latest("time_stamp")
         return sort_last.author

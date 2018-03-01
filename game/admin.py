@@ -7,7 +7,7 @@ from . models import User, FirmProfit, FirmPosition, FirmPrice, \
 
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        "username", "password", "email", "gender", "mechanical_id", "age", "nationality",
+        "id", "username", "password", "email", "gender", "mechanical_id", "age", "nationality",
         "deserter", "time_last_request", "last_request", "connected", "registered", "registration_time",
         "state", "tutorial_progression", "room_id", "round_id", "firm_id")
 
@@ -30,12 +30,12 @@ class ConsumerChoiceAdmin(admin.ModelAdmin):
 
 class RoundAdmin(admin.ModelAdmin):
     list_display = (
-        "room_id", "pvp", "missing_players", "ending_t", "t", "radius")
+        "id", "room_id", "pvp", "missing_players", "ending_t", "t", "radius")
 
 
 class RoomAdmin(admin.ModelAdmin):
     list_display = (
-        "opened", "missing_players", "trial", "radius",
+        "id", "opened", "missing_players", "trial", "radius",
         "ending_t", "state")
 
 

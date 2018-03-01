@@ -3,8 +3,8 @@ from django.db import models
 
 class Room(models.Model):
 
-    opened = models.BooleanField(default=False)
-    missing_players = models.IntegerField(default=-1)
+    opened = models.BooleanField(db_index=True, default=False)
+    missing_players = models.IntegerField(db_index=True, default=-1)
     radius = models.FloatField(default=-1)
     trial = models.BooleanField(default=False)
     ending_t = models.IntegerField(default=-1)
@@ -21,8 +21,8 @@ class RoomComposition(models.Model):
 class Round(models.Model):
 
     room_id = models.IntegerField(db_index=True, default=-1)
-    pvp = models.BooleanField(default=False)
-    missing_players = models.IntegerField(default=-1)
+    pvp = models.BooleanField(db_index=True, default=False)
+    missing_players = models.IntegerField(db_index=True, default=-1)
     ending_t = models.IntegerField(default=20)
     radius = models.FloatField(default=-1)
     t = models.IntegerField(default=0)
@@ -30,17 +30,17 @@ class Round(models.Model):
 
 class RoundComposition(models.Model):
 
-    round_id = models.IntegerField(default=-1)
-    user_id = models.IntegerField(default=-1)
+    round_id = models.IntegerField(db_index=True, default=-1)
+    user_id = models.IntegerField(db_index=True, default=-1)
     firm_id = models.IntegerField(default=-1)
-    bot = models.BooleanField(default=False)
-    available = models.BooleanField(default=True)
+    bot = models.BooleanField(db_index=True, default=False)
+    available = models.BooleanField(db_index=True, default=True)
 
 
 class RoundState(models.Model):
 
-    round_id = models.IntegerField(default=-1)
-    t = models.IntegerField(default=-1)
+    round_id = models.IntegerField(db_index=True, default=-1)
+    t = models.IntegerField(db_index=True, default=-1)
     firm_active = models.IntegerField(default=-1)
     firm_active_and_consumers_played = models.BooleanField(default=False)
 
@@ -70,8 +70,8 @@ class User(models.Model):
 class Data(models.Model):
 
     round_id = models.IntegerField(db_index=True, default=-1)
-    agent_id = models.IntegerField(default=-1)
-    t = models.IntegerField(default=-1)
+    agent_id = models.IntegerField(db_index=True, default=-1)
+    t = models.IntegerField(db_index=True, default=-1)
     value = models.IntegerField(default=-1)
 
     class Meta:

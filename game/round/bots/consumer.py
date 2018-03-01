@@ -1,36 +1,30 @@
 import numpy as np
-import os
-
-from parameters import parameters
+from django_bulk_update.helper import bulk_update
 
 from game.models import ConsumerChoice
 
 import game.round.data
-import game.room.field_of_view
+import game.round.field_of_view
 
-__path__ = os.path.relpath(__file__)
-
-
-# --------------------------------  public  --------------------------- #
 
 def play(rd, t):
 
     positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=t)
 
-    positions_seen = game.room.field_of_view.compute(radius=rd.radius, to_send=False)
+    positions_seen = game.round.field_of_view.compute(radius=rd.radius, to_send=False)
 
-    for agent_id in range(parameters.n_positions):
+    consumers = ConsumerChoice.objects.filter(round_id=rd.id, t=t).order_by("agent_id")
+
+    for agent_id, c in enumerate(consumers):
 
         choice = _choice(
             positions=positions, prices=prices, positions_seen=positions_seen[agent_id])
 
         # Save choice
-        e = ConsumerChoice.objects.get(round_id=rd.id, agent_id=agent_id, t=t)
-        e.value = choice
-        e.save(update_fields=("value",))
+        c.value = choice
 
+    bulk_update(consumers, update_fields=['value'])
 
-# --------------------------------  protected --------------------------- #
 
 def _choice(positions, prices, positions_seen):
 

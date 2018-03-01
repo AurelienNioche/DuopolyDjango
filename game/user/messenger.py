@@ -1,6 +1,6 @@
 from game.models import User
 
-from . import connection
+from game.user import connection
 
 
 def check_connected_users():

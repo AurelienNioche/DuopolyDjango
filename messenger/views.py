@@ -7,7 +7,7 @@ import os
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import game.player.messenger
+import game.user.messenger
 
 from . import management
 
@@ -34,7 +34,7 @@ class MessengerView(TemplateView):
         context.update({'subtitle': "Chat with players"})
 
         # Update connected players
-        game.player.messenger.check_connected_users()
+        game.user.messenger.check_connected_users()
 
         # Get messages
         users = management.get_all_users()

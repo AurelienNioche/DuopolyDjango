@@ -270,7 +270,7 @@ class BotClient:
         return self._request({
             KeyF.demand: DemandF.submit_tutorial_progression,
             KeyF.player_id: self.player_id,
-            KeyF.tutorial_progression: 100.00,
+            KeyF.tutorial_progression: 1.00,
         })
 
     @print_reply
@@ -287,6 +287,8 @@ class BotClient:
     def reply_tutorial_done(self, *args):
         return True
 
+    # ------------- Game -------------------- #
+
     def ask_firm_init(self):
         return self._request({
             KeyF.demand: DemandF.ask_firm_init,
@@ -296,6 +298,7 @@ class BotClient:
     @print_reply
     def reply_ask_firm_init(self, *args):
         self.t = int(args[0])
+        print(self.username, "t", self.t)
         self.state = args[1]
         return True
 
@@ -464,14 +467,14 @@ class BotProcess(ml.Process):
 
     def run(self):
 
-        # # For sign in uncomment
+        # # For sign
         # self.sign_in()
 
         # For Log in
         self.log_in()
 
         # For playing
-        # self.tutorial()
+        self.tutorial()
 
         self.b.game_state = "pve"
 

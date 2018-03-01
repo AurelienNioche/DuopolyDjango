@@ -2,15 +2,13 @@ import numpy as np
 import itertools as it
 import pickle
 import os
-from builtins import round as rnd
 
 from parameters import parameters
+from utils import utils
 
 from game.models import FirmPosition, FirmPrice
 
 import game.round.data
-
-__path__ = os.path.relpath(__file__)
 
 
 # --------------------------------  global variables ------------------------------- #
@@ -23,22 +21,17 @@ dir_path = os.path.dirname(os.path.realpath(__file__)) + "/data/"
 
 # --------------------------------  high level functions --------------------------- #
 
-def play(firm_bot, rd, rs, t):
+def play(firm_bot, rd, t):
 
-    # If active firm did not play and bot firms not already played
-    if firm_bot.firm_id == rs.firm_active and not rs.firm_active_and_consumers_played:
+    utils.log("Make bot firm play", f=play)
 
-        opp_id = (firm_bot.firm_id + 1) % parameters.n_firms  # 0 or 1
+    opp_id = (firm_bot.firm_id + 1) % parameters.n_firms  # 0 or 1
 
-        opp_position = FirmPosition.objects.get(round_id=rd.id, agent_id=opp_id, t=t)
-        opp_price = FirmPrice.objects.get(round_id=rd.id, agent_id=opp_id, t=t)
-        position, price = _choice(opp_position, opp_price, rd.radius)
+    opp_position = FirmPosition.objects.get(round_id=rd.id, agent_id=opp_id, t=t).value
+    opp_price = FirmPrice.objects.get(round_id=rd.id, agent_id=opp_id, t=t).value
+    position, price = _choice(opp_position, opp_price, rd.radius)
 
-        game.round.data.register_firm_choices(u=firm_bot, t=t, position=position, price=price)
-        return True
-
-    else:
-        return False
+    game.round.data.register_firm_choices(u=firm_bot, t=t, position=position, price=price)
 
 
 # --------------------------------  protected --------------------------- #
@@ -59,10 +52,8 @@ def _choice(opp_pos, opp_price, r):
         # Compute firms' decision matrix
         _compute_z(r, file_path)
         z = pickle.load(file=open(file_path, "rb"))
-    # ----------------------------------- #
 
-    opp_pos = opp_pos.value
-    opp_price = opp_price.value
+    # ----------------------------------- #
 
     for i, (pos, price) in enumerate(options):
 
@@ -73,7 +64,7 @@ def _choice(opp_pos, opp_price, r):
             n_consumers += to_share
 
         elif price == opp_price:
-            n_consumers += rnd(to_share / 2)
+            n_consumers += round(to_share / 2)
 
         exp_profits[i] = price * n_consumers
 
@@ -90,7 +81,7 @@ def _compute_z(r, file_path):
     #                   idx1: n consumers seeing only B,
     #                   idx2: consumers seeing A and B,
 
-    r = rnd(r * parameters.n_positions)
+    r = round(r * parameters.n_positions)
 
     for i, j in it.product(range(parameters.n_positions), repeat=2):
 

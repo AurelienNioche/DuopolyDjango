@@ -5,6 +5,13 @@ __________________________________________________
 
 # How to (local) 
 
+## Python dependencies (maybe incomplete)
+
+* django-bulk-update
+* django-crispy-forms
+* numpy
+* psycopg2-binary
+
 ## PostgreSQL (MacOs)
 install postgresql
 
