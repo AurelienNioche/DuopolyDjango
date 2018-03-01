@@ -225,9 +225,13 @@ class BotClient:
 
     @print_reply
     def reply_registered_as_player(self, *args):
-        if int(args[0]):
+
+        already_registered = int(args[0])
+        if already_registered:
             self.player_id = args[1]
-        return int(args[0])
+            self.game_state = args[2]
+            # Args 3 is consumer positions
+        return already_registered
 
     def room_available(self):
 
@@ -338,6 +342,7 @@ class BotClient:
 
     @print_reply
     def reply_ask_firm_active_choice_recording(self, *args):
+        # t is returned (to catch it: args[0])
         return True
 
     def ask_firm_active_consumer_choices(self):
@@ -407,7 +412,7 @@ class BotProcess(ml.Process):
 
         self.b.game_state = "tutorial"
 
-        print("Let's play!")
+        print("Let's play! " + "*" * 10)
 
     def tutorial(self):
 
@@ -460,7 +465,10 @@ class BotProcess(ml.Process):
                 if consumer_choices == "end_t":
                     break
 
-        self.b.game_state = "pvp" if self.b.game_state == "pve" else "end"
+            print(self.b.username, "t", self.b.t)
+
+        print(self.b.username, "state", self.b.game_state)
+        # self.b.game_state = "pvp" if self.b.game_state == "pve" else "end"
 
         if self.b.game_state == "end":
             return True
@@ -474,9 +482,11 @@ class BotProcess(ml.Process):
         self.log_in()
 
         # For playing
-        self.tutorial()
+        if self.b.game_state == "tutorial":
+            self.tutorial()
 
-        self.b.game_state = "pve"
+            self.b.game_state = "pve"
+            print(self.b.username, "state", self.b.game_state)
 
         end = False
         while not end:

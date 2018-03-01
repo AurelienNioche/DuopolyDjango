@@ -103,7 +103,6 @@ def ask_firm_active_choice_recording(u, rd, rs, t, position, price):
         if not rs.firm_active_and_consumers_played:
             # tables FirmPositions, FirmPrices are used
             game.round.data.register_firm_choices(u=u, t=t, position=position, price=price)
-
             game.round.bots.consumer.play(rd=rd, t=t)
             game.round.state.end_of_turn(rd=rd, rs=rs, t=t)
 
