@@ -106,11 +106,11 @@ venv.bak/
 .idea/
 
 credentials/
-round/bots/data
 
 game/migrations/
-game/player/bots/data/
 messenger/migrations/
-dashboard/migrations
+dashboard/migrations/
 
 static/game_data/
+
+game/round/bots/data/
