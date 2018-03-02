@@ -366,7 +366,7 @@ class BotClient:
 
 class BotProcess(ml.Process):
 
-    def __init__(self, url, start_event, username, password, delay=1.0):
+    def __init__(self, url, start_event, username, password, delay=0.5):
         super().__init__()
         self.start_event = start_event
         self.b = BotClient(url=url, username=username, password=password)
@@ -507,10 +507,10 @@ class BotProcess(ml.Process):
 
 def main():
 
-    url = "http://127.0.0.1:8000/client_request/"
-    # url = "http://51.15.6.148/client_request/",
+    # url = "http://127.0.0.1:8000/client_request/"
+    url = "http://51.15.6.148/client_request/"
 
-    n_accounts = 8
+    n_accounts = 40
 
     start_event = ml.Event()
 
