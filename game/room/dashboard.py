@@ -156,10 +156,13 @@ def create(data):
                 profit = 0
 
                 firm_prices.append(FirmPrice(round_id=rd.id, agent_id=firm_id, t=0, value=price))
+                firm_prices.append(FirmPrice(round_id=rd.id, agent_id=firm_id, t=1, value=price))
 
                 firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=0, value=position))
+                firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=1, value=position))
 
                 firm_profits.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit))
+                firm_profits.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=-1))
 
             # Create entries for other t
             for table, lst in zip(
@@ -168,7 +171,7 @@ def create(data):
             ):
 
                 # Add a supplementary line for avoiding multiple test for knowing when this is the end
-                for t in range(1, ending_t + 1):
+                for t in range(2, ending_t + 1):
 
                     for firm_id in range(parameters.n_firms):
 
