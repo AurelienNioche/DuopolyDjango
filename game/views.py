@@ -27,21 +27,22 @@ def client_request(request):
     utils.log("Post request: {}".format(list(request.POST.items())), f=client_request)
 
     error, demand, users, u, opp, rm = _verification(request)
+
     if error is not None:
-        return "reply", demand, error
+        to_reply = "reply", demand, error
 
-    try:
-        # Retrieve functions declared in the current script
-        functions = {f_name: f for f_name, f in globals().items() if not f_name.startswith("_")}
-        # Retrieve demanded function
-        func = functions[demand]
+    else:
+        try:
+            # Retrieve functions declared in the current script
+            functions = {f_name: f for f_name, f in globals().items() if not f_name.startswith("_")}
+            # Retrieve demanded function
+            func = functions[demand]
+            f_return = func(request=request, users=users, u=u, opp=opp, rm=rm)
+            args = [str(i) for i in f_return] if f_return is not None else []
+            to_reply = "/".join(["reply", demand] + args)
 
-    except KeyError:
-        raise Exception("Bad demand")
-
-    f_return = func(request=request, users=users, u=u, opp=opp, rm=rm)
-    args = [str(i) for i in f_return] if f_return is not None else []
-    to_reply = "/".join(["reply", demand] + args)
+        except KeyError:
+            raise Exception("Bad demand")
 
     # Log
     utils.log("I will reply '{}' to client.".format(to_reply), f=client_request)
