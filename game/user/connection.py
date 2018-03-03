@@ -40,7 +40,7 @@ def check(demand, users, u, opp=None, rm=None):
         # First, we check that the function called is missing players
         # if we reach the missing opponent timeout then return error
         if demand == "missing_players" and _no_opponent_found(u=u, rm=rm):
-            utils.log("No opponent has been found for {}".format(u.username))
+            utils.log("No opponent has been found for {}".format(u.username), f=check, level=3)
             return parameters.error["no_opponent_found"]
 
         # Then, we check that the current player is not
