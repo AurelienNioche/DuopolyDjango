@@ -29,7 +29,7 @@ def client_request(request):
     error, demand, users, u, opp, rm = _verification(request)
 
     if error is not None:
-        to_reply = "/".join(["reply", demand, error])
+        to_reply = "/".join(["reply", demand, str(error)])
 
     else:
         try:
