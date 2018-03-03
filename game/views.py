@@ -175,7 +175,7 @@ def room_available(**kwargs):
     users = kwargs["users"]
 
     # Get data from table
-    rooms = Room.objects.exclude(missing_players=0, opened=0)
+    rooms = Room.objects.exclude(missing_players=0).exclude(opened=0)
 
     # Return 'True' if a room is available
     rsp = game.user.registration.room_available(rooms_opened_with_missing_players=rooms, users=users)
