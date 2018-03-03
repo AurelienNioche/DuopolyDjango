@@ -75,7 +75,7 @@ def send_message(username, message):
         author="admin",
         to=username,
         message=message,
-        receipt_confirmation=True
+        receipt_confirmation=False
     )
 
     new_entry.save()
