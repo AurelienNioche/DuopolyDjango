@@ -82,7 +82,6 @@ def create(data):
     # that will be used in a bulk_create
     # in order to limit the nb of hits to the
     # database
-    rds = []
     compositions = []
     round_states = []
     firm_profits = []
