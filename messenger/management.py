@@ -101,7 +101,7 @@ def new_message_from_client(username, message):
 
     new_entry.save()
 
-    cls.send_auto_reply(username)
+    send_auto_reply(username)
 
 
 def receipt_confirmation_from_client(username, messages):
@@ -117,7 +117,7 @@ def send_auto_reply(username):
     auto_reply = BoolParameter.objects.filter(name="auto_reply").first()
 
     if auto_reply.value:
-        cls.send_message(
+        send_message(
             username=username,
             message=parameters.auto_reply_msg.format(utils.get_time_in_france())
         )
