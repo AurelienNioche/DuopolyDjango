@@ -71,13 +71,14 @@ def banned(u, rm):
 
     if u.deserter or (rm.opened and _is_timed_out(u.time_last_request, "banishment_timeout")):
 
-        # Set the opponent as a deserter
-        # and return that info to the player
-        u.deserter = True
-        u.save(update_fields=["deserter"])
+        if not u.deserter:
+            # Set the opponent as a deserter
+            # and return that info to the player
+            u.deserter = True
+            u.save(update_fields=["deserter"])
 
-        rm.opened = False
-        rm.save(update_fields=["opened"])
+            rm.opened = False
+            rm.save(update_fields=["opened"])
 
         return True
 
