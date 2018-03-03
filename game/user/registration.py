@@ -145,10 +145,6 @@ def _close_rooms_with_banned_players(rooms_opened_with_missing_players, users):
         u_room = users.filter(room_id=rm.id)
         if u_room:
             for u in u_room:
-                if connection.banned(u=u, rm=rm):
-
-                    rm.opened = False
-                    rm.save(update_fields=("opened",))
-                    break
+                connection.banned(u=u, rm=rm)
 
     return rooms_opened_with_missing_players.exclude(opened=False)  # Exclude rooms closed above
