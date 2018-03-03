@@ -72,12 +72,7 @@ def proceed_to_registration_as_player(
 
     # Decrease missing_players
     rm.missing_players -= 1
-
-    # If round pve does not welcome additional players
-    if rm.missing_players == 0:
-        rm.opened = 0
-
-    rm.save(update_fields=["missing_players", "opened"])
+    rm.save(update_fields=["missing_players"])
 
     # Room composition ----------------------- #
 

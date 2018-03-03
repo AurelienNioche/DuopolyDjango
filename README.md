@@ -24,7 +24,15 @@ run pgsql server
 create user and db
 
     createuser dasein
-    createdb DuopolyDB --owner dasein
+    createdb DuopolyRefactor --owner dasein
+
+if you need to reset the table contents
+    
+    psql DuopolyRefactor -a -f reset.sql
+
+if you need to remove the db
+    
+    dropdb DuopolyRefactor
 
 ## Django 
 

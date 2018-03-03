@@ -8,3 +8,4 @@ TRUNCATE game_firmposition;
 TRUNCATE game_firmprofit;
 TRUNCATE game_consumerchoice;
 TRUNCATE game_user;
+TRUNCATE messenger_message;
