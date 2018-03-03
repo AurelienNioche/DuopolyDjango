@@ -103,6 +103,8 @@ def create(data):
 
             there_is_a_bot = int(not pvp or trial)
 
+            # We save this one in a normal way (without bulk_create)
+            # because we need a round_id
             rd = Round(
                     room_id=rm.id,
                     missing_players=parameters.n_firms - there_is_a_bot,
@@ -112,9 +114,7 @@ def create(data):
                     t=0,
                 )
 
-            rd.save(commit=False)
-
-            rds.append(rd)
+            rd.save()
 
             for i in range(parameters.n_firms):
 
@@ -191,7 +191,6 @@ def create(data):
 
     # --------------- bulk_create all the lists ----------- #
 
-    Round.objects.bulk_create(rds)
     RoundComposition.objects.bulk_create(compositions)
     RoundState.objects.bulk_create(round_states)
     FirmPrice.objects.bulk_create(firm_prices)
