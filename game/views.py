@@ -82,7 +82,7 @@ def _verification(request):
 
         rm = Room.objects.filter(id=u.room_id).first()  # Could be None
         if rm:
-            rc_opp = RoomComposition.objects.filter(room_id=rm.id).exclude(user_id=u.id).first()
+            rc_opp = RoomComposition.objects.filter(room_id=rm.id, available=False).exclude(user_id=u.id).first()
             if rc_opp:
                 opp = users.get(id=rc_opp.user_id)
 
