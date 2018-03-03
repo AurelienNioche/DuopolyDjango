@@ -159,7 +159,7 @@ def create(data):
 
                 firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=0, value=position))
 
-                firm_positions.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit))
+                firm_profits.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit))
 
             # Create entries for other t
             for table, lst in zip(
