@@ -90,7 +90,7 @@ def get_messages_for_client(username):
     return n_new_messages, new_messages
 
 
-def new_message_from_client(cls, username, message):
+def new_message_from_client(username, message):
 
     new_entry = Message(
         author=username,
@@ -112,7 +112,7 @@ def receipt_confirmation_from_client(username, messages):
         entry.save(update_fields=["receipt_confirmation"])
 
 
-def send_auto_reply(cls, username):
+def send_auto_reply(username):
 
     auto_reply = BoolParameter.objects.filter(name="auto_reply").first()
 
