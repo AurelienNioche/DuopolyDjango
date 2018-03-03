@@ -193,7 +193,7 @@ def proceed_to_registration_as_player(**kwargs):
     else:
         with transaction.atomic():
 
-            rooms = Room.objects.select_for_update().exclude(missing_players=0, opened=0)
+            rooms = Room.objects.select_for_update().exclude(missing_players=0).exclude(opened=0)
             rounds = Round.objects.select_for_update().exclude(missing_players=0)
             round_compositions = RoundComposition.objects.select_for_update().filter(available=True)
             room_compositions = RoomComposition.objects.select_for_update().filter(available=True)
