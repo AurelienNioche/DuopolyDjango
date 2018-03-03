@@ -69,7 +69,7 @@ def check_connected_users(users):
 
 def banned(u, rm):
 
-    if _is_timed_out(u.time_last_request, "banishment_timeout"):
+    if rm.opened and _is_timed_out(u.time_last_request, "banishment_timeout"):
 
         # Set the opponent as a deserter
         # and return that info to the player
