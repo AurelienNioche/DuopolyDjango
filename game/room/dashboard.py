@@ -52,6 +52,7 @@ def create(data):
 
     missing_players = 1 if trial else 2
 
+    # We do bulk creates to limit the nb of hits
     rooms = Room.objects.bulk_create([
         Room(
             state=state.tutorial,
