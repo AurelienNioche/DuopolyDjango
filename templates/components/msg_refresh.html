@@ -7,7 +7,7 @@
                 <div class="messages msg_sent" style="display: inline-block;">
                     <p> {{ msg.message }}</p><br>
                     {% if msg.receipt_confirmation %}
-                        <a style="font-size: 10px">{{ msg.time_stamp }}</a>
+                        <a style="font-size: 10px">Seen | {{ msg.time_stamp }}</a>
                     {% endif %}
                 </div>
     </div>
@@ -21,7 +21,7 @@
         <div class="messages msg_receive" style="display: inline-block; margin-left: 10px">
             <p> {{ msg.message }}</p><br>
             {% if msg.receipt_confirmation %}
-                <a style="font-size: 10px">Seen | {{ msg.time_stamp }}</a>
+                <a style="font-size: 10px">{{ msg.time_stamp }}</a>
             {% endif %}
         </div>
     </div>
