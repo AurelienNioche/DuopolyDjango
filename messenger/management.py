@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 import os
 
 from messenger.models import Message, BoolParameter
@@ -109,7 +110,8 @@ def receipt_confirmation_from_client(username, messages):
     for msg in messages:
         entry = Message.objects.filter(author="admin", to=username, message=msg, receipt_confirmation=False).first()
         entry.receipt_confirmation = True
-        entry.save(update_fields=["receipt_confirmation"])
+        entry.time_stamp = timezone.now()
+        entry.save(update_fields=["receipt_confirmation", "time_stamp"])
 
 
 def send_auto_reply(username):

@@ -28,6 +28,7 @@ def register_as_user(email, nationality, gender, age, mechanical_id):
             time_last_request=timezone.now(),
             last_request=register_as_user.__name__
         )
+
         entry.save()
         return True
     else:
