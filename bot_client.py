@@ -402,7 +402,7 @@ class BotProcess(ml.Process):
 
                 # If there is place, try to register
                 if place:
-                    self.start_event.wait()
+                    # self.start_event.wait()
                     registered = self.b.proceed_to_registration_as_player()
                     self._wait()
                     if registered:
@@ -530,7 +530,7 @@ def main():
 
     # ml.Event().wait(2)
 
-    start_event.set()
+    # start_event.set()
 
 
 if __name__ == "__main__":

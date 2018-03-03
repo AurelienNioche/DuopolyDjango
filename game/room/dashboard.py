@@ -52,67 +52,80 @@ def create(data):
 
     missing_players = 1 if trial else 2
 
-    for r in range(nb_of_room):
-
-        rm = Room(
+    rooms = Room.objects.bulk_create([
+        Room(
             state=state.tutorial,
             ending_t=ending_t,
             radius=radius,
             trial=trial,
             missing_players=missing_players,
             opened=True
-        )
+        ) for _ in range(nb_of_room)
+    ])
 
-        rm.save()
+    RoomComposition.objects.bulk_create([
+          RoomComposition(room_id=rm.id) for rm in rooms
+    ])
 
-        # Create room composition -------------------------- #
+    if not trial:
+        RoomComposition.objects.bulk_create([
+            RoomComposition(
+                room_id=rm.id,
+                available=True,
+                user_id=-1
+            ) for rm in rooms
+        ])
 
-        rmc1 = RoomComposition(room_id=rm.id)
-        rmc1.save()
+    # ---- prepare storage list -------- #
+    # These lists contain objects
+    # that will be used in a bulk_create
+    # in order to limit the nb of hits to the
+    # database
+    rds = []
+    compositions = []
+    round_states = []
+    firm_profits = []
+    firm_prices = []
+    firm_positions = []
+    consumer_choices = []
 
-        if not trial:
-            rmc2 = RoomComposition(room_id=rm.id, available=True, user_id=-1)
-            rmc2.save()
+    if trial:
+        rounds_are_pvp = (False, True)
+    else:
+        rounds_are_pvp = (False, False, True)
+
+    # fill the lists
+    for rm in rooms:
 
         # Create rounds and their composition ------------------------------ #
-
-        if trial:
-            rounds_are_pvp = (False, True)
-        else:
-            rounds_are_pvp = (False, False, True)
-
         for pvp in rounds_are_pvp:
 
-            # Create round --------------------------- #
-
-            there_is_a_bot = not pvp or trial
+            there_is_a_bot = int(not pvp or trial)
 
             rd = Round(
-                room_id=rm.id,
-                missing_players=parameters.n_firms - int(there_is_a_bot),
-                ending_t=ending_t,
-                pvp=pvp,
-                radius=radius,
-                t=0,
-            )
+                    room_id=rm.id,
+                    missing_players=parameters.n_firms - there_is_a_bot,
+                    ending_t=ending_t,
+                    pvp=pvp,
+                    radius=radius,
+                    t=0,
+                )
 
-            rd.save()  # Have to save before access to id
-
-            # Create composition ----------------------------#
+            rds.append(rd)
 
             for i in range(parameters.n_firms):
 
                 bot = True if i == 0 and there_is_a_bot else False
 
-                composition = RoundComposition(
-                    round_id=rd.id,
-                    user_id=-1,
-                    firm_id=i,
-                    bot=bot,
-                    available=not bot
+                compositions.append(
+                    RoundComposition(
+                        round_id=rd.id,
+                        user_id=-1,
+                        firm_id=i,
+                        bot=bot,
+                        available=not bot
+                    )
                 )
-
-                composition.save()
 
             # Create state ---------------------------------- #
 
@@ -122,12 +135,14 @@ def create(data):
             firm_states[first_to_play:ending_t:2] = 1
 
             for t in range(ending_t):
-                round_state = RoundState(
-                    round_id=rd.id, firm_active=firm_states[t], t=t,
-                    firm_active_and_consumers_played=False
+                round_states.append(
+                    RoundState(
+                        round_id=rd.id,
+                        firm_active=firm_states[t],
+                        t=t,
+                        firm_active_and_consumers_played=False
+                    )
                 )
-
-                round_state.save()
 
             # Create data --------------------------------- #
 
@@ -138,38 +153,48 @@ def create(data):
                 position = np.random.randint(parameters.n_positions)
                 profit = 0
 
-                e = FirmPrice(round_id=rd.id, agent_id=firm_id, t=0, value=price)
-                e.save()
+                firm_prices.append(FirmPrice(round_id=rd.id, agent_id=firm_id, t=0, value=price))
 
-                e = FirmPosition(round_id=rd.id, agent_id=firm_id, t=0, value=position)
-                e.save()
+                firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=0, value=position))
 
-                e = FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit)
-                e.save()
+                firm_positions.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit))
 
             # Create entries for other t
-            for table in FirmProfit, FirmPrice, FirmPosition:
+            for table, lst in zip(
+                    (FirmProfit, FirmPrice, FirmPosition),
+                    (firm_profits, firm_prices, firm_positions)
+            ):
 
                 # Add a supplementary line for avoiding multiple test for knowing when this is the end
                 for t in range(1, ending_t + 1):
 
                     for firm_id in range(parameters.n_firms):
 
-                        entry = table(round_id=rd.id, agent_id=firm_id, t=t, value=-1)
-                        entry.save()
+                        lst.append(table(round_id=rd.id, agent_id=firm_id, t=t, value=-1))
 
             # Create entries for consumer t
             for t in range(0, ending_t):
 
                 for agent_id in range(parameters.n_positions):
 
-                    new_entry = ConsumerChoice(
-                        round_id=rd.id,
-                        agent_id=agent_id,
-                        t=t,
-                        value=-1
+                    consumer_choices.append(
+                        ConsumerChoice(
+                            round_id=rd.id,
+                            agent_id=agent_id,
+                            t=t,
+                            value=-1
+                        )
                     )
-                    new_entry.save()
+
+    # --------------- bulk_create all the lists ----------- #
+
+    Round.objects.bulk_create(rds)
+    RoundComposition.objects.bulk_create(compositions)
+    RoundState.objects.bulk_create(round_states)
+    FirmPrice.objects.bulk_create(firm_prices)
+    FirmPosition.objects.bulk_create(firm_positions)
+    FirmProfit.objects.bulk_create(firm_profits)
+    ConsumerChoice.objects.bulk_create(consumer_choices)
 
 
 def get_list():
