@@ -112,6 +112,8 @@ def create(data):
                     t=0,
                 )
 
+            rd.save(commit=False)
+
             rds.append(rd)
 
             for i in range(parameters.n_firms):
