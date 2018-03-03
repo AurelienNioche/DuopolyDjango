@@ -74,7 +74,7 @@ def banned(u, rm):
         # Set the opponent as a deserter
         # and return that info to the player
         u.deserter = True
-        u.save(update_fiels=["deserter"])
+        u.save(update_fields=["deserter"])
 
         rm.opened = False
         rm.save(update_fields=["opened"])
