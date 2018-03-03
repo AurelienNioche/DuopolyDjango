@@ -73,7 +73,7 @@ def _verification(request):
         username = request.POST.get("username")
         if username:
             username = username.lower()
-            u = users.get(username=username)
+            u = users.filter(username=username).first()  # Could be none in case of typo
         else:
             email = request.POST.get("email")
             email.lower()
