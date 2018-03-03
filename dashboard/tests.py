@@ -2,6 +2,11 @@
 from game.models import User
 
 
+def delete_bots():
+    users = User.objects.filter(username__startswith="bot")
+    users.delete()
+
+
 def create_bots(n_bots):
 
     User.objects.bulk_create([
@@ -19,6 +24,7 @@ def main():
 
     n_bots = 40
 
+    delete_bots()
     create_bots(n_bots)
 
 
