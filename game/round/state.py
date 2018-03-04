@@ -13,7 +13,7 @@ def end_of_turn(rd, rs, t):
 
     game.round.data.compute_scores(rd=rd, t=t)
 
-    if not is_end_of_round(rd, t):
+    if t == rd.t and not is_end_of_round(rd, t):
         rd.t += 1
         rd.save(update_fields=["t"])
 

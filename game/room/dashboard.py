@@ -148,21 +148,17 @@ def create(data):
 
             # Create data --------------------------------- #
 
-            # Initialize position, price, profit for t = 0
-            for firm_id in range(parameters.n_firms):
+            # Initialize position, price, profit for t = 0 and t = 1 (as a firm plays only once the two turns)
+            price = np.random.randint(1, parameters.n_prices + 1)
+            position = np.random.randint(parameters.n_positions)
+            profit = 0
 
-                price = np.random.randint(1, parameters.n_prices + 1)
-                position = np.random.randint(parameters.n_positions)
-                profit = 0
+            for t in range(2):
+                for firm_id in range(parameters.n_firms):
 
-                firm_prices.append(FirmPrice(round_id=rd.id, agent_id=firm_id, t=0, value=price))
-                firm_prices.append(FirmPrice(round_id=rd.id, agent_id=firm_id, t=1, value=price))
-
-                firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=0, value=position))
-                firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=1, value=position))
-
-                firm_profits.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=profit))
-                firm_profits.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=0, value=-1))
+                    firm_prices.append(FirmPrice(round_id=rd.id, agent_id=firm_id, t=t, value=price))
+                    firm_positions.append(FirmPosition(round_id=rd.id, agent_id=firm_id, t=t, value=position))
+                    firm_profits.append(FirmProfit(round_id=rd.id, agent_id=firm_id, t=t, value=profit))
 
             # Create entries for other t
             for table, lst in zip(
