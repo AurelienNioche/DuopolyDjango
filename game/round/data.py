@@ -9,31 +9,6 @@ from game.models import FirmPosition, FirmPrice, FirmProfit, ConsumerChoice
 __path__ = os.path.relpath(__file__)
 
 
-# def get_init_info(u, rd, rs):
-#
-#     opponent_id = (u.firm_id + 1) % parameters.n_firms
-#
-#     d = {i: {"position": 0, "price": 0, "profits": 0} for i in ("opp", "player")}
-#     d["firm_state"] = "active" if rs.firm_active == u.firm_id else "passive"
-#
-#     tables = {"position": FirmPosition, "price": FirmPrice, "profits": FirmProfit}
-#     ids = {"opp": opponent_id, "player": u.firm_id}
-#
-#     for i in ids.keys():
-#
-#         for key in d[i].keys():
-#
-#             entry = tables[key].objects.filter(
-#                 round_id=rd.id,
-#                 agent_id=ids[i],
-#                 t=rd.t
-#             ).first()
-#
-#             d[i][key] = entry.value
-#
-#     return d
-
-
 def get_positions_and_prices(rd, t):
 
     """
@@ -52,6 +27,10 @@ def get_positions_and_prices(rd, t):
 
 
 def get_profits(rd, t):
+
+    """
+    Deals with table FirmProfit
+    """
 
     profits = \
         [i[0] for i in FirmProfit.objects.values_list('value')
@@ -104,10 +83,8 @@ def compute_scores(rd, t):
         n_clients = np.sum(consumer_choices == firm_id)
 
         price = FirmPrice.objects.values_list('value').get(round_id=rd.id, agent_id=firm_id, t=t)[0]
-        try:
-            e = FirmProfit.objects.get(round_id=rd.id, agent_id=firm_id, t=t)
-        except:
-            print("id", rd.id, "firm_id", firm_id, "t", t)
+
+        e = FirmProfit.objects.get(round_id=rd.id, agent_id=firm_id, t=t)
         sc = e.value
 
         new_sc = sc + n_clients * price

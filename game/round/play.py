@@ -1,5 +1,3 @@
-import os
-
 from utils import utils
 from parameters import parameters
 
@@ -31,16 +29,6 @@ def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
     firm_state = "active" if rs.firm_active == u.firm_id else "passive"
     positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=rd.t)
     profits = game.round.data.get_profits(rd=rd, t=rd.t)
-
-    print("positions", positions)
-    print("prices", prices)
-    print("profits")
-    print("rd.id", rd.id)
-    print("u", u.id)
-    print("u firm_id", u.firm_id)
-    print("u round id", u.round_id)
-
-    # d = game.round.data.get_init_info(u=u, rd=rd, rs=rs)
 
     return \
         rd.t, firm_state, positions[0], prices[0], profits[0], \
