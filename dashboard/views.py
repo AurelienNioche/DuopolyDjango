@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.gzip import gzip_page
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.http import JsonResponse
@@ -169,6 +170,7 @@ class LogsView(TemplateView):
 
         return context
 
+    @gzip_page
     def dispatch(self, request, *args, **kwargs):
 
         if "refresh_logs" in request.GET:
