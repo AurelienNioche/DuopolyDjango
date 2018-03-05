@@ -34,9 +34,11 @@ def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
 
     profits = game.round.data.get_profits(rd=rd, t=rd.t)
 
+    opp_id = (u.firm_id + 1) % 2
+
     return \
-        rd.t, firm_state, positions[0], prices[0], profits[0], \
-        positions[1], prices[1], profits[1], rd.ending_t
+        rd.t, firm_state, positions[u.firm_id], prices[u.firm_id], profits[u.firm_id], \
+        positions[opp_id], prices[opp_id], profits[opp_id], rd.ending_t
 
 
 # ----------------------------------| passive firm demands |-------------------------------------- #
