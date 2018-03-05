@@ -63,7 +63,10 @@ class MessengerView(TemplateView):
 
         # update context with messages
         messages = management.get_all_messages_from_user(context['current_user'])
+
+        # reload = any(not m.receipt_confirmation for m in messages)
         context.update({'messages': messages})
+        # context.update({'reload': reload})
 
         return context
 
