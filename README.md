@@ -24,7 +24,7 @@ run pgsql server
 create user and db
 
     createuser dasein
-    createdb DuopolyDB --owner dasein
+    createdb DuopolyRefactor --owner dasein
 
 ## Django 
 
