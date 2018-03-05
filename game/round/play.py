@@ -27,7 +27,11 @@ def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
 
     # Get information necessary for firm initialization
     firm_state = "active" if rs.firm_active == u.firm_id else "passive"
-    positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=rd.t)
+    if rd.t == 0:
+        positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=rd.t)
+    else:
+        positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=rd.t - 1)
+
     profits = game.round.data.get_profits(rd=rd, t=rd.t)
 
     return \
