@@ -1,5 +1,4 @@
 # from django.test import TestCase
-import game.room.dashboard
 from game.models import User
 
 
@@ -29,7 +28,5 @@ def main():
     create_bots(n_bots)
 
 
-game.room.dashboard.delete(room_id=260)
-
-# main()
+main()
 
