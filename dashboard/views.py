@@ -193,11 +193,10 @@ class LogsView(TemplateView):
         f = parameters.logs_path + filename
         if os.path.exists(f):
             with open(parameters.logs_path + filename, "r") as f:
-                if n_lines:
-                    logs = "".join(f.readlines()[n_lines:])
-                else:
-                    logs = f.read()
-                f.close()
+                # if n_lines:
+                logs = "".join(f.readlines()[-200:])
+                # else:
+                #     logs = f.read()
             return logs
         else:
             return ""
