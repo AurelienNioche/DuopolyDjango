@@ -9,8 +9,10 @@ __________________________________________________
 
 * django-bulk-update
 * django-crispy-forms
-* numpy
+* django-bulk-update
 * psycopg2-binary
+* click
+* numpy
 
 ## PostgreSQL (MacOs)
 install postgresql
