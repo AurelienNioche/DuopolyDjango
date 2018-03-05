@@ -66,7 +66,6 @@ WSGI_APPLICATION = 'adminbase.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 # /!\ TEST DATABASE IS NAMED 'DuopolyTest' /!\
 DATABASES = {
     'default': {
@@ -80,7 +79,9 @@ DATABASES = {
     }
 }
 
+# Keep the default database when testing
 if 'test' in sys.argv:
+
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'DuopolyTest',
