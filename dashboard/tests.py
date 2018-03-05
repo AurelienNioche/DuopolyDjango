@@ -1,5 +1,5 @@
 # from django.test import TestCase
-import game.room.dashboard.delete
+import game.room.dashboard
 from game.models import User
 
 
