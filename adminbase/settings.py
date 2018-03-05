@@ -67,10 +67,11 @@ WSGI_APPLICATION = 'adminbase.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+# /!\ TEST DATABASE IS NAMED 'DuopolyTest' /!\
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DuopolyRefactor',
+        'NAME': 'DuopolyTest',
         'USER': 'dasein',
         'PASSWORD': '',
         'HOST': '',
@@ -82,7 +83,7 @@ DATABASES = {
 if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DuopolyRefactor',
+        'NAME': 'DuopolyTest',
         'USER': 'dasein',
         'PASSWORD': '',
         'HOST': '',
