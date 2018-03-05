@@ -23,5 +23,5 @@ logs_path = os.getcwd() + "/log/"
 
 
 auto_reply_msg = "Hi! Thanks for joining the experiment! Unfortunately we're not available "\
-             "for the moment. We are French and in France it is currently {}. We hope that you'll enjoy "\
-             "the game. Good luck!"
+             "for the moment. The team is French and it is currently {} in France. We hope that you'll enjoy (enjoyed)"\
+             "the game! If you're looking for the survey code, it's 999. In case of bug, just write us a mail!"
