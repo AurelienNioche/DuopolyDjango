@@ -145,8 +145,8 @@ class DataView(TemplateView):
         return context
 
 
-@method_decorator(login_required, name='dispatch')
 @method_decorator(gzip_page, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class LogsView(TemplateView):
     template_name = "components/logs.html"
 
