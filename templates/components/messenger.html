@@ -103,44 +103,6 @@
     // Scroll to bottom when page loads
     ScrollToBottom();
 
-    // request permission on page load
-    document.addEventListener('DOMContentLoaded', function () {
-
-      if (!Notification) {
-        alert('Desktop notifications not available in your browser. Try Chromium.');
-        return;
-      }
-
-      if (Notification.permission !== "granted") {
-          Notification.requestPermission();
-      }
-
-    });
-
-    previous_user_id = -1;
-
-    function notifyMe(user_id, username) {
-
-        // avoid notification spam
-        if (user_id !== previous_user_id) {
-            previous_user_id = user_id;
-
-            if (Notification.permission !== "granted") {
-                Notification.requestPermission();
-            }
-            else {
-                var notification = new Notification('Duopoly Messenger', {
-                    body: "New message from " + username
-                });
-
-                notification.onclick = function () {
-                    window.location = "/messenger_view/?user_id=" + user_id;
-                }
-
-            }
-        }
-    }
-
     function RefreshMsg() {
 
         // Get current user
@@ -153,7 +115,6 @@
             success: function (data) {
                 // REFRESH MSG
                 $('#chat').html(data);
-                ScrollToBottom();
             }
 
         });
@@ -192,6 +153,7 @@
                 success: function (data) {
                     console.log("Successfully sent!");
                     RefreshMsg();
+                    ScrollToBottom();
                 }
             });
         }
@@ -218,7 +180,42 @@
          window.location='/messenger_view/?user_id=' +  user_id ;
      }
 
-
+ // request permission on page load
+//document.addEventListener('DOMContentLoaded', function () {
+//
+//  if (!Notification) {
+//    alert('Desktop notifications not available in your browser. Try Chromium.');
+//    return;
+//  }
+//
+//  if (Notification.permission !== "granted") {
+//      Notification.requestPermission();
+//  }
+//
+//});
+//
+//previous_user_id = -1;
+//
+//function notifyMe(user_id, username) {
+//
+//    // avoid notification spam
+//    if (user_id !== previous_user_id) {
+//        previous_user_id = user_id;
+//
+//        if (Notification.permission !== "granted") {
+//            Notification.requestPermission();
+//        }
+//        else {
+//            var notification = new Notification('Duopoly Messenger', {
+//                body: "New message from " + username
+//           });
+//
+//           notification.onclick = function () {
+//               window.location = "/messenger_view/?user_id=" + user_id;
+//           }
+//
+//       }
+//   }
 </script>
 
 
