@@ -13,7 +13,7 @@ def end_of_turn(rd, rs, t):
 
     game.round.data.compute_scores(rd=rd, t=t)
 
-    if not is_end_of_round(rd, t):
+    if t == rd.t and not is_end_of_round(rd, t):
         rd.t += 1
         rd.save(update_fields=["t"])
 
@@ -60,7 +60,7 @@ def get_opponent_progression(u, opp, rd_opp):
         progression = opp.tutorial_progression
 
     else:  # User is waiting at pvp state...
-        if not opp.state == game.room.state.pve:
+        if opp.state == game.room.state.pve:
             progression = (rd_opp.t / rd_opp.ending_t) * 100
         else:
             progression = 100

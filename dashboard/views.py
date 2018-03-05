@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.gzip import gzip_page
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.http import JsonResponse
@@ -144,6 +145,7 @@ class DataView(TemplateView):
         return context
 
 
+@method_decorator(gzip_page, name='dispatch')
 @method_decorator(login_required, name='dispatch')
 class LogsView(TemplateView):
     template_name = "components/logs.html"

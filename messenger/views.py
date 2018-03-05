@@ -105,7 +105,8 @@ class MessengerView(TemplateView):
         """
         used when sending a msg
         """
-        management.send_message(username=request.POST["user"], message=request.POST["msg"])
+        username = request.POST["user"]
+        management.send_message(username=username, message=request.POST["msg"])
 
         return HttpResponse("Sent!")
 
@@ -151,7 +152,7 @@ class MessengerClientSide:
     @classmethod
     def client_speaks(cls, request):
 
-        username = request.POST["username"]
+        username = request.POST["username"].lower()
         message = request.POST["message"]
 
         management.new_message_from_client(username=username, message=message)
@@ -161,7 +162,7 @@ class MessengerClientSide:
     @classmethod
     def client_hears(cls, request):
 
-        username = request.POST["username"]
+        username = request.POST["username"].lower()
 
         n_new_messages, new_messages = management.get_messages_for_client(username=username)
 
@@ -170,7 +171,7 @@ class MessengerClientSide:
     @classmethod
     def client_receipt_confirmation(cls, request):
 
-        username = request.POST["username"]
+        username = request.POST["username"].lower()
         messages_list = request.POST["message"]
         messages = [i for i in messages_list.split("/") if len(i)]
 

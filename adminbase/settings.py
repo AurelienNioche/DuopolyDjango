@@ -70,7 +70,7 @@ WSGI_APPLICATION = 'adminbase.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DuopolyDB',
+        'NAME': 'DuopolyRefactor',
         'USER': 'dasein',
         'PASSWORD': '',
         'HOST': '',
@@ -82,7 +82,7 @@ DATABASES = {
 if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DuopolyDB',
+        'NAME': 'DuopolyRefactor',
         'USER': 'dasein',
         'PASSWORD': '',
         'HOST': '',
@@ -93,7 +93,6 @@ if 'test' in sys.argv:
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Europe/Paris'

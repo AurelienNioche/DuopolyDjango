@@ -1,5 +1,3 @@
-import os
-
 from utils import utils
 from parameters import parameters
 
@@ -28,10 +26,13 @@ def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
             return parameters.error["wait"], opp_progression  # Tuple is necessary!! '-1' hold for wait
 
     # Get information necessary for firm initialization
-    d = game.round.data.get_init_info(u=u, rd=rd, rs=rs)
+    firm_state = "active" if rs.firm_active == u.firm_id else "passive"
+    positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=rd.t)
+    profits = game.round.data.get_profits(rd=rd, t=rd.t)
 
-    return rd.t, d["firm_state"], d["player"]["position"], d["player"]["price"], d["player"]["profits"], \
-        d["opp"]["position"], d["opp"]["price"], d["opp"]["profits"], rd.ending_t
+    return \
+        rd.t, firm_state, positions[0], prices[0], profits[0], \
+        positions[1], prices[1], profits[1], rd.ending_t
 
 
 # ----------------------------------| passive firm demands |-------------------------------------- #

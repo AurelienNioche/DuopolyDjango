@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 import os
 
 from messenger.models import Message, BoolParameter
@@ -75,7 +76,7 @@ def send_message(username, message):
         author="admin",
         to=username,
         message=message,
-        receipt_confirmation=True
+        receipt_confirmation=False
     )
 
     new_entry.save()
@@ -90,7 +91,7 @@ def get_messages_for_client(username):
     return n_new_messages, new_messages
 
 
-def new_message_from_client(cls, username, message):
+def new_message_from_client(username, message):
 
     new_entry = Message(
         author=username,
@@ -101,7 +102,7 @@ def new_message_from_client(cls, username, message):
 
     new_entry.save()
 
-    cls.send_auto_reply(username)
+    send_auto_reply(username)
 
 
 def receipt_confirmation_from_client(username, messages):
@@ -109,15 +110,16 @@ def receipt_confirmation_from_client(username, messages):
     for msg in messages:
         entry = Message.objects.filter(author="admin", to=username, message=msg, receipt_confirmation=False).first()
         entry.receipt_confirmation = True
-        entry.save(update_fields=["receipt_confirmation"])
+        entry.time_stamp = timezone.now()
+        entry.save(update_fields=["receipt_confirmation", "time_stamp"])
 
 
-def send_auto_reply(cls, username):
+def send_auto_reply(username):
 
     auto_reply = BoolParameter.objects.filter(name="auto_reply").first()
 
     if auto_reply.value:
-        cls.send_message(
+        send_message(
             username=username,
             message=parameters.auto_reply_msg.format(utils.get_time_in_france())
         )

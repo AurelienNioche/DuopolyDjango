@@ -40,7 +40,7 @@ def check(demand, users, u, opp=None, rm=None):
         # First, we check that the function called is missing players
         # if we reach the missing opponent timeout then return error
         if demand == "missing_players" and _no_opponent_found(u=u, rm=rm):
-            utils.log("No opponent has been found for {}".format(u.username))
+            utils.log("No opponent has been found for {}".format(u.username), f=check, level=3)
             return parameters.error["no_opponent_found"]
 
         # Then, we check that the current player is not
@@ -69,15 +69,16 @@ def check_connected_users(users):
 
 def banned(u, rm):
 
-    if _is_timed_out(u.time_last_request, "banishment_timeout"):
+    if u.deserter or (rm.opened and _is_timed_out(u.time_last_request, "banishment_timeout")):
 
-        # Set the opponent as a deserter
-        # and return that info to the player
-        u.deserter = True
-        u.save(update_fiels=["deserter"])
+        if not u.deserter:
+            # Set the opponent as a deserter
+            # and return that info to the player
+            u.deserter = True
+            u.save(update_fields=["deserter"])
 
-        rm.opened = False
-        rm.save(update_fields=["opened"])
+            rm.opened = False
+            rm.save(update_fields=["opened"])
 
         return True
 

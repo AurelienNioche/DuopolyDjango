@@ -28,6 +28,7 @@ def register_as_user(email, nationality, gender, age, mechanical_id):
             time_last_request=timezone.now(),
             last_request=register_as_user.__name__
         )
+
         entry.save()
         return True
     else:
@@ -72,12 +73,7 @@ def proceed_to_registration_as_player(
 
     # Decrease missing_players
     rm.missing_players -= 1
-
-    # If round pve does not welcome additional players
-    if rm.missing_players == 0:
-        rm.opened = 0
-
-    rm.save(update_fields=["missing_players", "opened"])
+    rm.save(update_fields=["missing_players"])
 
     # Room composition ----------------------- #
 
@@ -150,10 +146,6 @@ def _close_rooms_with_banned_players(rooms_opened_with_missing_players, users):
         u_room = users.filter(room_id=rm.id)
         if u_room:
             for u in u_room:
-                if connection.banned(u=u, rm=rm):
-
-                    rm.opened = False
-                    rm.save(update_fields=("opened",))
-                    break
+                connection.banned(u=u, rm=rm)
 
     return rooms_opened_with_missing_players.exclude(opened=False)  # Exclude rooms closed above
