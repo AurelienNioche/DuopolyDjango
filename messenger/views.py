@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 import os
@@ -85,11 +85,18 @@ class MessengerView(TemplateView):
 
             if user_id != "null":
                 self.user = management.get_user_from_id(user_id)
+        else:
+            return redirect('/messenger_view/?user_id={}'.format(management.get_latest_msg_author()))
 
+        # If it is an "auto_reply" setting request
         if "auto_reply" in request.GET:
 
             management.set_auto_reply(request.GET["auto_reply"])
 
+        # There are different type of refresh request
+        # msg -> refresh all msg from the select user
+        # contacts -> refresh contact list
+        # all_unread_msg -> refresh the new msg counter (located on the sidebar)
         if "type" in request.GET:
 
             if request.GET["type"] == "msg":

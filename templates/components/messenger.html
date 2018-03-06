@@ -78,7 +78,7 @@
 {#                                <span style="color: #abb9d3; margin-bottom: 8px;">Auto reply</span>#}
                                 <label class="switch">
                                     <p>Auto Reply</p>
-                                  <input id="auto_reply" value="Auto reply" type="checkbox" {{ auto_reply }}>
+                                  <input id="auto_reply" onclick="SetAutoReply();" value="Auto reply" type="checkbox" {{ auto_reply }}>
                                   <span class="slider round"></span>
                                 </label>
                             </div>
@@ -103,7 +103,7 @@
     // Scroll to bottom when page loads
     ScrollToBottom();
 
-    function RefreshMsg() {
+    function RefreshMsg(scroll) {
 
         // Get current user
         var url = new URL(window.location.href);
@@ -115,20 +115,37 @@
             success: function (data) {
                 // REFRESH MSG
                 $('#chat').html(data);
+                if (scroll) {
+                    ScrollToBottom();
+                }
             }
 
         });
+    }
+
+    function SetAutoReply() {
+
+        var auto_reply = $('#auto_reply').prop("checked") ? 1 : 0;
+
+        $.ajax({
+            type: "GET",
+            url: '/refresh_messenger/?auto_reply=' + auto_reply,
+            success: function () {
+                console.log("Auto reply set to " + auto_reply);
+            }
+
+        });
+
     }
 
     function RefreshContacts(){
         // Get current user
         var url = new URL(window.location.href);
         var user_id = url.searchParams.get("user_id");
-        var auto_reply = $('#auto_reply').prop("checked") ? 1 : 0;
 
         $.ajax({
             type: "GET",
-            url: '/refresh_messenger/?user_id=' + user_id + '&type=contacts' + '&auto_reply=' + auto_reply,
+            url: '/refresh_messenger/?user_id=' + user_id + '&type=contacts',
             success: function (data) {
                 // REFRESH CONTACTS
                 $('#contacts').html(data)
@@ -138,28 +155,32 @@
 
     }
 
-    // Used in order to send msg
-    document.getElementById("btn-input").addEventListener('keypress', function (e) {
+    function InputListener(e) {
         var input = document.getElementById("btn-input").value;
         var key = e.which || e.keyCode;
+
         //if k == enter, send message
-        if (key === 13 && input.length > 0){
+        if (key === 13 && input.length > 0) {
+
             var data = $('#chatForm').serialize();
             SendMessage(input);
+
             $.ajax({
                 type: "POST",
                 url: '/messenger_view/',
                 data: data,
-                success: function (data) {
+                success: function () {
                     console.log("Successfully sent!");
-                    RefreshMsg();
-                    ScrollToBottom();
+                    RefreshMsg(true);
                 }
             });
         }
-    });
+    }
 
-     function SendMessage (msg) {
+    // Used in order to send msg
+    document.getElementById("btn-input").addEventListener('keypress', InputListener);
+
+    function SendMessage (msg) {
          document.getElementById("btn-input").value = "";
          chat.innerHTML += "<div class='row msg_container base_sent'> \
                             '<div class='col-md-10 col-xs-10' align='right'> \
@@ -169,16 +190,16 @@
                             </div>\
                             </div>";
          ScrollToBottom();
-     }
+    }
 
-     function ScrollToBottom() {
-         // Make the scrollbar go down
-         chat.scrollTop = chat.scrollHeight;
-     }
+    function ScrollToBottom() {
+        // Make the scrollbar go down
+        chat.scrollTop = chat.scrollHeight;
+    }
 
-     function ClickedOnContact(user_id){
-         window.location='/messenger_view/?user_id=' +  user_id ;
-     }
+    function ClickedOnContact(user_id){
+        window.location='/messenger_view/?user_id=' +  user_id ;
+    }
 
  // request permission on page load
 //document.addEventListener('DOMContentLoaded', function () {

@@ -11,8 +11,7 @@
                 {% if user.n_unread %}
                     {% if current_user == user.username %}
                         <script>
-                            RefreshMsg();
-                            ScrollToBottom();
+                            RefreshMsg(true);
                         </script>
                     {% endif %}
                         <a id="label_n_unread" class="label" style="font-size: 14px; margin-left: 29%;">{{ user.n_unread }}</a>
