@@ -47,6 +47,7 @@ class MessengerView(TemplateView):
         context.update({"auto_reply": auto_reply})
 
         utils.log("Messenger selected user: {}".format(self.user), f=self.get_context_data)
+
         management.set_user_msg_as_read(self.user)
 
         context.update(
