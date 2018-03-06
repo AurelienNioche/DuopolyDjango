@@ -7,7 +7,6 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 import os
-import subprocess
 
 from . forms import RoomForm
 from utils import utils
@@ -156,17 +155,17 @@ class LogsView(TemplateView):
 
         context.update({"subtitle": "Logs"})
 
-        filename = subprocess.getoutput("echo $(date +%F).log")
-
-        context.update({"current_file": filename})
-        context.update({"logs": self.refresh_logs(filename)})
-
         if os.path.exists(parameters.logs_path):
-            files = [f for f in os.listdir(parameters.logs_path)
-                     if os.path.isfile("".join([parameters.logs_path, f]))]
+            files = sorted(
+                [f for f in os.listdir(parameters.logs_path)
+                 if os.path.isfile("".join([parameters.logs_path, f]))]
+            )
         else:
             files = []
 
+        current_file = files[-1]
+        context.update({"current_file": current_file})
+        context.update({"logs": self.refresh_logs(current_file)})
         context.update({"files": files})
 
         return context
@@ -198,5 +197,3 @@ class LogsView(TemplateView):
                 # else:
                 #     logs = f.read()
             return logs
-        else:
-            return ""
