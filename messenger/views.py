@@ -92,6 +92,7 @@ class MessengerView(TemplateView):
         # If it is an "auto_reply" setting request
         if "auto_reply" in request.GET:
             management.set_auto_reply(int(request.GET["auto_reply"]))
+            return HttpResponse("Auto reply is set!")
 
         # There are different type of refresh request
         # msg -> refresh all msg from the select user
