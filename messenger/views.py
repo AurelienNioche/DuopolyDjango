@@ -55,7 +55,7 @@ class MessengerView(TemplateView):
             )
 
         else:
-            user = management.get_latest_msg_author()
+            user = management.get_latest_msg_author().username
             management.set_user_msg_as_read(user)
             context.update(
                 {"current_user": user}
@@ -86,7 +86,8 @@ class MessengerView(TemplateView):
             if user_id != "null":
                 self.user = management.get_user_from_id(user_id)
         else:
-            return redirect('/messenger_view/?user_id={}'.format(management.get_latest_msg_author()))
+            user_id = management.get_latest_msg_author().id
+            return redirect('/messenger_view/?user_id={}'.format(user_id))
 
         # If it is an "auto_reply" setting request
         if "auto_reply" in request.GET:
