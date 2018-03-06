@@ -1,5 +1,5 @@
 # from django.test import TestCase
-from game.models import User
+from game.models import User, Room
 
 
 def delete_bots():
@@ -28,6 +28,13 @@ def main():
     create_bots(n_bots)
 
 
+def get_rooms():
+    rooms_025 = Room.objects.filter(opened=True, missing_players=2, radius=0.25)
+    rooms_05 = Room.objects.filter(opened=True, missing_players=2, radius=0.5)
 
-main()
+    print("N opened room 025:", rooms_025.count())
+    print("N opened room 05:", rooms_05.count())
+
+
+get_rooms()
 
