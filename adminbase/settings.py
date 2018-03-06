@@ -81,7 +81,6 @@ DATABASES = {
 
 # Keep the default database when testing
 if 'test' in sys.argv:
-
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'DuopolyRefactor',
@@ -91,6 +90,7 @@ if 'test' in sys.argv:
         'PORT': '5432',
         # 'ATOMIC_REQUESTS': True,
     }
+
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 LANGUAGE_CODE = 'en-us'
 
@@ -109,7 +109,6 @@ LOGGING_CONFIG = None
 LOGIN_URL = "/"
 
 STATIC_URL = '/static/'
-
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
