@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import game.user.messenger
 
+from utils import utils
 from . import management
 
 __path__ = os.path.relpath(__file__)
@@ -48,6 +49,7 @@ class MessengerView(TemplateView):
         # get current user if a user is selected
         if self.user is not None:
 
+            utils.log("Messenger selected user: {}".format(self.user))
             management.set_user_msg_as_read(self.user)
 
             context.update(
@@ -85,6 +87,7 @@ class MessengerView(TemplateView):
 
             if user_id != "null":
                 self.user = management.get_user_from_id(int(user_id))
+
         else:
             user_id = management.get_latest_msg_author().id
             return redirect('/messenger_view/?user_id={}'.format(user_id))
