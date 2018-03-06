@@ -46,8 +46,6 @@ class MessengerView(TemplateView):
         # update context with auto_reply
         context.update({"auto_reply": auto_reply})
 
-        utils.log("Messenger selected user: {}".format(self.user), f=self.get_context_data)
-
         management.set_user_msg_as_read(self.user)
 
         context.update(
@@ -84,7 +82,6 @@ class MessengerView(TemplateView):
             user_id = request.GET["user_id"]
 
             if user_id != "null":
-                utils.log("Messenger selected user: {}".format(user_id), f=self.dispatch)
                 self.user = management.get_user_from_id(int(user_id))
 
         elif "user" in request.POST:
@@ -118,7 +115,6 @@ class MessengerView(TemplateView):
         used when sending a msg
         """
         username = request.POST["user"]
-        utils.log("Send a message to {}".format(username), f=self.post)
         management.send_message(username=username, message=request.POST["msg"])
 
         return HttpResponse("Sent!")
