@@ -87,6 +87,9 @@ class MessengerView(TemplateView):
                 utils.log("Messenger selected user: {}".format(user_id), f=self.dispatch)
                 self.user = management.get_user_from_id(int(user_id))
 
+        elif "user" in request.POST:
+            pass
+
         else:
             user_id = management.get_latest_msg_author().id
             return redirect('/messenger_view/?user_id={}'.format(user_id))
