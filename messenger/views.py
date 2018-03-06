@@ -84,6 +84,7 @@ class MessengerView(TemplateView):
             user_id = request.GET["user_id"]
 
             if user_id != "null":
+                utils.log("Messenger selected user: {}".format(user_id), f=self.dispatch)
                 self.user = management.get_user_from_id(int(user_id))
 
         else:
