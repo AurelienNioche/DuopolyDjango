@@ -49,7 +49,7 @@ class MessengerView(TemplateView):
         # get current user if a user is selected
         if self.user is not None:
 
-            utils.log("Messenger selected user: {}".format(self.user))
+            utils.log("Messenger selected user: {}".format(self.user), f=self.get_context_data)
             management.set_user_msg_as_read(self.user)
 
             context.update(
