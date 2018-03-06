@@ -79,6 +79,13 @@ class MessengerView(TemplateView):
         let the TemplateView do its stuff (get_context_data...)
         """
 
+        # If it is an "auto_reply" setting request
+        if "auto_reply" in request.GET:
+            management.set_auto_reply(int(request.GET["auto_reply"]))
+            return HttpResponse("Auto reply is set to {}".format(management.get_auto_reply()))
+
+        # Then select user based on user_id
+        # If user_id is None, redirect to last msg user
         if "user_id" in request.GET:
 
             user_id = request.GET["user_id"]
@@ -89,15 +96,11 @@ class MessengerView(TemplateView):
             user_id = management.get_latest_msg_author().id
             return redirect('/messenger_view/?user_id={}'.format(user_id))
 
-        # If it is an "auto_reply" setting request
-        if "auto_reply" in request.GET:
-            management.set_auto_reply(int(request.GET["auto_reply"]))
-            return HttpResponse("Auto reply is set to {}".format(management.get_auto_reply()))
-
+        # REFRESH REQUESTS
         # There are different type of refresh request
-        # msg -> refresh all msg from the select user
-        # contacts -> refresh contact list
-        # all_unread_msg -> refresh the new msg counter (located on the sidebar)
+        # msg -> refresh all msg from the selects user
+        # contacts -> refresh contact list and their attributes
+        # all_unread_msg -> refresh the msg counter (located on the sidebar)
         if "type" in request.GET:
 
             if request.GET["type"] == "msg":
