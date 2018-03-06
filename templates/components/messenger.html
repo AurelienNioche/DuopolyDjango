@@ -156,32 +156,30 @@
 
     }
 
-    function InputListener(e) {
-        var input = document.getElementById("btn-input").value;
-        var key = e.which || e.keyCode;
-
-        //if k == enter, send message
-        if (key === 13 && input.length > 0) {
-
-            var data = $('#chatForm').serialize();
-            SendMessage(input);
-            console.log("User!");
-            console.log(data["user"]);
-
-            $.ajax({
-                type: "POST",
-                url: '/messenger_view/',
-                data: data,
-                success: function () {
-                    console.log("Successfully sent!");
-                    RefreshMsg(true);
-                }
-            });
-        }
-    }
 
     // Used in order to send msg
-    document.getElementById("btn-input").addEventListener('keypress', InputListener);
+    document.getElementById("btn-input").addEventListener('keypress', function (e) {
+            var input = document.getElementById("btn-input").value;
+            var key = e.which || e.keyCode;
+
+            //if k == enter, send message
+            if (key === 13 && input.length > 0) {
+
+                var data = $('#chatForm').serialize();
+                SendMessage(input);
+
+                $.ajax({
+                    type: "POST",
+                    url: '/messenger_view/',
+                    data: data,
+                    success: function () {
+                        console.log("Successfully sent!");
+                        RefreshMsg(true);
+                    }
+                });
+            }
+        }
+    );
 
     function SendMessage (msg) {
          document.getElementById("btn-input").value = "";
