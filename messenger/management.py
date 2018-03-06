@@ -130,6 +130,7 @@ def set_auto_reply(value):
     auto_reply = BoolParameter.objects.filter(name="auto_reply").first()
 
     if auto_reply.value != value:
+        utils.log("Auto_reply: {}".format(value), f=set_auto_reply)
         auto_reply.value = value
         auto_reply.save(update_fields=["value"])
 

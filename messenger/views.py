@@ -91,7 +91,6 @@ class MessengerView(TemplateView):
 
         # If it is an "auto_reply" setting request
         if "auto_reply" in request.GET:
-            raise Exception("Tamere")
             management.set_auto_reply(int(request.GET["auto_reply"]))
 
         # There are different type of refresh request
