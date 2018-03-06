@@ -91,11 +91,12 @@
                 url: '/logs/?refresh_logs=1&filename=' + filename + '&n_lines=' + n_lines,
                 success: function (data) {
                     if (data["logs"].length > 0) {
-                        if (n_lines === 0) {
-                            $('#logs').html(data["logs"]);
-                        } else {
-                            $('#logs').append(data["logs"]);
-                        }
+
+                       //if (n_lines === 0) {
+                        $('#logs').html(data["logs"]);
+                        //} else {
+                         //   $('#logs').append(data["logs"]);
+                        //}
                     }
                     ScrollToBottom();
                 }
