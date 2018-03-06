@@ -114,6 +114,7 @@ class MessengerView(TemplateView):
         used when sending a msg
         """
         username = request.POST["user"]
+        utils.log("Send a message to {}".format(username), f=self.post)
         management.send_message(username=username, message=request.POST["msg"])
 
         return HttpResponse("Sent!")
