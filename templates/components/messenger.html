@@ -130,8 +130,8 @@
         $.ajax({
             type: "GET",
             url: '/refresh_messenger/?auto_reply=' + auto_reply,
-            success: function () {
-                console.log("Auto reply set to " + auto_reply);
+            success: function (msg) {
+                console.log(msg);
             }
 
         });
