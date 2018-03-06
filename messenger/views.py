@@ -91,7 +91,7 @@ class MessengerView(TemplateView):
             user_id = request.GET["user_id"]
 
             if user_id != "null":
-                self.user = management.get_user_from_id(user_id)
+                self.user = management.get_user_from_id(int(user_id))
         else:
             user_id = management.get_latest_msg_author().id
             return redirect('/messenger_view/?user_id={}'.format(user_id))
