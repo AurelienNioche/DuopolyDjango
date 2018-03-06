@@ -46,15 +46,12 @@ class MessengerView(TemplateView):
         # update context with auto_reply
         context.update({"auto_reply": auto_reply})
 
-        # get current user if a user is selected
-        if self.user is not None:
+        utils.log("Messenger selected user: {}".format(self.user), f=self.get_context_data)
+        management.set_user_msg_as_read(self.user)
 
-            utils.log("Messenger selected user: {}".format(self.user), f=self.get_context_data)
-            management.set_user_msg_as_read(self.user)
-
-            context.update(
-                {"current_user": self.user}
-            )
+        context.update(
+            {"current_user": self.user}
+        )
 
         # update context with messages
         messages = management.get_all_messages_from_user(context['current_user'])
