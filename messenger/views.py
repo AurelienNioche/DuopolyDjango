@@ -54,13 +54,6 @@ class MessengerView(TemplateView):
                 {"current_user": self.user}
             )
 
-        else:
-            user = management.get_latest_msg_author().username
-            management.set_user_msg_as_read(user)
-            context.update(
-                {"current_user": user}
-            )
-
         # update context with messages
         messages = management.get_all_messages_from_user(context['current_user'])
 
