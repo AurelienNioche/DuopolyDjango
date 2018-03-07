@@ -20,7 +20,7 @@ def create_bots(n_bots):
     ])
 
 
-def main():
+def reset_bots():
 
     n_bots = 40
 
