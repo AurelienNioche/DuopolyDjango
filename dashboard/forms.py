@@ -43,7 +43,7 @@ class ParametersForm(forms.Form):
 
     display_opponent_score = forms.BooleanField(
         label="Display opponent score",
-        initial=True,
+        initial=False,
         required=False
     )
 
