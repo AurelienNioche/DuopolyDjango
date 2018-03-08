@@ -35,7 +35,7 @@ class RoundAdmin(admin.ModelAdmin):
 
 class RoomAdmin(admin.ModelAdmin):
     list_display = (
-        "id", "opened", "missing_players", "trial", "radius",
+        "id", "opened", "missing_players", "trial", "display_opponent_score", "radius",
         "ending_t", "state")
 
 
