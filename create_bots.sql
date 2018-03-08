@@ -109,3 +109,37 @@ INSERT INTO game_user (
     'bot15', '0015', FALSE, FALSE, FALSE,
     current_timestamp AT TIME ZONE 'Europe/Paris', current_timestamp AT TIME ZONE 'Europe/Paris'
 );
+INSERT INTO game_user (
+  "username", "password", "deserter", "connected", "registered", "registration_time", "time_last_request"
+) VALUES (
+    'bot16', '0016', FALSE, FALSE, FALSE,
+    current_timestamp AT TIME ZONE 'Europe/Paris', current_timestamp AT TIME ZONE 'Europe/Paris'
+);
+
+INSERT INTO game_user (
+  "username", "password", "deserter", "connected", "registered", "registration_time", "time_last_request"
+) VALUES (
+    'bot17', '0017', FALSE, FALSE, FALSE,
+    current_timestamp AT TIME ZONE 'Europe/Paris', current_timestamp AT TIME ZONE 'Europe/Paris'
+);
+
+INSERT INTO game_user (
+  "username", "password", "deserter", "connected", "registered", "registration_time", "time_last_request"
+) VALUES (
+    'bot18', '0018', FALSE, FALSE, FALSE,
+    current_timestamp AT TIME ZONE 'Europe/Paris', current_timestamp AT TIME ZONE 'Europe/Paris'
+);
+
+INSERT INTO game_user (
+  "username", "password", "deserter", "connected", "registered", "registration_time", "time_last_request"
+) VALUES (
+    'bot19', '0019', FALSE, FALSE, FALSE,
+    current_timestamp AT TIME ZONE 'Europe/Paris', current_timestamp AT TIME ZONE 'Europe/Paris'
+);
+
+INSERT INTO game_user (
+  "username", "password", "deserter", "connected", "registered", "registration_time", "time_last_request"
+) VALUES (
+    'bot20', '0020', FALSE, FALSE, FALSE,
+    current_timestamp AT TIME ZONE 'Europe/Paris', current_timestamp AT TIME ZONE 'Europe/Paris'
+);
