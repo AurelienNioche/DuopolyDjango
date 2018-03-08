@@ -202,42 +202,12 @@
         window.location='/messenger_view/?user_id=' +  user_id ;
     }
 
- // request permission on page load
-//document.addEventListener('DOMContentLoaded', function () {
-//
-//  if (!Notification) {
-//    alert('Desktop notifications not available in your browser. Try Chromium.');
-//    return;
-//  }
-//
-//  if (Notification.permission !== "granted") {
-//      Notification.requestPermission();
-//  }
-//
-//});
-//
-//previous_user_id = -1;
-//
-//function notifyMe(user_id, username) {
-//
-//    // avoid notification spam
-//    if (user_id !== previous_user_id) {
-//        previous_user_id = user_id;
-//
-//        if (Notification.permission !== "granted") {
-//            Notification.requestPermission();
-//        }
-//        else {
-//            var notification = new Notification('Duopoly Messenger', {
-//                body: "New message from " + username
-//           });
-//
-//           notification.onclick = function () {
-//               window.location = "/messenger_view/?user_id=" + user_id;
-//           }
-//
-//       }
-//   }
+   function OpenProfileTab(user_id) {
+       var win = window.open("/admin/game/user/" + user_id + "/change", '_blank');
+       win.focus();
+   }
+
+
 </script>
 
 

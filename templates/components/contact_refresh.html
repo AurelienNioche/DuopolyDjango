@@ -1,6 +1,6 @@
  <tbody>
     {% for user in users %}
-        <tr onclick="ClickedOnContact({{ user.id }})">
+        <tr onclick="ClickedOnContact({{ user.id }})" oncontextmenu="OpenProfileTab({{ user.id }})">
             <td>
                {% if user.connected %}
                     <span class="fa fa-circle" style="color: #3F903F; font-size: 9px;"></span>

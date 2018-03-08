@@ -1,5 +1,6 @@
 # from django.test import TestCase
 from game.models import User, Room
+import sys
 
 
 def delete_bots():
@@ -18,6 +19,20 @@ def create_bots(n_bots):
             registered=False
         ) for i in range(n_bots)
     ])
+
+
+def unblock_players():
+
+    users = User.objects.filter(state="tutorial")
+
+    for u in users:
+        room = Room.objects.get(id=u.id)
+        if not room.opened:
+            room.opened = True
+            room.missing_players = 2
+            room.save()
+            u.registered = False
+            u.save()
 
 
 def reset_bots():
@@ -46,5 +61,14 @@ def get_rooms():
     print()
 
 
-get_rooms()
+if "-u" or "--unblock" in sys.argv:
+    unblock_players()
+
+elif "-r" or "--room" in sys.argv:
+    get_rooms()
+
+else:
+    print("Flag not understood\n")
+    print("-u / --unblock -> Unblock users\n")
+    print("-r / --rooms -> See opened and validated rooms\n")
 
