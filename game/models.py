@@ -9,6 +9,7 @@ class Room(models.Model):
     trial = models.BooleanField(default=False)
     ending_t = models.IntegerField(default=-1)
     state = models.TextField(max_length=30, default="null")
+    no_opponent_score = models.BooleanField(default=False)
 
 
 class RoomComposition(models.Model):

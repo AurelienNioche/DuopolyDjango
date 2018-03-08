@@ -45,10 +45,11 @@ def create(data):
 
     Room.objects.select_for_update().all()
 
-    trial = int(bool(data['trial']))
+    trial = bool(data['trial'])
     ending_t = int(data["ending_t"])
     radius = data['radius']
     nb_of_room = int(data["nb_of_room"])
+    no_opponent_score = bool(data["no_opponent_score"])
 
     missing_players = 1 if trial else 2
 
@@ -60,7 +61,8 @@ def create(data):
             radius=radius,
             trial=trial,
             missing_players=missing_players,
-            opened=True
+            opened=True,
+            no_opponent_score=no_opponent_score
         ) for _ in range(nb_of_room)
     ])
 

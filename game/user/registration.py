@@ -53,7 +53,7 @@ def get_init_info(u, opp, rm):
     else:
         end_vs_continue = game.room.state.end
 
-    return u.id, end_vs_continue, consumer_seen_positions
+    return u.id, end_vs_continue, consumer_seen_positions, int(rm.no_opponent_score)
 
 
 def proceed_to_registration_as_player(
@@ -124,7 +124,7 @@ def proceed_to_registration_as_player(
 
     utils.log("I registered {}".format(u.username), f=proceed_to_registration_as_player)
 
-    return u.id, game.room.state.tutorial, consumer_seen_positions
+    return u.id, game.room.state.tutorial, consumer_seen_positions, int(rm.no_opponent_score)
 
 
 def _generate_password():
