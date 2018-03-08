@@ -65,7 +65,11 @@ if (document.referrer.indexOf("new_room") !== -1){
                                                 <br>
                                                 <strong> Field of view radius: </strong>{{ room.att.radius }}
                                                 <br>
-                                                <strong> Trial: </strong>{{ room.att.trial }}
+                                                {% if room.att.trial %}
+                                                    <strong> Trial: </strong> <img src="/static/admin/img/icon-yes.svg" alt="True">
+                                                {% else %}
+                                                    <strong> Trial: </strong> <img src="/static/admin/img/icon-no.svg" alt="False">
+                                                {% endif %}
                                                 <br>
                                                 <strong> No opponent score: </strong>{{ room.att.no_opponent_score}}
                                                 <br>

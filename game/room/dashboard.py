@@ -49,7 +49,7 @@ def create(data):
     ending_t = int(data["ending_t"])
     radius = data['radius']
     nb_of_room = int(data["nb_of_room"])
-    no_opponent_score = bool(data["no_opponent_score"])
+    display_opponent_score = bool(data["display_opponent_score"])
 
     missing_players = 1 if trial else 2
 
@@ -62,7 +62,7 @@ def create(data):
             trial=trial,
             missing_players=missing_players,
             opened=True,
-            no_opponent_score=no_opponent_score
+            display_opponent_score=display_opponent_score
         ) for _ in range(nb_of_room)
     ])
 

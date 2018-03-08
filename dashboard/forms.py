@@ -41,8 +41,8 @@ class ParametersForm(forms.Form):
         required=False,
     )
 
-    no_opponent_score = forms.BooleanField(
-        label="No opponent score",
+    display_opponent_score = forms.BooleanField(
+        label="Display opponent score",
         initial=True,
         required=False
     )
@@ -81,10 +81,10 @@ class RoomForm(ParametersForm):
 
         if cleaned_data.get("trial") is None:
             self.cleaned_data["trial"] = False
-            self.cleaned_data["no_opponent_score"] = False
+            self.cleaned_data["display_opponent_score"] = False
         else:
             cleaned_data.pop("trial")
-            cleaned_data.pop("no_opponent_score")
+            cleaned_data.pop("display_opponent_score")
 
         if not all(cleaned_data.get(field) for field in cleaned_data.keys()):
 
