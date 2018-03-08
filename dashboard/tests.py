@@ -1,6 +1,5 @@
 # from django.test import TestCase
 from game.models import User, Room
-import sys
 
 
 def delete_bots():
@@ -26,8 +25,8 @@ def unblock_players():
     users = User.objects.filter(state="tutorial")
 
     for u in users:
-        room = Room.objects.get(id=u.room_id)
-        if not room.opened:
+        room = Room.objects.filter(id=u.room_id).first()
+        if room and not room.opened:
             room.opened = True
             room.missing_players = 2
             room.save()
