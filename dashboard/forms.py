@@ -44,7 +44,7 @@ class ParametersForm(forms.Form):
     no_opponent_score = forms.BooleanField(
         label="No opponent score",
         initial=True,
-        required=True
+        required=False
     )
 
     form_function = forms.Field(widget=forms.HiddenInput, initial="room_organisation")
