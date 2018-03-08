@@ -205,7 +205,7 @@ input:checked + .slider:before {
 
 #page-wrapper {
     padding: 0 15px;
-    min-height: 1500px !important;
+    /*min-height: 1200px !important;*/
     height: auto !important;
     margin-top: -45px !important;
     background-color: #444A58;
