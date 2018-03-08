@@ -88,8 +88,11 @@ class MessengerView(TemplateView):
             pass
 
         else:
-            user_id = management.get_latest_msg_author().id
-            return redirect('/messenger_view/?user_id={}'.format(user_id))
+            last_author = management.get_latest_msg_author()
+            if last_author:
+                return redirect('/messenger_view/?user_id={}'.format(last_author.id))
+            else:
+                self.user = None
 
         # REFRESH REQUESTS
         # There are different type of refresh request
