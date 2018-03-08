@@ -85,6 +85,6 @@ def get_rooms():
     print()
 
 
-unblock_players()
-# get_rooms()
+# unblock_players()
+get_rooms()
 
