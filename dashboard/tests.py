@@ -61,14 +61,14 @@ def get_rooms():
     print()
 
 
-if "-u" or "--unblock" in sys.argv:
+if "u" or "unblock" in sys.argv:
     unblock_players()
 
-elif "-r" or "--room" in sys.argv:
+elif "r" or "room" in sys.argv:
     get_rooms()
 
 else:
     print("Flag not understood\n")
-    print("-u / --unblock -> Unblock users\n")
-    print("-r / --rooms -> See opened and validated rooms\n")
+    print("u / unblock -> Unblock users\n")
+    print("r / rooms -> See opened and validated rooms\n")
 
