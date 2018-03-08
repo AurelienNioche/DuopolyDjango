@@ -32,6 +32,7 @@ def unblock_players():
             room.missing_players = 2
             room.save()
             u.registered = False
+            u.deserter = False
             u.save()
 
 
