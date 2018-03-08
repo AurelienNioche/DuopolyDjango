@@ -87,10 +87,4 @@ def get_rooms():
 
 
 # unblock_players()
-# get_rooms()
-
-rooms = Room.objects.filter(display_opponent_score=False)
-
-for r in rooms:
-    r.display_opponent_score = True
-    r.save()
+get_rooms()
