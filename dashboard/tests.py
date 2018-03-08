@@ -26,7 +26,7 @@ def unblock_players():
     users = User.objects.filter(state="tutorial")
 
     for u in users:
-        room = Room.objects.get(id=u.id)
+        room = Room.objects.get(id=u.room_id)
         if not room.opened:
             room.opened = True
             room.missing_players = 2
