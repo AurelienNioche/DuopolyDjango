@@ -69,7 +69,7 @@ def proceed_to_registration_as_player(
     # Room ------------------------------------- #
 
     # Select the room
-    rm = rooms.order_by("missing_players").first()
+    rm = rooms.order_by("missing_players").order_by('id').first()
 
     # Decrease missing_players
     rm.missing_players -= 1

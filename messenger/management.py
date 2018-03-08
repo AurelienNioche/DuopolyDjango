@@ -45,7 +45,7 @@ def get_all_users():
         u.n_unread = get_unread_msg(u.username)
         user_list.append(u)
 
-    return user_list
+    return user_list[::-1]
 
 
 def get_user_from_id(user_id):
