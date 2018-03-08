@@ -59,7 +59,11 @@ if (document.referrer.indexOf("new_room") !== -1){
                                         <ul class="list-group">
                                             <li class="list-group-item">
                                                 <h4>Properties</h4>
-                                                <strong> Opened: </strong>{{ room.att.opened }}
+                                                {% if room.att.opened %}
+                                                    <strong> Opened: </strong> <img src="/static/admin/img/icon-yes.svg" alt="True">
+                                                {% else %}
+                                                    <strong> Opened: </strong> <img src="/static/admin/img/icon-no.svg" alt="False">
+                                                {% endif %}
                                                 <br>
                                                 <strong> Missing players: </strong>{{ room.att.missing_players }}
                                                 <br>
@@ -71,7 +75,11 @@ if (document.referrer.indexOf("new_room") !== -1){
                                                     <strong> Trial: </strong> <img src="/static/admin/img/icon-no.svg" alt="False">
                                                 {% endif %}
                                                 <br>
-                                                <strong> Display opponent score: </strong>{{ room.att.display_opponent_score}}
+                                                {% if room.att.display_opponent_score %}
+                                                    <strong> Display opponent score: </strong><img src="/static/admin/img/icon-yes.svg" alt="True">
+                                                {% else %}
+                                                    <strong> Display opponent score: </strong> <img src="/static/admin/img/icon-no.svg" alt="False">
+                                                {% endif %}
                                                 <br>
                                                 <strong> State: </strong>{{ room.att.state }}
                                                 <br>
