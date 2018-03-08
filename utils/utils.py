@@ -30,18 +30,19 @@ def log(msg, f, level=1):
         msg))
 
 
-def get_time_in_france():
-
-    naive_dt = datetime.datetime(2013, 9, 3, 16, 0)
-    dt = pytz.timezone("Europe/Paris").localize(naive_dt, is_dst=None)
-    now = dt.now()
-    now += datetime.timedelta(hours=1)
-    now = datetime.datetime(
-        year=now.year,
-        day=now.day,
-        hour=now.hour,
-        minute=now.minute,
-        month=now.month
-    )
-
-    return now.strftime("%I:%M %p")
+# def get_time_in_france():
+#
+#     naive_dt = datetime.datetime(2013, 9, 3, 16, 0)
+#     dt = pytz.timezone("Europe/Paris").localize(naive_dt, is_dst=None)
+#     now = dt.now()
+#     # now += datetime.timedelta(hours=1)
+#     # now = datetime.datetime(
+#     #     year=now.year,
+#     #     day=now.day,
+#     #     hour=now.hour,
+#     #     minute=now.minute,
+#     #     month=now.month
+#     # )
+#
+#
+#     return now.strftime("%I:%M %p")

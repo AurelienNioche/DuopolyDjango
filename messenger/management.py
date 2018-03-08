@@ -118,10 +118,12 @@ def send_auto_reply(username):
 
     auto_reply = BoolParameter.objects.filter(name="auto_reply").first()
 
+    time_in_france = timezone.now().strftime("%I:%M %p")
+
     if auto_reply.value:
         send_message(
             username=username,
-            message=parameters.auto_reply_msg.format(utils.get_time_in_france())
+            message=parameters.auto_reply_msg.format(time_in_france)
         )
 
 

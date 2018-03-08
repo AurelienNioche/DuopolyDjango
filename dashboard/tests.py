@@ -1,5 +1,5 @@
 # from django.test import TestCase
-from game.models import User, Room
+from game.models import User, Room, RoomComposition
 
 
 def delete_bots():
@@ -25,12 +25,36 @@ def unblock_players():
     users = User.objects.filter(state="tutorial")
 
     for u in users:
+
         room = Room.objects.filter(id=u.room_id).first()
+
         if room and not room.opened:
+
+            rmc = RoomComposition.objects.filter(room_id=room.id, user_id=u.id).first()
+            rmc.available = True
+            rmc.user_id = "null"
+            rmc.save()
+
+            rmc = RoomComposition.objects.filter(room_id=room.id).exclude(user_id=u.id).first()
+
+            if rmc:
+                opp_id = rmc.user_id
+
+                rmc.available = True
+                rmc.user_id = "null"
+                rmc.save()
+
+                opp = User.objects.filter(id=opp_id)
+                opp.registered = False
+                opp.room_id = -1
+                opp.deserter = False
+                opp.save()
+
             room.opened = True
             room.missing_players = 2
             room.save()
             u.registered = False
+            u.room_id = -1
             u.deserter = False
             u.save()
 
