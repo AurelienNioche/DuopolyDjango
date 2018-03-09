@@ -73,7 +73,7 @@ class MessengerView(TemplateView):
         # If it is an "auto_reply" setting request
         if "auto_reply" in request.GET:
             management.set_auto_reply(int(request.GET["auto_reply"]))
-            return
+            return HttpResponse("Auto reply set.")
 
         # Then select user based on user_id
         # If user_id is None, redirect to last msg user
@@ -116,7 +116,7 @@ class MessengerView(TemplateView):
                 elif request.GET["type"] == "all_unread_msg":
                     return self.refresh_all_unread_msg(request, **kwargs)
             else:
-                return
+                return HttpResponse("Refresh not allowed.")
 
         return super().dispatch(request, *args, **kwargs)
 
