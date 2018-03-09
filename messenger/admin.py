@@ -22,7 +22,7 @@ class DateTimeParameterAdmin(admin.ModelAdmin):
 
 class IntParameterAdmin(admin.ModelAdmin):
     list_display = \
-        ("name", "value")
+        ("name", "value", "unit")
 
 
 admin.site.register(DateTimeParameter, DateTimeParameterAdmin)
