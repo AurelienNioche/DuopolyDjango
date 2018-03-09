@@ -294,3 +294,12 @@ def flush_db():
         entries = table.objects.all()
         entries.delete()
 
+
+def get_rooms():
+
+    rooms_025 = Room.objects.filter(opened=True, missing_players=2, radius=0.25).count()
+    rooms_05 = Room.objects.filter(opened=True, missing_players=2, radius=0.5).count()
+    rooms_025_done = Room.objects.filter(radius=0.25, state="end").count()
+    rooms_05_done = Room.objects.filter(radius=0.5, state="end").count()
+
+    return rooms_05, rooms_05_done, rooms_025, rooms_025_done
