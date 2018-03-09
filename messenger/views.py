@@ -114,7 +114,7 @@ class MessengerView(TemplateView):
                 elif request.GET["type"] == "all_unread_msg":
                     return self.refresh_all_unread_msg(request, **kwargs)
             else:
-                return JsonResponse({"reload": False})
+                return JsonResponse({"refresh": False})
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -131,7 +131,8 @@ class MessengerView(TemplateView):
     def refresh_msg(self, request, **kwargs):
         context = {
             "messages": management.get_all_messages_from_user(self.user),
-            "current_user": self.user
+            "current_user": self.user,
+            "refresh": True
         }
         management.set_user_msg_as_read(self.user)
         return render(request, MessengerRefreshView.msg_template_name, context)
@@ -143,7 +144,9 @@ class MessengerView(TemplateView):
 
         context = {
             "users": management.get_all_users(),
-            "current_user": self.user
+            "current_user": self.user,
+            "refresh": True
+
         }
 
         return render(request, MessengerRefreshView.contact_template_name, context)

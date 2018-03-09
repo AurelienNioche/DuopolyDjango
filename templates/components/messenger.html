@@ -113,11 +113,13 @@
             type: "GET",
             url: '/refresh_messenger/?user_id=' + user_id + '&type=msg',
             success: function (data) {
-                // REFRESH MSG
-                $('#chat').html(data);
-                console.log("Received msg!");
-                if (scroll) {
-                    ScrollToBottom();
+                if (data["refresh"]) {
+                    // REFRESH MSG
+                    $('#chat').html(data);
+                    console.log("Received msg!");
+                    if (scroll) {
+                        ScrollToBottom();
+                    }
                 }
             }
 
@@ -148,9 +150,9 @@
             type: "GET",
             url: '/refresh_messenger/?user_id=' + user_id + '&type=contacts',
             success: function (data) {
-                if (data["reload"]) {
+                if (data["refresh"]) {
                     // REFRESH CONTACTS
-                    console.log("Refreshing contacts!")
+                    console.log("Refreshing contacts!");
                     $('#contacts').html(data)
                 }
             }
