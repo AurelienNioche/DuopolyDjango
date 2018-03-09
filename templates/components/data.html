@@ -55,14 +55,13 @@
     function getDatabaseURL() {
 
         $("#progressdiv").show();
-        {#$("#progressbar").show();#}
 
         $.ajax({
             method: "GET",
             url: "/data/?sqlite=true",
             success: function (data) {
                 downloadDB(data["url"]);
-                $("#progressbar").hide();
+                $("#progressdiv").hide();
                 $("#done").show();
             }
         })
