@@ -58,6 +58,7 @@
 
     function getDatabaseURL() {
 
+        $("#progressbar").addClass("active");
         $("#progressbar").text("");
         $("#progressdiv").hide();
         $("#progressdiv").show();
@@ -68,12 +69,13 @@
             success: function (data) {
                 downloadDB(data["url"]);
                 $("#progressbar").text("Conversion done!");
+                $("#progressbar").removeClass("active");
             }
         })
     }
 
     function flushDB () {
-
+        $("#progressbar").addClass("active");
         $("#progressbar").text("");
         $("#progressdiv").hide();
         $("#progressdiv").show();
@@ -84,8 +86,9 @@
             success: function () {
                 console.log("Flushed!");
                 $("#progressbar").text("Database flushed!");
+                $("#progressbar").removeClass("active");
             }
-        })
+        });
 
     }
 
