@@ -61,7 +61,8 @@
             url: "/data/?sqlite=true",
             success: function (data) {
                 downloadDB(data["url"]);
-                $("#progressbar").attr("class", "inactive");
+                $("#progressbar").hide();
+                $("#progressdiv").text("Done!");
             }
         })
     }
