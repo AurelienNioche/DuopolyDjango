@@ -510,7 +510,7 @@ def main():
     url = "http://51.15.6.148/client_request/"
     # url = "http://51.15.6.148/client_request/"
 
-    n_accounts = 10
+    n_accounts = 20
 
     start_event = ml.Event()
 

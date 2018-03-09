@@ -11,6 +11,7 @@
                 {% if user.n_unread %}
                     {% if current_user == user.username %}
                         <script>
+                            alert("Salut!");
                             RefreshMsg(true);
                         </script>
                     {% endif %}
