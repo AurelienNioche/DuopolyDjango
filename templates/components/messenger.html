@@ -117,7 +117,11 @@
                     // REFRESH MSG
                     $('#chat').html(data);
                     console.log("Received msg!");
-                    ScrollToBottom();
+
+                    if (data["scroll"]) {
+                        ScrollToBottom();
+                    }
+
                 }
             }
 

@@ -131,12 +131,14 @@ class MessengerView(TemplateView):
 
     def refresh_msg(self, request, **kwargs):
 
-        new = management.get_unread_msg(self.user) > 0
+        new_from_user = management.get_unread_msg(self.user) > 0
+        new_from_admin = management.get_unread_msg("admin") > 0
 
-        if new:
+        if new_from_admin or new_from_user:
             context = {
                 "messages": management.get_all_messages_from_user(self.user),
-                "current_user": self.user
+                "current_user": self.user,
+                "scroll": new_from_user
             }
             management.set_user_msg_as_read(self.user)
             return render(request, MessengerRefreshView.msg_template_name, context)
