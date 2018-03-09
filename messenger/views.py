@@ -101,8 +101,6 @@ class MessengerView(TemplateView):
         # all_unread_msg -> refresh the msg counter (located on the sidebar)
         if "type" in request.GET:
 
-            management.set_time_last_refresh()
-
             if management.has_to_refresh():
 
                 management.set_time_last_refresh()
@@ -116,7 +114,7 @@ class MessengerView(TemplateView):
                 elif request.GET["type"] == "all_unread_msg":
                     return self.refresh_all_unread_msg(request, **kwargs)
             else:
-                return HttpResponse("Refresh not allowed.")
+                return JsonResponse({"reload": False})
 
         return super().dispatch(request, *args, **kwargs)
 
