@@ -103,6 +103,7 @@ class MessengerView(TemplateView):
 
             if management.has_to_refresh():
 
+                utils.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
                 management.set_time_last_refresh()
 
                 if request.GET["type"] == "msg":
