@@ -29,8 +29,8 @@
                         <a class="btn btn-success"
                            onclick="getDatabaseURL();" download><i class="fa fa-download"></i> download sqlite data</a>
                         <br>
-                        <div class="progress" style="display: none;" id="progress">
-                            <div id="progress" style="display: none;" class="progress-bar progress-bar-striped active" role="progressbar"
+                        <div class="progress" style="display: none;" id="progressdiv">
+                            <div id="progressbar" style="display: none;" class="progress-bar progress-bar-striped active" role="progressbar"
                                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
                             </div>
                         </div>
@@ -51,13 +51,14 @@
 
     function getDatabaseURL() {
 
-        $("#progress").css("display", "block");
+        $("#progressdiv").css("display", "block");
+        $("#progressbar").css("display", "block");
 
         $.ajax({
             method: "GET",
             url: "/data/?sqlite=true",
             success: function (data) {
-                $("#progress").text("Done!");
+                $("#progressbar").text("Done!");
                 downloadDB(data["url"]);
             }
         })
