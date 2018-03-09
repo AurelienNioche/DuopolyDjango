@@ -262,7 +262,7 @@ def convert_data_to_pickle():
     return mydata.to_return
 
 
-def convert_data_to_sql():
+def convert_data_to_sqlite():
 
     db_source = "DuopolyRefactor"
 

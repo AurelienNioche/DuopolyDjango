@@ -133,15 +133,21 @@ class DataView(TemplateView):
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
-        # Get list of existing rooms
-        url_pickle = game.room.dashboard.convert_data_to_pickle()
-        url_sql = game.room.dashboard.convert_data_to_sql()
-
         context.update({"subtitle": "Download data"})
-        context.update({"url_pickle": url_pickle})
-        context.update({"url_sql": url_sql})
-
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if "sqlite" in request.GET:
+            return self.convert_data_to_sqlite()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    @staticmethod
+    def convert_data_to_sqlite():
+
+        url = game.room.dashboard.convert_data_to_sqlite()
+        return JsonResponse({"url": url})
 
 
 @method_decorator(gzip_page, name='dispatch')
