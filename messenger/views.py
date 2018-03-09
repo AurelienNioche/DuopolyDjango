@@ -101,6 +101,8 @@ class MessengerView(TemplateView):
         # all_unread_msg -> refresh the msg counter (located on the sidebar)
         if "type" in request.GET:
 
+            management.set_time_last_refresh()
+
             if management.has_to_refresh():
 
                 management.set_time_last_refresh()
