@@ -150,6 +150,7 @@
             success: function (data) {
                 if (data["reload"]) {
                     // REFRESH CONTACTS
+                    console.log("Refreshing contacts!")
                     $('#contacts').html(data)
                 }
             }
