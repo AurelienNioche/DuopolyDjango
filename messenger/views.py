@@ -132,7 +132,6 @@ class MessengerView(TemplateView):
         context = {
             "messages": management.get_all_messages_from_user(self.user),
             "current_user": self.user,
-            "refresh": True
         }
         management.set_user_msg_as_read(self.user)
         return render(request, MessengerRefreshView.msg_template_name, context)
@@ -145,8 +144,6 @@ class MessengerView(TemplateView):
         context = {
             "users": management.get_all_users(),
             "current_user": self.user,
-            "refresh": True
-
         }
 
         return render(request, MessengerRefreshView.contact_template_name, context)
