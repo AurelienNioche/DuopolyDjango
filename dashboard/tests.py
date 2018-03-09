@@ -61,7 +61,7 @@ def unblock_players():
 
 def reset_bots():
 
-    n_bots = 40
+    n_bots = 20
 
     delete_bots()
     create_bots(n_bots)
@@ -87,4 +87,5 @@ def get_rooms():
 
 
 # unblock_players()
-get_rooms()
+# get_rooms()
+reset_bots()
