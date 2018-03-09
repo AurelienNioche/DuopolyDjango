@@ -1,7 +1,7 @@
 import numpy as np
 from django.utils import timezone
 
-from utils import utils
+# from utils import utils
 
 from game.models import User
 

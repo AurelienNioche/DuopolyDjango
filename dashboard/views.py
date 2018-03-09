@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 import os
 
 from . forms import RoomForm
-from utils import utils
+# from utils import utils
 
 from parameters import parameters
 
@@ -113,8 +113,12 @@ class RoomManagementView(TemplateView):
         room_025, room_025_done, room_05, room_05_done = game.room.dashboard.get_rooms()
 
         context["room_info"] = {
-           "room_025": ro
+            "room_025": room_025,
+            "room_025_done": room_025_done,
+            "room_05": room_05,
+            "room_05_done": room_05_done
         }
+
         context.update({"rooms": rooms_list})
 
         return context
