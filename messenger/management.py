@@ -21,7 +21,7 @@ def get_all_messages_from_user(user):
 def get_all_users():
 
     users = User.objects.order_by("registered", "room_id", "username")\
-        .only("tutorial_progression", "state", "registered", "connected", "username", "deserter")
+        .only("id", "tutorial_progression", "state", "registered", "connected", "username", "deserter")
     user_list = []
 
     # We sort users by room ids
