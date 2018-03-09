@@ -12,6 +12,7 @@
                     {% if current_user == user.username %}
                         <script>
                             RefreshMsg(true);
+                            console.log("Refresh msg with auto scroll true.");
                         </script>
                     {% endif %}
                         <a id="label_n_unread" class="label" style="font-size: 14px; float: right;">{{ user.n_unread }}</a>
