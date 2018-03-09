@@ -73,7 +73,7 @@ class MessengerView(TemplateView):
         # If it is an "auto_reply" setting request
         if "auto_reply" in request.GET:
             management.set_auto_reply(int(request.GET["auto_reply"]))
-            return HttpResponse("Auto reply is set to {}".format(management.get_auto_reply()))
+            return
 
         # Then select user based on user_id
         # If user_id is None, redirect to last msg user
@@ -101,14 +101,18 @@ class MessengerView(TemplateView):
         # all_unread_msg -> refresh the msg counter (located on the sidebar)
         if "type" in request.GET:
 
-            if request.GET["type"] == "msg":
-                return self.refresh_msg(request, **kwargs)
+            if management.has_to_refresh():
 
-            elif request.GET["type"] == "contacts":
-                return self.refresh_contacts(request, **kwargs)
+                management.set_time_last_refresh()
 
-            elif request.GET["type"] == "all_unread_msg":
-                return self.refresh_all_unread_msg(request, **kwargs)
+                if request.GET["type"] == "msg":
+                    return self.refresh_msg(request, **kwargs)
+
+                elif request.GET["type"] == "contacts":
+                    return self.refresh_contacts(request, **kwargs)
+
+                elif request.GET["type"] == "all_unread_msg":
+                    return self.refresh_all_unread_msg(request, **kwargs)
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -123,15 +127,26 @@ class MessengerView(TemplateView):
         return HttpResponse("Sent!")
 
     def refresh_msg(self, request, **kwargs):
-        context = self.get_context_data(**kwargs)
+        context = {
+            "messages": management.get_all_messages_from_user(self.user)
+        }
+        management.set_user_msg_as_read(self.user)
         return render(request, MessengerRefreshView.msg_template_name, context)
 
     @staticmethod
     def refresh_all_unread_msg(request, **kwargs):
         return JsonResponse({"count": management.get_unread_msg()})
 
-    def refresh_contacts(self, request, **kwargs):
-        context = self.get_context_data(**kwargs)
+    @staticmethod
+    def refresh_contacts(request, **kwargs):
+
+        # Update connected players
+        game.user.messenger.check_connected_users()
+
+        context = {
+            "users": management.get_all_users()
+        }
+
         return render(request, MessengerRefreshView.contact_template_name, context)
 
 

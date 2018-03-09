@@ -1,8 +1,9 @@
 from django.db.models import Q
 from django.utils import timezone
+import datetime
 import os
 
-from messenger.models import Message, BoolParameter
+from messenger.models import Message, BoolParameter, DateTimeParameter, IntParameter
 
 from game.models import User, Round
 import game.room.state
@@ -55,11 +56,12 @@ def get_user_from_id(user_id):
 
 def set_user_msg_as_read(username):
 
-    entries = Message.objects.filter(author=username)
+    entries = Message.objects.only("username", "receipt_confirmation")
 
     for e in entries:
-        e.receipt_confirmation = True
-        e.save(update_fields=["receipt_confirmation"])
+        if username == e.username:
+            e.receipt_confirmation = True
+            e.save(update_fields=["receipt_confirmation"])
 
 
 def get_unread_msg(username=None):
@@ -85,7 +87,7 @@ def send_message(username, message):
 
 def get_messages_for_client(username):
 
-    entries = Message.objects.filter(author="admin", to=username, receipt_confirmation=False)
+    entries = Message.objects.filter(author="admin", to=username, receipt_confirmation=False).only("message")
     n_new_messages = len(entries)
     new_messages = [i.message for i in entries]
 
@@ -158,3 +160,47 @@ def get_latest_msg_author():
     if msg:
         sort_last = msg.latest("time_stamp")
         return User.objects.get(username=sort_last.author)
+
+
+def has_to_refresh():
+
+    # Get reference time
+    reference_time = DateTimeParameter.objects.filter(name="time_last_refresh").first()
+
+    if reference_time:
+
+        # Then get the timezone
+        tz_info = reference_time.tzinfo
+        # Get time now using timezone info
+        t_now = datetime.datetime.now(tz_info)
+        # Generate a timedelta
+        param = IntParameter.objects.filter(name="refresh_frequency").first()
+
+        if param is None:
+                param = IntParameter(name="refresh_frequency", value=3, unit="seconds")
+                param.save()
+
+        if param.unit == "seconds":
+            delta = datetime.timedelta(seconds=param.value)
+        else:
+            delta = datetime.timedelta(minutes=param.value)
+
+        # If more than X min/seconds since the last request
+        timeout = t_now > reference_time + delta
+
+        return timeout
+
+
+def set_time_last_refresh():
+
+    time_last_refresh = DateTimeParameter.objects.filter(name="time_last_refresh").first()
+
+    if time_last_refresh:
+        time_last_refresh.value = timezone.now()
+        time_last_refresh.save(update_fields=["value"])
+    else:
+        time_last_refresh = DateTimeParameter(
+            name="time_last_refresh",
+            value=timezone.now()
+        )
+        time_last_refresh.save()

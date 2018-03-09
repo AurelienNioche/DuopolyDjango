@@ -16,3 +16,16 @@ class BoolParameter(models.Model):
     value = models.BooleanField(default=False)
 
 
+class DateTimeParameter(models.Model):
+
+    name = models.TextField()
+    value = models.DateTimeField(auto_now_add=True, blank=True)
+
+
+class IntParameter(models.Model):
+
+    name = models.TextField()
+    value = models.IntegerField()
+    unit = models.TextField()
+
+
