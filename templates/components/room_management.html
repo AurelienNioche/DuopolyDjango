@@ -46,13 +46,31 @@ if (document.referrer.indexOf("new_room") !== -1){
                 <div class="panel-body">
                     <div class="row">
                             <div align="middle" style="margin-right: 200px; margin-left: 200px; margin-top: 100px;">
-                                <strong>Number of opened 025 rooms:</strong> {{ room_info.room_025 }}
-                                <br>
-                                <strong>Number of opened 05 rooms:</strong> {{ room_info.room_05 }}
-                                <br>
-                                <strong>Number of completed 025 rooms:</strong> {{ room_info.room_025_done }}
-                                <br>
-                                <strong>Number of completed 05 rooms:</strong> {{ room_info.room_05_done }}
+
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" data-toggle="collapse" href="#collapse-info"
+                                        style="cursor: pointer;">
+                                            <h4 class="panel-title">
+                                                <a style="font-size: 22px; pointer-events: none; cursor: default;">General information</a>
+                                            </h4>
+                                        </div>
+                                    <div id="collapse-info" class="panel-collapse collapse" align="middle">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <strong>Number of opened 0.25 rooms:</strong> {{ room_info.room_025 }}
+                                                <br>
+                                                <strong>Number of completed 0.25 rooms:</strong> {{ room_info.room_025_done }}
+                                                <br>
+                                                <strong>Number of opened 0.5 rooms:</strong> {{ room_info.room_05 }}
+                                                <br>
+                                                <strong>Number of completed 0.5 rooms:</strong> {{ room_info.room_05_done }}
+                                                <br>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                </div>
                             {% for room in rooms %}
                                <div class="panel-group">
                                     <div class="panel panel-default">
