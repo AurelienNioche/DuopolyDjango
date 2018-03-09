@@ -141,6 +141,9 @@ class DataView(TemplateView):
         if "sqlite" in request.GET:
             return self.convert_data_to_sqlite()
 
+        if "flush" in request.GET:
+            game.room.dashboard.flush_db()
+
         return super().dispatch(request, *args, **kwargs)
 
     @staticmethod

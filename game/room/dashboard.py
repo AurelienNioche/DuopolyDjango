@@ -1,6 +1,6 @@
 import numpy as np
 from django.utils import timezone
-from adminbase.settings import DATABASES
+from adminbase import settings
 
 import os
 import subprocess
@@ -265,7 +265,7 @@ def convert_data_to_pickle():
 
 def convert_data_to_sqlite():
 
-    db_source = DATABASES["default"]["NAME"]
+    db_source = settings.DATABASES["default"]["NAME"]
 
     sql_file = get_path("sql")
     db_name = "duopoly.sqlite3"
@@ -278,3 +278,19 @@ def convert_data_to_sqlite():
     subprocess.call("java -jar pg2sqlite.jar -d {} -o {}".format(sql_file.file_path, db_path), shell=True)
 
     return to_return
+
+
+def flush_db():
+
+    os.makedirs("dumps", exist_ok=True)
+
+    subprocess.call("pg_dump -U dasein {} > dumps/dump_$(date +%F).sql".format(
+        settings.DATABASES["default"]["NAME"]
+    ), shell=True)
+
+    for table in (Room, RoomComposition, Round, RoundComposition, Round, FirmPrice, FirmPosition, FirmProfit,
+                  ConsumerChoice):
+
+        entries = table.objects.all()
+        entries.delete()
+
