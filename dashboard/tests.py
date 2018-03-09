@@ -112,3 +112,5 @@ def flush_db():
 
         entries = table.objects.all()
         entries.delete()
+
+flush_db()
