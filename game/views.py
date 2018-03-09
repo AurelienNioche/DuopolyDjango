@@ -24,7 +24,7 @@ def client_request(request):
     """
 
     # Log
-    # utils.log("Post request: {}".format(list(request.POST.items())), f=client_request)
+    utils.log("Post request: {}".format(list(request.POST.items())), f=client_request)
 
     error, demand, users, u, opp, rm = _verification(request)
 
@@ -45,7 +45,12 @@ def client_request(request):
             raise Exception("Bad demand")
 
     # Log
-    # utils.log("I will reply '{}' to client.".format(to_reply), f=client_request)
+    if "username" in request.POST:
+        identifier = request.POST["username"]
+    elif "player_id" in request.POST:
+        identifier = request.POST["player_id"]
+
+    utils.log("I will reply '{}' to player {}.".format(to_reply, identifier), f=client_request)
 
     response = HttpResponse(to_reply)
     response["Access-Control-Allow-Credentials"] = "true"
