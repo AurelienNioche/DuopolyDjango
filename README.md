@@ -61,6 +61,11 @@ You should now be able to join the game using the Unity client.
 Take a dump
    
    pg_dump -U dasein DuopolyRefactor > dump_$(date +F%).sql 
+
+
+Convert postgreSQL to SQLite
+    java -jar pg2sqlite.jar -d DuopolyRefactor -o <sqlite_filename>.sqlite3
+   
     
 
 ## Services required to run the game server in production
