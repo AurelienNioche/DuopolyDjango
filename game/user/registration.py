@@ -37,23 +37,18 @@ def register_as_user(email, nationality, gender, age, mechanical_id):
 
 def get_init_info(u, opp, rm):
 
-    consumer_seen_positions = game.round.field_of_view.compute(radius=rm.radius, to_send=True)
-
     # If room state is not end
-    if rm.state != game.room.state.end:
+    if rm and rm.state != game.room.state.end and not u.deserter and not opp.deserter:
+
+        consumer_seen_positions = game.round.field_of_view.compute(radius=rm.radius, to_send=True)
 
         # get player's state
-        end_vs_continue = u.state
+        u_state = u.state
 
-        # Check if one of the player is a deserter
-        if (u and u.deserter) or (opp and opp.deserter):
-            # Return that the game ends
-            end_vs_continue = game.room.state.end
+        return u.id, u_state, consumer_seen_positions, int(rm.display_opponent_score)
 
     else:
-        end_vs_continue = game.room.state.end
-
-    return u.id, end_vs_continue, consumer_seen_positions, int(rm.display_opponent_score)
+        return u.id, game.room.state.end
 
 
 def proceed_to_registration_as_player(

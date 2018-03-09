@@ -161,7 +161,8 @@ def get_latest_msg_author():
     msg = Message.objects.exclude(author="admin")
     if msg:
         sort_last = msg.latest("time_stamp")
-        return User.objects.get(username=sort_last.author)
+        u = User.objects.filter(username=sort_last.author).first()
+        return u
 
 
 def has_to_refresh():
