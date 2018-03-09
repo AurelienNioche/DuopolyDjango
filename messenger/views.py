@@ -130,13 +130,18 @@ class MessengerView(TemplateView):
         return HttpResponse("Sent!")
 
     def refresh_msg(self, request, **kwargs):
-        if management.get_unread_msg(self.user) > 0 or management.get_unread_msg("admin") > 0:
+
+        new = management.get_unread_msg(self.user) > 0\
+              or management.get_unread_msg("admin") > 0
+
+        if new:
             context = {
                 "messages": management.get_all_messages_from_user(self.user),
                 "current_user": self.user,
             }
             management.set_user_msg_as_read(self.user)
             return render(request, MessengerRefreshView.msg_template_name, context)
+
         else:
             return JsonResponse({"refresh": False})
 
