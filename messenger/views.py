@@ -114,6 +114,7 @@ class MessengerView(TemplateView):
                 elif request.GET["type"] == "all_unread_msg":
                     return self.refresh_all_unread_msg(request, **kwargs)
             else:
+
                 return JsonResponse({"refresh": False})
 
         return super().dispatch(request, *args, **kwargs)
