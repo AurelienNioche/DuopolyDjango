@@ -104,7 +104,7 @@
     // Scroll to bottom when page loads
     ScrollToBottom();
 
-    function RefreshMsg(scroll) {
+    function RefreshMsg() {
 
         // Get current user
         var url = new URL(window.location.href);
@@ -118,10 +118,7 @@
                     // REFRESH MSG
                     $('#chat').html(data);
                     console.log("Received msg!");
-                    if (scroll) {
-                        console.log("Refresh msg with auto scroll true.");
-                        ScrollToBottom();
-                    }
+                    ScrollToBottom();
                 }
             }
 
