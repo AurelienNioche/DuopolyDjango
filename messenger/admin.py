@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from . models import Message, BoolParameter
+from . models import Message, BoolParameter, IntParameter, DateTimeParameter
 
 
 class MessageAdmin(admin.ModelAdmin):
@@ -15,5 +15,17 @@ class BoolParameterAdmin(admin.ModelAdmin):
         ("name", "value")
 
 
+class DateTimeParameterAdmin(admin.ModelAdmin):
+    list_display = \
+        ("name", "value")
+
+
+class IntParameterAdmin(admin.ModelAdmin):
+    list_display = \
+        ("name", "value")
+
+
+admin.site.register(DateTimeParameter, DateTimeParameterAdmin)
+admin.site.register(IntParameter, IntParameterAdmin)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(BoolParameter, BoolParameterAdmin)
