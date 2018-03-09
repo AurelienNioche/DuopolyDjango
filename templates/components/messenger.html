@@ -148,10 +148,11 @@
             type: "GET",
             url: '/refresh_messenger/?user_id=' + user_id + '&type=contacts',
             success: function (data) {
-                // REFRESH CONTACTS
-                $('#contacts').html(data)
+                if (data["reload"]) {
+                    // REFRESH CONTACTS
+                    $('#contacts').html(data)
+                }
             }
-
         });
 
     }
