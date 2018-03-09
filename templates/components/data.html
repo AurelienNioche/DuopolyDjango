@@ -36,6 +36,7 @@
                                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                             </div>
                         </div>
+                        <img id="done" src="/static/admin/img/icon-yes.svg" style="width: 30px;" hidden>
                     </div>
                     <!-- /.col-lg-6 (nested) -->
                 </div>
@@ -62,7 +63,7 @@
             success: function (data) {
                 downloadDB(data["url"]);
                 $("#progressbar").hide();
-                $("#progressdiv").text("Done!");
+                $("#done").show();
             }
         })
     }
