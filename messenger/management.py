@@ -167,9 +167,11 @@ def get_latest_msg_author():
 def has_to_refresh():
 
     # Get reference time
-    reference_time = DateTimeParameter.objects.filter(name="time_last_refresh").first().value
+    entry = DateTimeParameter.objects.filter(name="time_last_refresh").first()
 
-    if reference_time:
+    if entry:
+
+        reference_time = entry.value
 
         # Then get the timezone
         tz_info = reference_time.tzinfo
