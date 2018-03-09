@@ -11,7 +11,7 @@ import game.round.field_of_view
 
 def play(rd, t):
 
-    utils.log("Make play customers", f=play)
+    # utils.log("Make play customers", f=play)
 
     positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=t)
 

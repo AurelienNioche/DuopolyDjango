@@ -20,7 +20,7 @@ def end_of_turn(rd, rs, t):
 
 def is_end_of_round(rd, t):
 
-    utils.log("ending_t: {}, t: {}".format(rd.ending_t, t), f=is_end_of_round)
+    # utils.log("ending_t: {}, t: {}".format(rd.ending_t, t), f=is_end_of_round)
 
     return t == rd.ending_t - 1  # -1 because starts at 0
 
@@ -94,7 +94,7 @@ def _tutorial_is_done(u, opp, rm):
 
 def _pve_is_done(u, opp, rm):
 
-    utils.log("User {} has done pve. I will put him in pvp.", f=_pve_is_done)
+    # utils.log("User {} has done pve. I will put him in pvp.", f=_pve_is_done)
 
     # load objects
     next_round = Round.objects.get(room_id=u.room_id, pvp=True)

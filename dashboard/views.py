@@ -36,7 +36,7 @@ class LoginView(TemplateView):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            utils.log("Logging {} user.".format(user), f=login)
+            # utils.log("Logging {} user.".format(user), f=login)
             login(request, user)
             return redirect("/room_management/")
 
@@ -118,7 +118,7 @@ class RoomManagementView(TemplateView):
 
         if "delete" in request.POST:
             room_id = request.POST["delete"]
-            utils.log("Delete room {}.".format(room_id), f=self.post)
+            # utils.log("Delete room {}.".format(room_id), f=self.post)
 
             # Delete room
             game.room.dashboard.delete(room_id=room_id)

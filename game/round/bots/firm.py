@@ -23,7 +23,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__)) + "/data/"
 
 def play(firm_bot, rd, t):
 
-    utils.log("Make bot firm play", f=play)
+    # utils.log("Make bot firm play", f=play)
 
     opp_id = (firm_bot.firm_id + 1) % parameters.n_firms  # 0 or 1
 

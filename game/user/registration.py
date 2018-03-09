@@ -122,7 +122,7 @@ def proceed_to_registration_as_player(
 
     # Rounds ------------------------------------------- #
 
-    utils.log("I registered {}".format(u.username), f=proceed_to_registration_as_player)
+    # utils.log("I registered {}".format(u.username), f=proceed_to_registration_as_player)
 
     return u.id, game.room.state.tutorial, consumer_seen_positions, int(rm.display_opponent_score)
 
@@ -135,7 +135,7 @@ def room_available(rooms_opened_with_missing_players, users):
 
     rooms = _close_rooms_with_banned_players(rooms_opened_with_missing_players, users)
 
-    utils.log("There are {} available rooms".format(len(rooms)), f=room_available)
+    # utils.log("There are {} available rooms".format(len(rooms)), f=room_available)
 
     return len(rooms) > 0
 

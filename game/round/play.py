@@ -58,7 +58,7 @@ def ask_firm_passive_opponent_choice(u, rd, rs, opp, rm, t):
 
             # Get firm bot if there is one
             firm_bot = RoundComposition.objects.filter(round_id=rd.id, bot=True).first()
-            utils.log("There is a bot: {}".format(firm_bot is not None), f=ask_firm_passive_opponent_choice)
+            # utils.log("There is a bot: {}".format(firm_bot is not None), f=ask_firm_passive_opponent_choice)
 
             if firm_bot and firm_bot.firm_id == rs.firm_active:
 
@@ -77,18 +77,18 @@ def ask_firm_passive_opponent_choice(u, rd, rs, opp, rm, t):
             round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
 
             if round_ends:
-                utils.log("Round ends", f=ask_firm_passive_opponent_choice)
+                # utils.log("Round ends", f=ask_firm_passive_opponent_choice)
                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 
             return (t, positions[opponent_id], prices[opponent_id], ) + \
                     tuple((i for i in consumer_choices)) + (int(round_ends),)
 
         else:
-            utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_opponent_choice)
+            # utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_opponent_choice)
             return parameters.error["wait"],  # Tuple is necessary!!
 
     else:
-        utils.log("Error: Time is superior!!!!", f=ask_firm_passive_opponent_choice, level=3)
+        # utils.log("Error: Time is superior!!!!", f=ask_firm_passive_opponent_choice, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
@@ -102,11 +102,11 @@ def ask_firm_passive_opponent_choice(u, rd, rs, opp, rm, t):
 #             return (t,) +
 #
 #         else:
-#             utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_consumer_choices)
+#             # utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_consumer_choices)
 #             return parameters.error["wait"],  # Tuple is necessary!! // Have to wait
 #
 #     else:
-#         utils.log("Error: Time is superior!!!!", f=ask_firm_passive_consumer_choices, level=3)
+#         # utils.log("Error: Time is superior!!!!", f=ask_firm_passive_consumer_choices, level=3)
 #         return parameters.error["time_is_superior"],  # Time is superior!
 
 
@@ -130,13 +130,13 @@ def ask_firm_active_choice_recording(u, rd, rs, opp, rm, t, position, price):
             round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
 
             if round_ends:
-                utils.log("Round ends", f=ask_firm_active_choice_recording)
+                # utils.log("Round ends", f=ask_firm_active_choice_recording)
                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 
             return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
 
     else:
-        utils.log("Error: Time is superior!!!!", f=ask_firm_active_choice_recording, level=3)
+        # utils.log("Error: Time is superior!!!!", f=ask_firm_active_choice_recording, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
@@ -152,15 +152,15 @@ def ask_firm_active_choice_recording(u, rd, rs, opp, rm, t, position, price):
 #             round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
 #
 #             if round_ends:
-#                 utils.log("Round ends", f=ask_firm_passive_consumer_choices)
+#                 # utils.log("Round ends", f=ask_firm_passive_consumer_choices)
 #                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 #
 #             return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
 #
 #         else:
-#             utils.log("Have to wait: Active firm needs to play", f=ask_firm_active_consumer_choices)
+#             # utils.log("Have to wait: Active firm needs to play", f=ask_firm_active_consumer_choices)
 #             return parameters.error["wait"],  # Tuple is necessary!!
 #
 #     else:
-#         utils.log("Error: Time is superior!!!!", f=ask_firm_active_consumer_choices, level=3)
+#         # utils.log("Error: Time is superior!!!!", f=ask_firm_active_consumer_choices, level=3)
 #         return parameters.error["time_is_superior"],  # Time is superior!
