@@ -49,6 +49,8 @@ def client_request(request):
         identifier = request.POST["username"]
     elif "player_id" in request.POST:
         identifier = request.POST["player_id"]
+    else:
+        identifier = ""
 
     utils.log("I will reply '{}' to player {}.".format(to_reply, identifier), f=client_request)
 
