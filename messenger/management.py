@@ -177,11 +177,13 @@ def has_to_refresh():
         param = IntParameter.objects.filter(name="refresh_frequency").first()
 
         if param is None:
-                param = IntParameter(name="refresh_frequency", value=3, unit="seconds")
+                param = IntParameter(name="refresh_frequency", value=500, unit="milliseconds")
                 param.save()
 
         if param.unit == "seconds":
             delta = datetime.timedelta(seconds=param.value)
+        elif param.unit == "milliseconds":
+            delta = datetime.timedelta(milliseconds=param.value)
         else:
             delta = datetime.timedelta(minutes=param.value)
 
