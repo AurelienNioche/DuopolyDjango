@@ -26,7 +26,8 @@
 {#                           href="{% static url_pickle %}" download><i class="fa fa-download"></i> Download pickle data</a>#}
 {#                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/SQLite370.svg/2000px-SQLite370.svg.png"#}
 {#                            style="width: 20%">#}
-                        <a class="btn btn-success"
+                        <a class="btn btn-danger" onclick="flushDB();"><i class="fa fa-remove"></i> Flush DB</a>
+                        <a class="btn btn-success" style="margin-left: 8px;"
                            onclick="getDatabaseURL();" download><i class="fa fa-download"></i> SQLite data</a>
                         <br>
                         <br>
@@ -36,8 +37,10 @@
                                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                             </div>
                         </div>
-                        <a id="flush" class="btn btn-alert" onclick="flushDB();" hidden>Flush DB</a>
-                        <img id="done" src="/static/admin/img/icon-yes.svg" style="width: 30px;" hidden>
+{#                        <img id="done" src="/static/admin/img/icon-yes.svg" style="width: 30px;" hidden>#}
+                        <br>
+                        <br>
+
                     </div>
                     <!-- /.col-lg-6 (nested) -->
                 </div>
@@ -55,28 +58,32 @@
 
     function getDatabaseURL() {
 
+        $("#progressbar").text("");
+        $("#progressdiv").hide();
         $("#progressdiv").show();
-        $("#done").hide();
 
         $.ajax({
             method: "GET",
             url: "/data/?sqlite=true",
             success: function (data) {
                 downloadDB(data["url"]);
-                $("#progressdiv").hide();
-                $("#done").show();
-                $("#flush").show();
+                $("#progressbar").text("Conversion done!");
             }
         })
     }
 
     function flushDB () {
 
+        $("#progressbar").text("");
+        $("#progressdiv").hide();
+        $("#progressdiv").show();
+
         $.ajax({
             method: "GET",
             url: "/data/?flush=true",
             success: function () {
-                console.log("Flushed!")
+                console.log("Flushed!");
+                $("#progressbar").text("Database flushed!");
             }
         })
 
