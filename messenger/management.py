@@ -56,10 +56,10 @@ def get_user_from_id(user_id):
 
 def set_user_msg_as_read(username):
 
-    entries = Message.objects.only("username", "receipt_confirmation")
+    entries = Message.objects.only("author", "receipt_confirmation")
 
     for e in entries:
-        if username == e.username:
+        if username == e.author:
             e.receipt_confirmation = True
             e.save(update_fields=["receipt_confirmation"])
 
