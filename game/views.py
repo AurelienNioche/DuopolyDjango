@@ -244,9 +244,9 @@ def missing_players(**kwargs):
 
 # ----------------------------------| Demand relatives to Tutorial  |------------------------------------------------- #
 
-def tutorial_done(**kwargs):
-
-    game.round.state.go_to_next_round(u=kwargs["u"], opp=kwargs["opp"], rm=kwargs["rm"])
+# def tutorial_done(**kwargs):
+#
+#     game.round.state.go_to_next_round(u=kwargs["u"], opp=kwargs["opp"], rm=kwargs["rm"])
 
 
 def submit_tutorial_progression(**kwargs):
@@ -280,22 +280,6 @@ def ask_firm_passive_opponent_choice(**kwargs):
     called by a passive firm
     """
 
-    request, u = (kwargs.get(i) for i in ("request", "u"))
-
-    t = int(request.POST["t"])
-
-    rd = Round.objects.get(id=u.round_id)
-    rs = RoundState.objects.get(round_id=u.round_id, t=t)
-
-    return game.round.play.ask_firm_passive_opponent_choice(u=u, rd=rd, rs=rs, t=t)
-
-
-def ask_firm_passive_consumer_choices(**kwargs):
-
-    """
-    Called by a passive firm in order to get consumers' firm choices.
-    """
-
     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
 
     t = int(request.POST["t"])
@@ -303,7 +287,23 @@ def ask_firm_passive_consumer_choices(**kwargs):
     rd = Round.objects.get(id=u.round_id)
     rs = RoundState.objects.get(round_id=u.round_id, t=t)
 
-    return game.round.play.ask_firm_passive_consumer_choices(u=u, opp=opp, rm=rm, rd=rd, rs=rs, t=t)
+    return game.round.play.ask_firm_passive_opponent_choice(u=u, rd=rd, rs=rs, t=t, rm=rm, opp=opp)
+
+
+# def ask_firm_passive_consumer_choices(**kwargs):
+#
+#     """
+#     Called by a passive firm in order to get consumers' firm choices.
+#     """
+#
+#     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
+#
+#     t = int(request.POST["t"])
+#
+#     rd = Round.objects.get(id=u.round_id)
+#     rs = RoundState.objects.get(round_id=u.round_id, t=t)
+#
+#     return game.round.play.ask_firm_passive_consumer_choices(u=u, opp=opp, rm=rm, rd=rd, rs=rs, t=t)
 
 # -----------------------------------| active firm demands |-------------------------------------------------------- #
 
@@ -314,7 +314,7 @@ def ask_firm_active_choice_recording(**kwargs):
     called by active firm
     """
 
-    request, u = (kwargs.get(i) for i in ("request", "u"))
+    request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
 
     t = int(request.POST["t"])
     position = int(request.POST["position"])
@@ -323,20 +323,21 @@ def ask_firm_active_choice_recording(**kwargs):
     rd = Round.objects.get(id=u.round_id)
     rs = RoundState.objects.get(round_id=u.round_id, t=t)
 
-    return game.round.play.ask_firm_active_choice_recording(u=u, rd=rd, rs=rs, t=t, position=position, price=price)
+    return game.round.play.ask_firm_active_choice_recording(
+        u=u, rd=rd, rs=rs, t=t, position=position, price=price, opp=opp, rm=rm)
 
 
-def ask_firm_active_consumer_choices(**kwargs):
-
-    """
-    called by active firm
-    """
-
-    request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
-
-    t = int(request.POST["t"])
-
-    rd = Round.objects.get(id=u.round_id)
-    rs = RoundState.objects.get(round_id=u.round_id, t=t)
-
-    return game.round.play.ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t)
+# def ask_firm_active_consumer_choices(**kwargs):
+#
+#     """
+#     called by active firm
+#     """
+#
+#     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
+#
+#     t = int(request.POST["t"])
+#
+#     rd = Round.objects.get(id=u.round_id)
+#     rs = RoundState.objects.get(round_id=u.round_id, t=t)
+#
+#     return game.round.play.ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t)

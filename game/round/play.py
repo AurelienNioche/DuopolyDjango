@@ -3,11 +3,11 @@ from parameters import parameters
 
 from game.models import RoundComposition
 
-
 import game.round.bots.firm
 import game.round.bots.consumer
 import game.round.state
 import game.round.data
+import game.room.state
 
 """
     Here are grouped the functions called by client during the playing phase
@@ -17,6 +17,12 @@ import game.round.data
 # ----------------------------------- init ------------------------------------------------------ #
 
 def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
+
+    #
+    if u.state == game.room.state.tutorial:
+        game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
+        u.tutorial_progression = 100
+        u.save(update_fields=["tutorial_progression"])
 
     # Maybe client has to wait the other player
     if game.round.state.client_has_to_wait_over_player(u=u, opp=opp, rm=rm):
@@ -43,7 +49,7 @@ def ask_firm_init(u, opp, rd_opp, rm, rd, rs):
 
 # ----------------------------------| passive firm demands |-------------------------------------- #
 
-def ask_firm_passive_opponent_choice(u, rd, rs, t):
+def ask_firm_passive_opponent_choice(u, rd, rs, opp, rm, t):
 
     if t <= rd.t:
 
@@ -64,7 +70,18 @@ def ask_firm_passive_opponent_choice(u, rd, rs, t):
 
             opponent_id = (u.firm_id + 1) % parameters.n_firms
             positions, prices = game.round.data.get_positions_and_prices(rd=rd, t=t)
-            return t, positions[opponent_id], prices[opponent_id]
+
+            consumer_choices = game.round.data.get_consumer_choices(rd=rd, t=t)
+            consumer_choices = [1 if i == u.firm_id else 0 if i != -1 else -1 for i in consumer_choices]
+
+            round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
+
+            if round_ends:
+                utils.log("Round ends", f=ask_firm_passive_opponent_choice)
+                game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
+
+            return (t, positions[opponent_id], prices[opponent_id], ) + \
+                    tuple((i for i in consumer_choices)) + (int(round_ends),)
 
         else:
             utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_opponent_choice)
@@ -75,35 +92,27 @@ def ask_firm_passive_opponent_choice(u, rd, rs, t):
         return parameters.error["time_is_superior"],  # Time is superior!
 
 
-def ask_firm_passive_consumer_choices(u, opp, rm, rd, rs, t):
-
-    if t <= rd.t:
-
-        if rs.firm_active_and_consumers_played:
-
-            consumer_choices = game.round.data.get_consumer_choices(rd=rd, t=t)
-            consumer_choices = [1 if i == u.firm_id else 0 if i != -1 else -1 for i in consumer_choices]
-
-            round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
-
-            if round_ends:
-                utils.log("Round ends", f=ask_firm_passive_consumer_choices)
-                game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
-
-            return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
-
-        else:
-            utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_consumer_choices)
-            return parameters.error["wait"],  # Tuple is necessary!! // Have to wait
-
-    else:
-        utils.log("Error: Time is superior!!!!", f=ask_firm_passive_consumer_choices, level=3)
-        return parameters.error["time_is_superior"],  # Time is superior!
+# def ask_firm_passive_consumer_choices(u, opp, rm, rd, rs, t):
+#
+#     if t <= rd.t:
+#
+#         if rs.firm_active_and_consumers_played:
+#
+#
+#             return (t,) +
+#
+#         else:
+#             utils.log("Have to wait: Active firm needs to play", f=ask_firm_passive_consumer_choices)
+#             return parameters.error["wait"],  # Tuple is necessary!! // Have to wait
+#
+#     else:
+#         utils.log("Error: Time is superior!!!!", f=ask_firm_passive_consumer_choices, level=3)
+#         return parameters.error["time_is_superior"],  # Time is superior!
 
 
 # -----------------------------------| active firm demands |-------------------------------------- #
 
-def ask_firm_active_choice_recording(u, rd, rs, t, position, price):
+def ask_firm_active_choice_recording(u, rd, rs, opp, rm, t, position, price):
 
     if t <= rd.t:
 
@@ -113,17 +122,6 @@ def ask_firm_active_choice_recording(u, rd, rs, t, position, price):
             game.round.bots.consumer.play(rd=rd, t=t)
             game.round.state.end_of_turn(rd=rd, rs=rs, t=t)
 
-        return t,  # ! Must be a tuple
-
-    else:
-        utils.log("Error: Time is superior!!!!", f=ask_firm_active_choice_recording, level=3)
-        return parameters.error["time_is_superior"],  # Time is superior!
-
-
-def ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t):
-
-    if t <= rd.t:
-
         if rs.firm_active_and_consumers_played:
 
             consumer_choices = game.round.data.get_consumer_choices(rd=rd, t=t)
@@ -132,15 +130,37 @@ def ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t):
             round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
 
             if round_ends:
-                utils.log("Round ends", f=ask_firm_passive_consumer_choices)
+                utils.log("Round ends", f=ask_firm_active_choice_recording)
                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
 
             return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
 
-        else:
-            utils.log("Have to wait: Active firm needs to play", f=ask_firm_active_consumer_choices)
-            return parameters.error["wait"],  # Tuple is necessary!!
-
     else:
-        utils.log("Error: Time is superior!!!!", f=ask_firm_active_consumer_choices, level=3)
+        utils.log("Error: Time is superior!!!!", f=ask_firm_active_choice_recording, level=3)
         return parameters.error["time_is_superior"],  # Time is superior!
+
+
+# def ask_firm_active_consumer_choices(u, opp, rm, rd, rs, t):
+#
+#     if t <= rd.t:
+#
+#         if rs.firm_active_and_consumers_played:
+#
+#             consumer_choices = game.round.data.get_consumer_choices(rd=rd, t=t)
+#             consumer_choices = [1 if i == u.firm_id else 0 if i != -1 else -1 for i in consumer_choices]
+#
+#             round_ends = game.round.state.is_end_of_round(rd=rd, t=t)
+#
+#             if round_ends:
+#                 utils.log("Round ends", f=ask_firm_passive_consumer_choices)
+#                 game.round.state.go_to_next_round(u=u, opp=opp, rm=rm)
+#
+#             return (t,) + tuple((i for i in consumer_choices)) + (int(round_ends),)
+#
+#         else:
+#             utils.log("Have to wait: Active firm needs to play", f=ask_firm_active_consumer_choices)
+#             return parameters.error["wait"],  # Tuple is necessary!!
+#
+#     else:
+#         utils.log("Error: Time is superior!!!!", f=ask_firm_active_consumer_choices, level=3)
+#         return parameters.error["time_is_superior"],  # Time is superior!

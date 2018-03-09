@@ -1,5 +1,6 @@
 # from django.test import TestCase
 from game.models import User, Room, RoomComposition
+from game import room
 
 
 def delete_bots():
@@ -67,6 +68,12 @@ def reset_bots():
     create_bots(n_bots)
 
 
+def delete_rooms():
+    rooms = Room.objects.all()
+    for r in rooms:
+        room.dashboard.delete(r.id)
+
+
 def get_rooms():
 
     rooms_025 = Room.objects.filter(opened=True, missing_players=2, radius=0.25).count()
@@ -85,7 +92,5 @@ def get_rooms():
     print()
 
 
-
-# unblock_players()
-# get_rooms()
 reset_bots()
+

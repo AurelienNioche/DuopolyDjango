@@ -35,8 +35,10 @@ def get_all_users():
                 u.progression = progression if progression != -1 else 0
 
             elif u.state == game.room.state.pve or u.state == game.room.state.pvp:
-                rd = Round.objects.get(id=u.round_id)
-                u.progression = round((rd.t / rd.ending_t) * 100)
+                rd = Round.objects.filter(id=u.round_id).first()
+
+                if rd:
+                    u.progression = round((rd.t / rd.ending_t) * 100)
 
         else:
 
