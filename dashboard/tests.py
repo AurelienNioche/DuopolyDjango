@@ -1,6 +1,13 @@
+import subprocess
+import os
+
+from adminbase import settings
+
 # from django.test import TestCase
-from game.models import User, Room, RoomComposition
+from game.models import User, Room, RoomComposition, Round, RoundComposition, \
+    RoundState, FirmProfit, FirmPosition, FirmPrice, ConsumerChoice
 from game import room
+
 
 
 def delete_bots():
@@ -92,5 +99,16 @@ def get_rooms():
     print()
 
 
-reset_bots()
+def flush_db():
 
+    os.makedirs("dumps", exist_ok=True)
+
+    subprocess.call("pg_dump -U dasein {} > dumps/dump_$(date +%F).sql".format(
+        settings.DATABASES["default"]["NAME"]
+    ), shell=True)
+
+    for table in (Room, RoomComposition, Round, RoundComposition, Round, FirmPrice, FirmPosition, FirmProfit,
+                  ConsumerChoice):
+
+        entries = table.objects.all()
+        entries.delete()

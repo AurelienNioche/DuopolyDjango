@@ -8,7 +8,7 @@ from messenger.models import Message, BoolParameter, DateTimeParameter, IntParam
 from game.models import User, Round
 import game.room.state
 
-from utils import utils
+# from utils import utils
 from parameters import parameters
 
 __path__ = os.path.relpath(__file__)
