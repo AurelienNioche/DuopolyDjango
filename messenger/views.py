@@ -138,7 +138,7 @@ class MessengerView(TemplateView):
             context = {
                 "messages": management.get_all_messages_from_user(self.user),
                 "current_user": self.user,
-                "scroll": new_from_user
+                "scroll": int(new_from_user)
             }
             management.set_user_msg_as_read(self.user)
             return render(request, MessengerRefreshView.msg_template_name, context)

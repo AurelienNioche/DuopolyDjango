@@ -13,7 +13,6 @@
     </div>
 </div>
 {% endif  %}
-
 <!-- display user msg ----->
 {% if msg.author == current_user %}
 <div class="row msg_container base_receive">
@@ -28,6 +27,9 @@
 </div>
 {% endif  %}
 {% endfor %}
+
+<!-- If true scroll down messages -->
+<input id="scroll" value="{{ scroll }}"  hidden>
 
 
 

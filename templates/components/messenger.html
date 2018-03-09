@@ -118,10 +118,11 @@
                     $('#chat').html(data);
                     console.log("Received msg!");
 
-                    if (data["scroll"]) {
+                    var scroll = parseInt($("#scroll").val());
+
+                    if (scroll) {
                         ScrollToBottom();
                     }
-
                 }
             }
 
