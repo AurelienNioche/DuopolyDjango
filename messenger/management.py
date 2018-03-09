@@ -165,7 +165,7 @@ def get_latest_msg_author():
 def has_to_refresh():
 
     # Get reference time
-    reference_time = DateTimeParameter.objects.filter(name="time_last_refresh").first()
+    reference_time = DateTimeParameter.objects.filter(name="time_last_refresh").first().value
 
     if reference_time:
 
