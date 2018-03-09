@@ -46,6 +46,7 @@ if (document.referrer.indexOf("new_room") !== -1){
                 <div class="panel-body">
                     <div class="row">
                             <div align="middle" style="margin-right: 200px; margin-left: 200px; margin-top: 100px;">
+                            {{ n_opened_rooms }} {{ n_validated_rooms }}
                             {% for room in rooms %}
                                <div class="panel-group">
                                     <div class="panel panel-default">

@@ -110,6 +110,11 @@ class RoomManagementView(TemplateView):
         # Get list of existing rooms and players
         rooms_list = game.room.dashboard.get_list()
 
+        room_025, room_025_done, room_05, room_05_done = game.room.dashboard.get_rooms()
+
+        context["room_info"] = {
+           "room_025": ro
+        }
         context.update({"rooms": rooms_list})
 
         return context
