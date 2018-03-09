@@ -128,26 +128,27 @@ class MessengerView(TemplateView):
 
     def refresh_msg(self, request, **kwargs):
         context = {
-            "messages": management.get_all_messages_from_user(self.user)
+            "messages": management.get_all_messages_from_user(self.user),
+            "current_user": self.user
         }
         management.set_user_msg_as_read(self.user)
         return render(request, MessengerRefreshView.msg_template_name, context)
 
-    @staticmethod
-    def refresh_all_unread_msg(request, **kwargs):
-        return JsonResponse({"count": management.get_unread_msg()})
-
-    @staticmethod
-    def refresh_contacts(request, **kwargs):
+    def refresh_contacts(self, request, **kwargs):
 
         # Update connected players
         game.user.messenger.check_connected_users()
 
         context = {
-            "users": management.get_all_users()
+            "users": management.get_all_users(),
+            "current_user": self.user
         }
 
         return render(request, MessengerRefreshView.contact_template_name, context)
+
+    @staticmethod
+    def refresh_all_unread_msg(request, **kwargs):
+        return JsonResponse({"count": management.get_unread_msg()})
 
 
 class MessengerRefreshView(TemplateView):
