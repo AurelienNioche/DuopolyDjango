@@ -1,5 +1,6 @@
 import numpy as np
 from django.utils import timezone
+from adminbase.settings import DATABASES
 
 import os
 import subprocess
@@ -264,7 +265,7 @@ def convert_data_to_pickle():
 
 def convert_data_to_sqlite():
 
-    db_source = "DuopolyRefactor"
+    db_source = DATABASES["default"]["NAME"]
 
     sql_file = get_path("sql")
     db_name = "duopoly.sqlite3"
