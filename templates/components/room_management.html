@@ -58,13 +58,13 @@ if (document.referrer.indexOf("new_room") !== -1){
                                     <div id="collapse-info" class="panel-collapse collapse" align="middle">
                                         <ul class="list-group">
                                             <li class="list-group-item">
-                                                <strong>Number of opened 0.25 rooms:</strong> {{ room_info.room_025 }}
+                                                <strong>Number of 0.25 rooms with opp score (opened/completed):</strong> {{ room_info.room_25_opp_score }}
                                                 <br>
-                                                <strong>Number of completed 0.25 rooms:</strong> {{ room_info.room_025_done }}
+                                                <strong>Number of 0.25 rooms without opp score (opened/completed):</strong> {{ room_info.room_25_no_opp_score }}
                                                 <br>
-                                                <strong>Number of opened 0.5 rooms:</strong> {{ room_info.room_05 }}
+                                                <strong>Number of 0.50 rooms with opp score (opened/completed):</strong> {{ room_info.room_50_opp_score }}
                                                 <br>
-                                                <strong>Number of completed 0.5 rooms:</strong> {{ room_info.room_05_done }}
+                                                <strong>Number of 0.50 rooms without opp score (opened/completed):</strong> {{ room_info.room_50_no_opp_score }}
                                                 <br>
                                             </li>
                                         </ul>
