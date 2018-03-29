@@ -38,7 +38,7 @@ def register_as_user(email, nationality, gender, age, mechanical_id):
 def get_init_info(u, opp, rm):
 
     # If room state is not end
-    if rm and rm.state != game.room.state.end and not u.deserter and not opp.deserter:
+    if rm and rm.state != game.room.state.end and not u.deserter and (not opp or not opp.deserter):
 
         consumer_seen_positions = game.round.field_of_view.compute(radius=rm.radius, to_send=True)
 
