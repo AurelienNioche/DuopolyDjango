@@ -297,9 +297,23 @@ def flush_db():
 
 def get_rooms():
 
-    rooms_025 = Room.objects.filter(opened=True, missing_players=2, radius=0.25).count()
-    rooms_025_done = Room.objects.filter(radius=0.25, state="end").count()
-    rooms_05 = Room.objects.filter(opened=True, missing_players=2, radius=0.5).count()
-    rooms_05_done = Room.objects.filter(radius=0.5, state="end").count()
+    room_info = dict()
 
-    return rooms_025, rooms_025_done, rooms_05, rooms_05_done
+    room_info["room_25_opp_score"] = "{} / {}".format(
+        Room.objects.filter(display_opponent_score=True, opened=True, missing_players=2, radius=0.25).count(),
+        Room.objects.filter(display_opponent_score=True, state="end", radius=0.25).count()
+    )
+    room_info["room_25_no_opp_score"] = "{} / {}".format(
+        Room.objects.filter(display_opponent_score=True, opened=True, missing_players=2, radius=0.25).count(),
+        Room.objects.filter(display_opponent_score=True, state="end", radius=0.25).count()
+    )
+    room_info["room_50_opp_score"] = "{} / {}".format(
+        Room.objects.filter(display_opponent_score=True, opened=True, missing_players=2, radius=0.50).count(),
+        Room.objects.filter(display_opponent_score=True, state="end", radius=0.50).count()
+    )
+    room_info["room_50_no_opp_score"] = "{} / {}".format(
+        Room.objects.filter(display_opponent_score=True, opened=True, missing_players=2, radius=0.50).count(),
+        Room.objects.filter(display_opponent_score=True, state="end", radius=0.50).count()
+    )
+
+    return room_info
