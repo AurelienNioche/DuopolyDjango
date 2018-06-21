@@ -59,7 +59,7 @@ You should now be able to join the game using the Unity client.
 # How to (server) 
 
 Dump database   
-   pg_dump -U dasein DuopolyRefactor > dump_$(date +%F).sql 
+    pg_dump -U dasein DuopolyRefactor > dump_$(date +%F).sql 
 
 
 Convert postgreSQL to SQLite
