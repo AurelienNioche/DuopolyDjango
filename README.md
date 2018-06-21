@@ -58,8 +58,7 @@ You should now be able to join the game using the Unity client.
 
 # How to (server) 
 
-Take a dump
-   
+Dump database   
    pg_dump -U dasein DuopolyRefactor > dump_$(date +%F).sql 
 
 
