@@ -59,7 +59,7 @@ def client_request(request):
     response["Access-Control-Allow-Credentials"] = "true"
     response["Access-Control-Allow-Headers"] = "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time"
     response["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response["Access-Control-Allow-Origin"] = "http://duopoly.free.fr"
+    response["Access-Control-Allow-Origin"] = "http://duopoly.free.fr, http://duopoly.free.fr/demo, *"
 
     return response
 
