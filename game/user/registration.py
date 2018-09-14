@@ -18,7 +18,7 @@ def trial_registration(n_player):
     passwords = []
 
     rm, = game.room.dashboard.create({
-        'trial': n_player > 1,
+        'trial': n_player == 1,
         'ending_t': 15,
         'radius': 0.25,
         'nb_of_room': 1,
