@@ -66,7 +66,11 @@ def client_request(request):
 
 def _verification(request):
 
-    demand = request.POST["demand"]
+    demand = request.POST.get("demand")
+
+    if not demand:
+        demand = request.GET.get("demand")
+
     player_id = request.POST.get("player_id")
 
     # Get data from table
