@@ -123,7 +123,7 @@ def _verification(request):
 
 def trial_registration(**kwargs):
 
-    n_player = kwargs['request'].POST['n_player']
+    n_player = int(kwargs['request'].POST['n_player'])
     usernames, passwords = game.user.registration.trial_registration(n_player=n_player)
 
     return str(usernames), str(passwords)
