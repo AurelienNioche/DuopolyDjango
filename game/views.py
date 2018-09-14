@@ -70,6 +70,8 @@ def _verification(request):
 
     if not demand:
         demand = request.GET.get("demand")
+        utils.log("Get request: {}".format(list(request.GET.items())), f=client_request)
+        request.POST = request.GET
 
     player_id = request.POST.get("player_id")
 
