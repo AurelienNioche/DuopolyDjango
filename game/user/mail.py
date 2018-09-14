@@ -1,6 +1,6 @@
 import smtplib
 
-from credentials import credentials
+import credentials.credentials as credentials
 
 
 def send_mail_using_g_mail(user, pwd, recipient, subject, body):

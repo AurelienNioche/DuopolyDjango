@@ -6,9 +6,58 @@ from django.utils import timezone
 from game.models import User
 
 import game.room.state
+import game.room.dashboard
 import game.round.field_of_view
 
 from game.user import mail, connection
+
+
+def trial_registration(n_player):
+
+    usernames = []
+    passwords = []
+
+    rm, = game.room.dashboard.create({
+        'trial': n_player > 1,
+        'ending_t': 15,
+        'radius': 0.25,
+        'nb_of_room': 1,
+        'display_opponent_score': 1
+    })
+
+    for _ in range(n_player):
+
+        while True:
+            username = 'demo' + str(np.random.randint(9999))
+
+            if not User.objects.filter(username=username).first():
+                break
+
+        password = _generate_password()
+        mechanical_id = "xxxxx"
+        gender = 'Neutral'
+        nationality = 'NoBorder'
+        age = 99
+        entry = User(
+            username=username,
+            email=username,
+            password=password,
+            nationality=nationality,
+            gender=gender,
+            age=age,
+            mechanical_id=mechanical_id,
+            time_last_request=timezone.now(),
+            last_request=trial_registration.__name__,
+            demo=True,
+            room_id=rm.id
+        )
+
+        entry.save()
+
+        usernames.append(username)
+        passwords.append(password)
+
+    return usernames, passwords
 
 
 def register_as_user(email, nationality, gender, age, mechanical_id):
@@ -54,7 +103,7 @@ def get_init_info(u, opp, rm):
 def proceed_to_registration_as_player(
         u, users, rooms_opened_with_missing_players,
         rounds_with_missing_players, round_compositions_available,
-        room_compositions_available):
+        room_compositions_available, rm):
 
     # check if a room is available (and remove room with deserters)
     rooms = _close_rooms_with_banned_players(rooms_opened_with_missing_players, users)
@@ -64,7 +113,9 @@ def proceed_to_registration_as_player(
     # Room ------------------------------------- #
 
     # Select the room
-    rm = rooms.order_by("missing_players").order_by('id').first()
+
+    if not rm:
+        rm = rooms.order_by("missing_players").order_by('id').first()
 
     # Decrease missing_players
     rm.missing_players -= 1

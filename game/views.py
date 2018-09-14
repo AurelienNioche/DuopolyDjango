@@ -11,6 +11,7 @@ import game.user.registration
 import game.user.mail
 import game.round.play
 import game.round.state
+import game.room.dashboard
 
 
 @csrf_exempt
@@ -89,6 +90,7 @@ def _verification(request):
     if u:
 
         rm = Room.objects.filter(id=u.room_id).first()  # Could be None
+
         if rm:
             rc_opp = RoomComposition.objects.filter(room_id=rm.id, available=False).exclude(user_id=u.id).first()
             if rc_opp:
@@ -116,6 +118,13 @@ def _verification(request):
 
 
 # ----------------------| Demands relative to registration |--------------------------------------------------------- #
+
+
+def trial_registration(**kwargs):
+
+    usernames, passwords = game.user.registration.trial_registration(n_player=kwargs['n_player'])
+
+    return str(usernames), str(passwords)
 
 
 def register(**kwargs):
@@ -199,6 +208,8 @@ def proceed_to_registration_as_player(**kwargs):
     else:
         with transaction.atomic():
 
+            rm = Room.objects.filter(id=u.room_id).first() if u.demo else None
+
             rooms = Room.objects.select_for_update().exclude(missing_players=0).exclude(opened=0)
             rounds = Round.objects.select_for_update().exclude(missing_players=0)
             round_compositions = RoundComposition.objects.select_for_update().filter(available=True)
@@ -209,7 +220,8 @@ def proceed_to_registration_as_player(**kwargs):
                 rounds_with_missing_players=rounds,
                 round_compositions_available=round_compositions,
                 room_compositions_available=room_compositions,
-                u=u)
+                u=u,
+                rm=rm)
 
     if rsp:
         return (1, ) + rsp

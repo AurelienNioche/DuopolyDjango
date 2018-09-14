@@ -66,6 +66,7 @@ class User(models.Model):
     room_id = models.IntegerField(default=-1, null=True)
     round_id = models.IntegerField(default=-1, null=True)
     firm_id = models.IntegerField(default=-1, null=True)
+    demo = models.BooleanField(default=False)
 
 
 class Data(models.Model):

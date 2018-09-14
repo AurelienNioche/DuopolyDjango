@@ -201,6 +201,8 @@ def create(data):
     FirmProfit.objects.bulk_create(firm_profits)
     ConsumerChoice.objects.bulk_create(consumer_choices)
 
+    return rooms
+
 
 def get_list():
 
