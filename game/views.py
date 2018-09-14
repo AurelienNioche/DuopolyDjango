@@ -84,8 +84,9 @@ def _verification(request):
             u = users.filter(username=username).first()  # Could be none in case of typo
         else:
             email = request.POST.get("email")
-            email.lower()
-            u = users.filter(email=email).first()  # Could be None
+            if email is not None:
+                email.lower()
+                u = users.filter(email=email).first()  # Could be None
 
     if u:
 
