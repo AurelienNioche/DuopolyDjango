@@ -29,6 +29,7 @@ INSTALLED_APPS = (
     'game',
     'crispy_forms',
     'messenger'
+    'channels',
 )
 
 # crispy forms css
@@ -114,3 +115,14 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+# Channels
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "capacity": 200,
+            "expiry": 4,
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

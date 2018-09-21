@@ -78,7 +78,7 @@ def _verification(request):
     # Get data from table
     users = User.objects.all()
 
-    error, u, opp, rm = None, None, None, None
+    error, u, opp, rm = (None, ) * 4
 
     if player_id:
         u = users.get(id=player_id)
