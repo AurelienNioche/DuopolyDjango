@@ -30,7 +30,7 @@ class GameWebSocketConsumer(JsonWebsocketConsumer):
 
         if to_reply:
 
-            self.send_json(to_reply)
+            self.send(to_reply)
 
             try:
                 utils.log(f'Sending to current channel: {to_reply}', f=self.receive_json)

@@ -24,8 +24,14 @@ def client_request(request):
     :return: response
     """
 
+    is_http_request = False
+
+    if hasattr(request, 'GET'):
+        request = request.GET
+        is_http_request = True
+
     # Log
-    utils.log("Post request: {}".format(list(request.POST.items())), f=client_request)
+    utils.log("Request: {}".format(list(request.items())), f=client_request)
 
     error, demand, users, u, opp, rm = _verification(request)
 
@@ -46,50 +52,44 @@ def client_request(request):
             raise Exception("Bad demand")
 
     # Log
-    if "username" in request.POST:
-        identifier = request.POST["username"]
-    elif "player_id" in request.POST:
-        identifier = request.POST["player_id"]
+    if "username" in request:
+        identifier = request['username']
+    elif "player_id" in request:
+        identifier = request['player_id']
     else:
         identifier = ""
 
     utils.log("I will reply '{}' to player {}.".format(to_reply, identifier), f=client_request)
 
-    response = HttpResponse(to_reply)
-    response["Access-Control-Allow-Credentials"] = "true"
-    response["Access-Control-Allow-Headers"] = "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time"
-    response["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response["Access-Control-Allow-Origin"] = "*"
+    if is_http_request:
+        to_reply = HttpResponse(to_reply)
+        to_reply["Access-Control-Allow-Credentials"] = "true"
+        to_reply["Access-Control-Allow-Headers"] = "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time"
+        to_reply["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        to_reply["Access-Control-Allow-Origin"] = "*"
 
-    return response
+    return to_reply
 
 
 def _verification(request):
 
-    demand = request.POST.get("demand")
-
-    if not demand:
-        demand = request.GET.get("demand")
-        utils.log("Get request: {}".format(list(request.GET.items())), f=client_request)
-        request.POST = request.GET
-
-    player_id = request.POST.get("player_id")
+    demand = request.get("demand")
+    player_id = request.get("player_id")
 
     # Get data from table
     users = User.objects.all()
-
     error, u, opp, rm = (None, ) * 4
 
     if player_id:
-        u = users.get(id=player_id)
+         u = users.get(id=player_id)
 
     else:
-        username = request.POST.get("username")
+        username = request.get("username")
         if username:
             username = username.lower()
             u = users.filter(username=username).first()  # Could be none in case of typo
         else:
-            email = request.POST.get("email")
+            email = request.get("email")
             if email is not None:
                 email.lower()
                 u = users.filter(email=email).first()  # Could be None
@@ -129,7 +129,7 @@ def _verification(request):
 
 def trial_registration(**kwargs):
 
-    n_player = int(kwargs['request'].POST['n_player'])
+    n_player = int(kwargs['request']['n_player'])
     usernames, passwords = game.user.registration.trial_registration(n_player=n_player)
 
     return str(usernames), str(passwords)
@@ -139,11 +139,11 @@ def register(**kwargs):
 
     request, u = (kwargs.get(i) for i in ("request", "u"))
 
-    email = request.POST["email"].lower()
-    nationality = request.POST["nationality"]
-    gender = request.POST["gender"]
-    age = request.POST["age"]
-    mechanical_id = request.POST["mechanical_id"]
+    email = request["email"].lower()
+    nationality = request["nationality"]
+    gender = request["gender"]
+    age = request["age"]
+    mechanical_id = request["mechanical_id"]
 
     # Do stuff
     if u:
@@ -170,11 +170,11 @@ def send_password_again(**kwargs):
     """
     request, u = [kwargs.get(i) for i in ("request", "u")]
 
-    email = request.POST["email"].lower()
-    nationality = request.POST["nationality"],
-    gender = request.POST["gender"],
-    age = request.POST["age"],
-    mechanical_id = request.POST["mechanical_id"]
+    email = request["email"].lower()
+    nationality = request["nationality"],
+    gender = request["gender"],
+    age = request["age"],
+    mechanical_id = request["mechanical_id"]
 
     # If already registered
     if u:
@@ -243,8 +243,8 @@ def connect(**kwargs):
     request, users = (kwargs.get(i) for i in ("request", "users"))
 
     # Get info from POST
-    username = request.POST["username"].lower()
-    password = request.POST["password"]
+    username = request["username"].lower()
+    password = request["password"]
 
     u = users.filter(username=username, password=password).first()  # Could be None
 
@@ -280,7 +280,7 @@ def submit_tutorial_progression(**kwargs):
 
     request, u = (kwargs.get(i) for i in ("request", "u"))
 
-    tutorial_progression = float(request.POST["tutorial_progression"].replace(",", "."))
+    tutorial_progression = float(request["tutorial_progression"].replace(",", "."))
 
     u.tutorial_progression = tutorial_progression * 100
     u.save(update_fields=("tutorial_progression", ))
@@ -309,7 +309,7 @@ def ask_firm_passive_opponent_choice(**kwargs):
 
     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
 
-    t = int(request.POST["t"])
+    t = int(request["t"])
 
     rd = Round.objects.get(id=u.round_id)
     rs = RoundState.objects.get(round_id=u.round_id, t=t)
@@ -325,7 +325,7 @@ def ask_firm_passive_opponent_choice(**kwargs):
 #
 #     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
 #
-#     t = int(request.POST["t"])
+#     t = int(request["t"])
 #
 #     rd = Round.objects.get(id=u.round_id)
 #     rs = RoundState.objects.get(round_id=u.round_id, t=t)
@@ -343,9 +343,9 @@ def ask_firm_active_choice_recording(**kwargs):
 
     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
 
-    t = int(request.POST["t"])
-    position = int(request.POST["position"])
-    price = int(request.POST["price"])
+    t = int(request["t"])
+    position = int(request["position"])
+    price = int(request["price"])
 
     rd = Round.objects.get(id=u.round_id)
     rs = RoundState.objects.get(round_id=u.round_id, t=t)
@@ -362,7 +362,7 @@ def ask_firm_active_choice_recording(**kwargs):
 #
 #     request, u, opp, rm = (kwargs.get(i) for i in ("request", "u", "opp", "rm"))
 #
-#     t = int(request.POST["t"])
+#     t = int(request["t"])
 #
 #     rd = Round.objects.get(id=u.round_id)
 #     rs = RoundState.objects.get(round_id=u.round_id, t=t)
